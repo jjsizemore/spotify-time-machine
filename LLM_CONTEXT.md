@@ -1,5 +1,17 @@
 # Spotify Time Machine
 
+## Optimization Preferences
+
+- Prioritize simplicity and speed of implementation while maintaining code quality
+- Use established, well-documented libraries and frameworks
+- Focus on core functionality first, then add additional features
+- Leverage existing Spotify API features where possible
+- Implement features incrementally with working code at each step
+- Use pnpm for all package management and scripts
+- Use the Next.js App Router pattern (src/app directory, server/client components, layouts, etc.)
+- Use Tailwind CSS for all styling and utility classes
+- Follow modern React/Next.js best practices (e.g., file-based routing, server components, hooks, etc.)
+
 Create a comprehensive web application that integrates with Spotify's API to provide users with detailed insights into their listening history. The application should:
 
 CORE FUNCTIONALITY:
@@ -52,7 +64,7 @@ TECHNICAL REQUIREMENTS:
 3. Data Management:
    - Store user preferences locally
    - Don't store sensitive Spotify tokens in insecure storage
-   - Consider implementating a backend service for token management
+   - Consider implementing a backend service for token management
 
 USER EXPERIENCE:
 
