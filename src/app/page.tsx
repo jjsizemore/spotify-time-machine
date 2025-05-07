@@ -23,7 +23,7 @@ export default function Home() {
 				</p>
 				<button
 					onClick={() => signIn('spotify', { callbackUrl: '/dashboard' })}
-					className="flex items-center gap-2 bg-spotify-green text-spotify-black font-bold px-6 py-3 rounded-full shadow-lg hover:bg-spotify-green/90 transition text-lg"
+					className="spotify-button"
 				>
 					<Image src="/spotify-icon.png" alt="Spotify" width={28} height={28} />
 					Sign in with Spotify

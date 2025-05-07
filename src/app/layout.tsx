@@ -1,6 +1,6 @@
 import React from 'react';
-import { NextAuthProvider } from '@/components/providers/NextAuthProvider';
-import './globals.css';
+import { NextAuthProvider } from '../components/providers/NextAuthProvider';
+import './spotify.css';
 
 export const metadata = {
 	title: 'Spotify Time Machine',

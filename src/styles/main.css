@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --spotify-green: #1db954;
+    --spotify-black: #191414;
+    --spotify-dark-gray: #121212;
+    --spotify-medium-gray: #535353;
+    --spotify-light-gray: #b3b3b3;
+  }
+
+  body {
+    @apply bg-spotify-black text-spotify-light-gray font-sans min-h-screen;
+  }
+
+  ::selection {
+    @apply bg-spotify-green text-spotify-black;
+  }
+}
+
+@layer components {
+  .spotify-button {
+    @apply bg-spotify-green text-spotify-black font-bold px-6 py-3 rounded-full
+           shadow-lg hover:bg-spotify-green/90 transition text-lg flex items-center gap-2;
+  }
+
+  .card {
+    @apply bg-spotify-dark-gray p-6 rounded-lg hover:bg-spotify-dark-gray/80 transition;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  background: var(--spotify-dark-gray);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--spotify-medium-gray);
+  border-radius: 4px;
+}

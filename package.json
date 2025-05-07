@@ -7,6 +7,8 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
+		"css:build": "tailwindcss -i ./src/styles/main.css -o ./src/app/spotify.css",
+		"css:watch": "tailwindcss -i ./src/styles/main.css -o ./src/app/spotify.css --watch",
 		"postinstall": "prisma generate"
 	},
 	"dependencies": {
