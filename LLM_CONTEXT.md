@@ -1,5 +1,9 @@
 # Spotify Time Machine
 
+## IMPORTANT INSTRUCTIONS
+- Check TODO.md at the project root for a detailed feature implementation checklist
+- The TODO.md file contains the current implementation status and priorities
+
 ## Optimization Preferences
 
 - Prioritize simplicity and speed of implementation while maintaining code quality
