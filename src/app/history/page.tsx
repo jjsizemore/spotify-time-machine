@@ -3,36 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useSpotify } from '@/hooks/useSpotify';
-import LoadingSpinner from '@/components/LoadingSpinner';
 import ErrorDisplay from '@/components/ErrorDisplay';
+import PageContainer from '@/components/PageContainer';
+import MonthlyTrackList from '@/components/MonthlyTrackList';
+import TrackItem from '@/components/TrackItem';
+import ActionButton from '@/components/ActionButton';
+import { processAndGroupTracks, createPlaylist, MonthlyTracks, SavedTrack } from '@/lib/spotifyTrackUtils';
 import { format } from 'date-fns';
-import Image from 'next/image';
-import Navigation from '@/components/Navigation';
-
-interface SavedTrack {
-  added_at: string;
-  track: {
-    id: string;
-    name: string;
-    album: {
-      name: string;
-      images: { url: string; height: number; width: number }[];
-    };
-    artists: { id: string; name: string }[];
-    duration_ms: number;
-    preview_url: string | null;
-  };
-}
-
-interface MonthlyTracks {
-  month: string;
-  tracks: SavedTrack[];
-  expanded: boolean;
-}
 
 export default function HistoryPage() {
-  const { data: session, status } = useSession();
-  const spotifyApi = useSpotify();
+  const { status } = useSession();
+  const { spotifyApi, isReady } = useSpotify();
   const [monthlyTracks, setMonthlyTracks] = useState<MonthlyTracks[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +24,7 @@ export default function HistoryPage() {
   // Initial load of saved tracks
   useEffect(() => {
     const fetchSavedTracks = async () => {
-      if (!spotifyApi.getAccessToken()) return;
+      if (!isReady) return;
 
       try {
         setIsLoading(true);
@@ -65,11 +46,11 @@ export default function HistoryPage() {
     };
 
     fetchSavedTracks();
-  }, [spotifyApi]);
+  }, [spotifyApi, isReady]);
 
   // Function to load more tracks
   const loadMoreTracks = async () => {
-    if (!hasMore || loadingMore) return;
+    if (!hasMore || loadingMore || !isReady) return;
 
     try {
       setLoadingMore(true);
@@ -113,58 +94,6 @@ export default function HistoryPage() {
     }
   };
 
-  // Process and group tracks by month
-  const processAndGroupTracks = (items: any[]): MonthlyTracks[] => {
-    const processedTracks: SavedTrack[] = items.map(item => ({
-      added_at: item.added_at,
-      track: {
-        id: item.track.id,
-        name: item.track.name,
-        album: {
-          name: item.track.album.name,
-          images: item.track.album.images.map((img: any) => ({
-            url: img.url,
-            height: img.height || 0,
-            width: img.width || 0,
-          })),
-        },
-        artists: item.track.artists.map((artist: any) => ({
-          id: artist.id,
-          name: artist.name,
-        })),
-        duration_ms: item.track.duration_ms,
-        preview_url: item.track.preview_url,
-      }
-    }));
-
-    return groupTracksByMonth(processedTracks);
-  };
-
-  // Helper function to group tracks by month
-  const groupTracksByMonth = (tracks: SavedTrack[]): MonthlyTracks[] => {
-    const months: { [key: string]: SavedTrack[] } = {};
-
-    tracks.forEach(item => {
-      const added_at = new Date(item.added_at);
-      const monthName = format(added_at, 'MMMM yyyy');
-
-      if (!months[monthName]) {
-        months[monthName] = [];
-      }
-
-      months[monthName].push(item);
-    });
-
-    // Convert to array and add expanded state
-    return Object.entries(months).map(([month, tracks]) => ({
-      month,
-      tracks,
-      expanded: false,
-    })).sort((a, b) =>
-      new Date(b.month).getTime() - new Date(a.month).getTime()
-    );
-  };
-
   // Toggle expanded state for a month
   const toggleMonth = (month: string) => {
     setMonthlyTracks(prevMonths =>
@@ -176,157 +105,85 @@ export default function HistoryPage() {
 
   // Create a playlist for a specific month
   const createMonthlyPlaylist = async (month: string, tracks: SavedTrack[]) => {
+    if (!isReady) {
+      alert('Cannot create playlist. Spotify API is not ready.');
+      return;
+    }
+
     try {
       // First create a new playlist
-      const user = await spotifyApi.getMe();
       const formattedDate = format(new Date(month), 'MMMM yyyy');
+      const playlistName = `${formattedDate} Time Machine`;
+      const description = `Songs I liked during ${formattedDate}. Created with Spotify Time Machine.`;
+      const trackUris = tracks.map(t => `spotify:track:${t.track.id}`);
 
-      // Create playlist with properly typed options
-      const playlist = await spotifyApi.createPlaylist(
-        user.body.id,
-        {
-          description: `Songs I liked during ${formattedDate}. Created with Spotify Time Machine.`,
-          public: false
-        },
-        // Pass the name separately as the first parameter
-        `${formattedDate} Time Machine`
+      await createPlaylist(
+        spotifyApi,
+        playlistName,
+        description,
+        trackUris
       );
 
-      // Then add tracks to the playlist
-      const trackUris = tracks.map(t => `spotify:track:${t.track.id}`);
-      await spotifyApi.addTracksToPlaylist(playlist.body.id, trackUris);
-
-      alert(`Playlist "${formattedDate} Time Machine" created successfully!`);
+      alert(`Playlist "${playlistName}" created successfully!`);
     } catch (err) {
       console.error('Error creating playlist:', err);
       alert('Failed to create playlist. Please try again later.');
     }
   };
 
-  if (status === 'loading' || isLoading) {
+  // Render a track item
+  const renderTrackItem = (track: SavedTrack) => {
     return (
-      <div className="min-h-screen bg-spotify-black flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
+      <TrackItem
+        key={track.track.id}
+        track={track.track}
+        addedAt={track.added_at}
+        showAddedDate={true}
+      />
     );
-  }
+  };
 
   if (error) {
     return (
-      <div className="min-h-screen bg-spotify-black p-6">
-        <ErrorDisplay message={error} onRetry={() => window.location.reload()} />
-      </div>
+      <PageContainer>
+        <ErrorDisplay message={error} retry={() => window.location.reload()} />
+      </PageContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-spotify-black">
-      {/* Top Navigation Bar */}
-      <Navigation user={session?.user} />
+    <PageContainer
+      title="Your Monthly Listening History"
+      isLoading={status === 'loading' || isLoading}
+      maxWidth="6xl"
+    >
+      {/* Timeline */}
+      <div className="space-y-6">
+        {monthlyTracks.map((month) => (
+          <MonthlyTrackList
+            key={month.month}
+            month={month.month}
+            tracks={month.tracks}
+            expanded={month.expanded}
+            onToggle={toggleMonth}
+            onCreatePlaylist={createMonthlyPlaylist}
+            renderTrackItem={renderTrackItem}
+          />
+        ))}
+      </div>
 
-      {/* Main Content */}
-      <main className="p-6 max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-spotify-light-gray mb-8">
-          Your Monthly Listening History
-        </h1>
-
-        {/* Timeline */}
-        <div className="space-y-6">
-          {monthlyTracks.map((month) => (
-            <div
-              key={month.month}
-              className="bg-spotify-dark-gray rounded-lg overflow-hidden"
-            >
-              {/* Month Header */}
-              <div
-                className="bg-spotify-medium-gray py-4 px-6 flex justify-between items-center cursor-pointer"
-                onClick={() => toggleMonth(month.month)}
-              >
-                <h2 className="text-xl font-bold text-spotify-white">
-                  {month.month} • {month.tracks.length} tracks
-                </h2>
-                <div className="flex gap-4 items-center">
-                  <button
-                    className="bg-spotify-green text-spotify-black font-medium px-4 py-2 rounded-full hover:bg-spotify-green/90 transition text-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      createMonthlyPlaylist(month.month, month.tracks);
-                    }}
-                  >
-                    Create Playlist
-                  </button>
-                  <span className="text-2xl text-spotify-light-gray">
-                    {month.expanded ? '▲' : '▼'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Track List */}
-              {month.expanded && (
-                <div className="p-4">
-                  <div className="space-y-4">
-                    {month.tracks.map((item) => (
-                      <div
-                        key={`${item.track.id}-${item.added_at}`}
-                        className="flex items-center gap-4 p-2 hover:bg-spotify-medium-gray/20 rounded-md transition"
-                      >
-                        {/* Album Art */}
-                        <div className="flex-shrink-0 w-16 h-16 relative">
-                          <Image
-                            src={item.track.album.images[0]?.url || '/default-album.png'}
-                            alt={item.track.album.name}
-                            fill
-                            className="object-cover rounded-md"
-                          />
-                        </div>
-
-                        {/* Track Info */}
-                        <div className="flex-grow min-w-0">
-                          <h3 className="text-spotify-white font-medium truncate">
-                            {item.track.name}
-                          </h3>
-                          <p className="text-spotify-light-gray text-sm truncate">
-                            {item.track.artists.map(a => a.name).join(', ')}
-                          </p>
-                          <p className="text-spotify-light-gray text-xs">
-                            Added on {format(new Date(item.added_at), 'MMM d, yyyy')}
-                          </p>
-                        </div>
-
-                        {/* Preview Button */}
-                        {item.track.preview_url && (
-                          <button
-                            className="bg-spotify-green text-spotify-black p-2 rounded-full hover:bg-spotify-green/90 transition"
-                            onClick={() => {
-                              const audio = new Audio(item.track.preview_url!);
-                              audio.play();
-                            }}
-                          >
-                            ▶
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+      {/* Load More Button */}
+      {hasMore && (
+        <div className="mt-8 text-center">
+          <ActionButton
+            onClick={loadMoreTracks}
+            disabled={loadingMore}
+            variant="secondary"
+          >
+            {loadingMore ? 'Loading...' : 'Load More Tracks'}
+          </ActionButton>
         </div>
-
-        {/* Load More Button */}
-        {hasMore && (
-          <div className="mt-8 text-center">
-            <button
-              className="bg-spotify-medium-gray text-spotify-white px-6 py-3 rounded-full hover:bg-spotify-medium-gray/80 transition"
-              onClick={loadMoreTracks}
-              disabled={loadingMore}
-            >
-              {loadingMore ? <LoadingSpinner size="sm" /> : 'Load More Months'}
-            </button>
-          </div>
-        )}
-      </main>
-    </div>
+      )}
+    </PageContainer>
   );
 }
