@@ -1,9 +1,10 @@
 import { useSession, signIn } from 'next-auth/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { spotifyApi } from '@/lib/spotify';
 
 export const useSpotify = () => {
   const { data: session } = useSession();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     if (session) {
@@ -16,9 +17,12 @@ export const useSpotify = () => {
       // Set the access token on the spotifyApi instance
       if (session.accessToken) {
         spotifyApi.setAccessToken(session.accessToken);
+        setIsReady(true);
       }
+    } else {
+      setIsReady(false);
     }
   }, [session]);
 
-  return spotifyApi;
+  return { spotifyApi, isReady };
 };
