@@ -70,6 +70,8 @@
 - [x] Add audio previews directly in the app
 - [ ] Implement sharing capabilities for playlists
 - [ ] Create visualization for listening trends
+    - [ ] **Listening Trends:** Implement as a monthly bar chart showing liked track counts. Ensure bars are visible and correctly scaled. X-axis: Month/Year. Y-axis (implied): Track count. Uses `--spotify-green`.
+    - [ ] **Genre Evolution:** Implement as a series of stacked horizontal bars per period (quarter/year). Segments represent top genre prevalence. Includes legend and filters for time range/granularity.
 - [ ] Add theme customization options
 - [ ] Implement keyboard shortcuts
 
@@ -78,6 +80,9 @@
 - [ ] Implement SSR where beneficial
 - [x] Add client-side caching for API responses
 - [x] Optimize image loading and rendering
+- [ ] Investigate and implement server-side data aggregation for `ListeningTrends.tsx` and `GenreTrendsVisualization.tsx` to reduce client-side load.
+- [ ] Explore using Web Workers to offload data processing for `ListeningTrends.tsx` and `GenreTrendsVisualization.tsx` to prevent UI blocking.
+- [ ] Implement progressive rendering/data chunking and user-controlled granularity (e.g., yearly vs. quarterly for "All Time") for `ListeningTrends.tsx` and `GenreTrendsVisualization.tsx` to improve perceived performance with large datasets.
 
 ## Implementation Notes
 

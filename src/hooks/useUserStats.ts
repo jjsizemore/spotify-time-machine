@@ -10,6 +10,7 @@ export interface Artist {
   images: { url: string; height: number; width: number }[];
   genres: string[];
   popularity: number;
+  external_urls: { spotify: string; };
 }
 
 export interface Track {
@@ -69,6 +70,7 @@ export const useUserStats = (timeRange: TimeRange = 'medium_term') => {
         })),
         genres: artist.genres,
         popularity: artist.popularity,
+        external_urls: artist.external_urls,
       }));
 
       const mappedTracks: Track[] = topTracksRes.body.items.map(track => ({

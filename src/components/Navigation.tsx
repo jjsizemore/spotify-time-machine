@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+import ActionButton from './ActionButton';
 
 interface NavigationProps {
   user?: {
@@ -126,13 +127,13 @@ export default function Navigation({ user }: NavigationProps) {
 
             {/* Dropdown Menu */}
             {dropdownOpen && (
-              <div className="absolute top-full right-0 mt-2 bg-spotify-dark-gray border border-spotify-medium-gray shadow-lg rounded-md py-1 w-40 z-50">
-                <button
+              <div className="absolute top-full right-0 mt-2 bg-spotify-dark-gray border border-spotify-medium-gray shadow-lg rounded-md py-1 w-40 z-50 text-center">
+                <ActionButton
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-spotify-light-gray hover:bg-spotify-medium-gray hover:text-spotify-white transition-colors"
+                  variant="primary"
                 >
                   Logout
-                </button>
+                </ActionButton>
               </div>
             )}
           </div>

@@ -35,9 +35,12 @@ export default function TopArtists({ artists, isLoading, error, onRetry }: TopAr
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {artists.map((artist) => (
-        <div
+        <a
           key={artist.id}
-          className="bg-spotify-dark-gray p-3 rounded-md hover:bg-spotify-medium-gray/20 transition cursor-pointer"
+          href={artist.external_urls.spotify}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-spotify-dark-gray p-3 rounded-md hover:bg-spotify-medium-gray/20 transition cursor-pointer block"
         >
           <div className="aspect-square relative mb-2 rounded-md overflow-hidden">
             <Image
@@ -51,7 +54,7 @@ export default function TopArtists({ artists, isLoading, error, onRetry }: TopAr
           <p className="text-xs text-spotify-light-gray">
             {artist.genres.slice(0, 2).join(', ')}
           </p>
-        </div>
+        </a>
       ))}
     </div>
   );

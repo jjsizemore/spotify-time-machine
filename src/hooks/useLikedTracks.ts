@@ -23,10 +23,11 @@ export interface SavedTrack {
 
 // Cache for artists data to prevent redundant API calls
 const artistsCache = new Map<string, any>();
-// Cache for liked tracks to prevent redundant API calls
+
+// Reinstate in-memory cache for liked tracks
 let likedTracksCache: SavedTrack[] | null = null;
 let lastFetchTime = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache lifetime
+const LIKED_TRACKS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache lifetime
 
 export function useLikedTracks() {
   const { spotifyApi, isReady } = useSpotify();
@@ -42,9 +43,15 @@ export function useLikedTracks() {
       return [];
     }
 
-    // Check if data is in cache and still fresh
     const now = Date.now();
-    if (!forceRefresh && likedTracksCache && (now - lastFetchTime < CACHE_TTL)) {
+    // Check if data is in in-memory cache and still fresh
+    if (!forceRefresh && likedTracksCache && (now - lastFetchTime < LIKED_TRACKS_CACHE_TTL)) {
+      // Simulate API loading states briefly if cache is hit immediately
+      setIsLoading(true);
+      setError(null);
+      await new Promise(resolve => setTimeout(resolve, 50)); // Ensure loading state is visible
+      setTracks(likedTracksCache); // Set tracks from in-memory cache
+      setIsLoading(false);
       return likedTracksCache;
     }
 
@@ -65,7 +72,7 @@ export function useLikedTracks() {
         offset += limit;
       } while (offset < total);
 
-      // Update cache
+      // Update in-memory cache
       likedTracksCache = allTracks;
       lastFetchTime = now;
       return allTracks;
@@ -79,8 +86,8 @@ export function useLikedTracks() {
   }, [isReady, spotifyApi]);
 
   // Fetch detailed information about artists
-  const fetchArtistsDetails = useCallback(async (tracks: SavedTrack[]) => {
-    if (!isReady || tracks.length === 0) {
+  const fetchArtistsDetails = useCallback(async (tracksToProcess: SavedTrack[]) => {
+    if (!isReady || tracksToProcess.length === 0) {
       return;
     }
 
@@ -89,7 +96,7 @@ export function useLikedTracks() {
 
       // Collect unique artist IDs from all tracks
       const artistIds = new Set<string>();
-      tracks.forEach(item => {
+      tracksToProcess.forEach(item => {
         item.track.artists.forEach(artist => {
           // Only fetch if not already in cache
           if (!artistsCache.has(artist.id)) {
@@ -133,22 +140,42 @@ export function useLikedTracks() {
     let isMounted = true;
 
     const loadData = async () => {
-      if (!isReady) return;
+      if (!isReady) {
+        // If not ready, try to load from in-memory cache if available
+        if (likedTracksCache && isMounted) {
+          setTracks(likedTracksCache);
+          // Artists details would need to be fetched if not also cached in memory or if dependent on fresh tracks
+          // For simplicity, we might re-fetch artists or ensure artistsCache is populated correctly elsewhere
+          fetchArtistsDetails(likedTracksCache);
+        }
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
 
       try {
         // First load tracks (either from cache or API)
+        // fetchLikedTracks will handle cache check internally if forceRefresh is false (default)
         const loadedTracks = await fetchLikedTracks();
 
         if (isMounted) {
           setTracks(loadedTracks);
+          setIsLoading(false); // Set loading to false after tracks are set
 
           // Then load artists details (staggered loading)
-          fetchArtistsDetails(loadedTracks);
+          if (loadedTracks.length > 0) {
+            await fetchArtistsDetails(loadedTracks);
+          } else {
+            setIsLoadingArtists(false); // No artists to load
+          }
         }
       } catch (err) {
         console.error('Error in useLikedTracks hook:', err);
         if (isMounted) {
           setError('Failed to load your music data. Please try again later.');
+          setIsLoading(false);
+          setIsLoadingArtists(false);
         }
       }
     };
@@ -158,12 +185,24 @@ export function useLikedTracks() {
     return () => {
       isMounted = false;
     };
-  }, [isReady, fetchLikedTracks, fetchArtistsDetails]);
+  }, [isReady, fetchLikedTracks, fetchArtistsDetails]); // fetchLikedTracks is stable due to useCallback
 
   // Function to refresh data
-  const refresh = useCallback(() => {
-    return fetchLikedTracks(true);
-  }, [fetchLikedTracks]);
+  const refresh = useCallback(async () => {
+    if (!isReady) return [];
+    setIsLoading(true);
+    // Clear in-memory cache for refresh
+    likedTracksCache = null;
+    lastFetchTime = 0;
+    const refreshedTracks = await fetchLikedTracks(true);
+    if (refreshedTracks) {
+        setTracks(refreshedTracks);
+        // artistsCache.clear(); // Optionally clear artist cache too for full refresh
+        await fetchArtistsDetails(refreshedTracks);
+    }
+    setIsLoading(false);
+    return refreshedTracks;
+  }, [isReady, fetchLikedTracks, fetchArtistsDetails]);
 
   return {
     tracks,

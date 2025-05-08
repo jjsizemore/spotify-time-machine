@@ -1,5 +1,6 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
+import { ipAddress } from "@vercel/functions";
 import type { NextRequest } from 'next/server';
 
 // Define a basic rate limiting structure
@@ -50,7 +51,7 @@ function isRateLimited(ip: string): boolean {
 // This function runs before the auth check
 export function middleware(request: NextRequest) {
   // Get client IP
-  const ip = request.ip || 'unknown';
+  const ip = ipAddress(request) || 'unknown';
 
   // Check for auth session and state cookies
   const authSession = request.cookies.get('next-auth.session-token') ||
@@ -139,16 +140,24 @@ if (typeof setInterval !== 'undefined') {
 }
 
 // Use withAuth to protect routes that require authentication
-export default withAuth({
-  callbacks: {
-    authorized: ({ token }) => !!token,
-  },
-  pages: {
-    signIn: '/auth/signin',
-  },
-});
+export default withAuth(
+  {
+    callbacks: {
+      authorized: ({ token }) => {
+        return !!token;
+      }
+    },
+    pages: {
+      signIn: '/auth/signin',
+    },
+  }
+);
 
 // Specify which routes should be protected
 export const config = {
-  matcher: ['/dashboard/:path*', '/history/:path*', '/playlist-generator/:path*', '/api/:path*'],
+  matcher: [
+    '/dashboard/:path*',
+    '/history/:path*',
+    '/playlist-generator/:path*',
+  ],
 };

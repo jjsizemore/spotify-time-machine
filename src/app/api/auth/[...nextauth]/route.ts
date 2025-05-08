@@ -2,6 +2,7 @@ import { refreshAccessToken, scopes } from '@/lib/spotify';
 import NextAuth from 'next-auth';
 import SpotifyProvider from 'next-auth/providers/spotify';
 
+
 const handler = NextAuth({
 	providers: [
 		SpotifyProvider({
@@ -41,10 +42,10 @@ const handler = NextAuth({
 			}
 		},
 		async session({ session, token }) {
-			session.accessToken = token.accessToken;
-			session.refreshToken = token.refreshToken;
-			session.expiresAt = token.expiresAt;
-			session.error = token.error;
+			session.accessToken = token.accessToken as string | undefined;
+			session.refreshToken = token.refreshToken as string | undefined;
+			session.expiresAt = token.expiresAt as number | undefined;
+			session.error = token.error as string | undefined;
 			return session;
 		},
 	},

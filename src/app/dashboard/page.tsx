@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, lazy } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useUserStats, TimeRange } from '@/hooks/useUserStats';
 import TopArtists from '@/components/TopArtists';
@@ -11,7 +11,6 @@ import TimeRangeSelector from '@/components/TimeRangeSelector';
 import StatsTabs from '@/components/StatsTabs';
 import PageContainer from '@/components/PageContainer';
 import FeatureCard from '@/components/FeatureCard';
-import VisualizationContainer from '@/components/VisualizationContainer';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Lazy load the visualization components
@@ -67,15 +66,15 @@ export default function Dashboard() {
 
       {/* Visualizations - Only show if set to true & using Suspense for lazy loading */}
       {showVisualizations && (
-        <>
-          <VisualizationContainer title="listening trends">
+        <div className="space-y-8 mb-10">
+          <Suspense fallback={<div className="bg-spotify-dark-gray rounded-lg p-6 min-h-[200px] flex justify-center items-center"><LoadingSpinner size="lg" /></div>}>
             <ListeningTrends />
-          </VisualizationContainer>
+          </Suspense>
 
-          <VisualizationContainer title="genre evolution">
+          <Suspense fallback={<div className="bg-spotify-dark-gray rounded-lg p-6 min-h-[200px] flex justify-center items-center"><LoadingSpinner size="lg" /></div>}>
             <GenreTrendsVisualization />
-          </VisualizationContainer>
-        </>
+          </Suspense>
+        </div>
       )}
 
       {/* Stats Section */}

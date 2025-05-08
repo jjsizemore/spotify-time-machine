@@ -1,5 +1,6 @@
 import React from 'react';
 import LoadingSpinner from './LoadingSpinner';
+import ToggleButton from './ToggleButton';
 
 interface FilterSelectorProps<T> {
   title: string;
@@ -42,18 +43,13 @@ export default function FilterSelector<T>({
               const id = getItemId(item);
               const name = getItemName(item);
               return (
-                <button
+                <ToggleButton
                   key={id}
-                  type="button"
-                  onClick={() => onToggleItem(id)}
-                  className={`px-4 py-2 rounded-full text-sm transition ${
-                    selectedItems.includes(id)
-                      ? 'bg-spotify-green text-spotify-black'
-                      : 'bg-spotify-medium-gray text-spotify-white'
-                  }`}
-                >
-                  {name}
-                </button>
+                  id={id}
+                  label={name}
+                  isSelected={selectedItems.includes(id)}
+                  onClick={onToggleItem}
+                />
               );
             })}
             {displayItems.length === 0 && (

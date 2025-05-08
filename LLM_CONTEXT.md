@@ -53,6 +53,28 @@
     - `next.config.js`: Includes updated image remote patterns for Spotify images.
     - `postcss.config.js`: Standard PostCSS setup for Tailwind CSS and Autoprefixer (using CommonJS).
 
+- **Dashboard Visualizations:**
+    - **`ListeningTrends.tsx` (Your Listening Trends):**
+        - **Purpose:** To display the number of tracks liked by the user each month over time.
+        - **Appearance:** A bar chart where each bar represents a month.
+            - X-axis: Month and year (e.g., "Jan 2023", "Feb 2023"). Rotated labels for readability if space is tight.
+            - Y-axis (implied): Number of tracks liked.
+            - Bars: Height proportional to the number of tracks liked in that month, normalized against the month with the highest count. Bars should have a minimum visible height (e.g., 4px) even for low counts.
+            - Color: Uses `--spotify-green` for bars.
+            - Interaction: Horizontal scrolling if the timeline exceeds viewport width.
+        - **Data:** Derived from the `added_at` timestamp of liked tracks.
+        - **Loading/Empty States:** Handled by `VisualizationContainer`. Shows total track count below the chart.
+        - **Optimization:** Uses client-side chunked processing for large datasets to maintain UI responsiveness.
+    - **`GenreTrendsVisualization.tsx` (Your Genre Evolution):**
+        - **Purpose:** To show how the user's preferences for top genres have changed over time (quarterly or yearly).
+        - **Appearance:** A series of stacked horizontal bars, where each row represents a time period (e.g., "2023-Q1" or "2023").
+            - Rows: Labelled with the period.
+            - Stacked Bars: Each row/period consists of a horizontal bar segmented by colors. Each segment represents a top genre, and its width is proportional to that genre's prevalence (count) within that period, relative to other top genres in the same period.
+            - Legend: Displays the top N (e.g., 8) genres and their corresponding colors, taken from a predefined palette.
+            - Filters: Allows users to select time range ("Past Year", "Past 2 Years", "All Time") and granularity for "All Time" view ("Quarterly", "Yearly").
+        - **Data:** Derived from genres associated with artists of liked tracks, grouped by period.
+        - **Loading/Empty States:** Handled by `VisualizationContainer`.
+
 Create a comprehensive web application that integrates with Spotify's API to provide users with detailed insights into their listening history. The application should:
 
 CORE FUNCTIONALITY:

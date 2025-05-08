@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 const SIGN_IN_PROCESS_STARTED_KEY = 'sign_in_process_started';
 
-export default function SignIn() {
+// Extracted content into a new component to be wrapped by Suspense
+function SignInContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
@@ -60,3 +61,24 @@ export default function SignIn() {
 	);
 }
 
+export default function SignIn() {
+	return (
+		<Suspense fallback={<SignInFallback />}>
+			<SignInContent />
+		</Suspense>
+	);
+}
+
+// Fallback UI component
+function SignInFallback() {
+	return (
+		<div className="min-h-screen flex flex-col items-center justify-center bg-spotify-black">
+			<div className="text-center">
+				<LoadingSpinner size="lg" />
+				<p className="text-spotify-light-gray mt-4">
+					Loading sign-in page...
+				</p>
+			</div>
+		</div>
+	);
+}
