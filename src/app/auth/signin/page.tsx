@@ -1,39 +1,62 @@
 'use client';
 
+import { useEffect } from 'react';
 import { signIn } from 'next-auth/react';
-import Image from 'next/image';
-import React from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import LoadingSpinner from '@/components/LoadingSpinner';
+
+const SIGN_IN_PROCESS_STARTED_KEY = 'sign_in_process_started';
 
 export default function SignIn() {
-	return (
-		<div className="min-h-screen flex items-center justify-center bg-spotify-black">
-			<div className="max-w-md w-full space-y-8 p-8 bg-spotify-dark-gray rounded-lg shadow-lg">
-				<div className="text-center">
-					<h2 className="mt-6 text-3xl font-bold text-white">
-						Welcome to Spotify Time Machine
-					</h2>
-					<p className="mt-2 text-sm text-spotify-light-gray">
-						Connect your Spotify account to get started
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
+	const error = searchParams?.get('error');
+
+	useEffect(() => {
+		if (error) {
+			console.error('Sign-in error:', error);
+			sessionStorage.removeItem(SIGN_IN_PROCESS_STARTED_KEY);
+			const timer = setTimeout(() => {
+				router.replace('/');
+			}, 3000);
+			return () => clearTimeout(timer);
+		}
+
+		const signInProcessAlreadyStarted = sessionStorage.getItem(SIGN_IN_PROCESS_STARTED_KEY) === 'true';
+
+		if (!signInProcessAlreadyStarted) {
+			sessionStorage.setItem(SIGN_IN_PROCESS_STARTED_KEY, 'true');
+			signIn('spotify', { callbackUrl });
+		}
+		// If the process was already started, we just show the loading spinner below
+		// and wait for NextAuth/Spotify to complete its redirects.
+	}, [callbackUrl, error, router]);
+
+	if (error) {
+		return (
+			<div className="min-h-screen flex flex-col items-center justify-center bg-spotify-black">
+				<div className="text-center p-6">
+					<h2 className="text-2xl font-bold text-spotify-red mb-4">Authentication Error</h2>
+					<p className="text-spotify-light-gray mb-8">
+						There was a problem signing you in. Redirecting to home page...
 					</p>
 				</div>
-				<div className="mt-8">
-					<button
-						onClick={() => signIn('spotify', { callbackUrl: '/' })}
-						className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-full text-spotify-black bg-spotify-green hover:bg-spotify-green/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-					>
-						<span className="absolute left-0 inset-y-0 flex items-center pl-3">
-							<Image
-								src="/spotify-icon.png"
-								alt="Spotify"
-								width={24}
-								height={24}
-								className="h-5 w-5"
-							/>
-						</span>
-						Sign in with Spotify
-					</button>
-				</div>
+			</div>
+		);
+	}
+
+	// Default: show loading spinner. This will be shown if no error,
+	// or if signInProcessAlreadyStarted is true (meaning we're waiting for redirect).
+	return (
+		<div className="min-h-screen flex flex-col items-center justify-center bg-spotify-black">
+			<div className="text-center">
+				<LoadingSpinner size="lg" />
+				<p className="text-spotify-light-gray mt-4">
+					Connecting to Spotify...
+				</p>
 			</div>
 		</div>
 	);
 }
+

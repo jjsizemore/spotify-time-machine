@@ -1,13 +1,8 @@
 import { refreshAccessToken, scopes } from '@/lib/spotify';
-import { PrismaAdapter } from '@auth/prisma-adapter';
-import { PrismaClient } from '@prisma/client';
 import NextAuth from 'next-auth';
 import SpotifyProvider from 'next-auth/providers/spotify';
 
-const prisma = new PrismaClient();
-
 const handler = NextAuth({
-	adapter: PrismaAdapter(prisma),
 	providers: [
 		SpotifyProvider({
 			clientId: process.env.SPOTIFY_CLIENT_ID!,
@@ -59,6 +54,35 @@ const handler = NextAuth({
 	secret: process.env.NEXTAUTH_SECRET,
 	session: {
 		strategy: 'jwt',
+	},
+	cookies: {
+		sessionToken: {
+			name: `next-auth.session-token`,
+			options: {
+				httpOnly: true,
+				sameSite: 'lax',
+				path: '/',
+				secure: process.env.NODE_ENV === 'production',
+			},
+		},
+		callbackUrl: {
+			name: `next-auth.callback-url`,
+			options: {
+				httpOnly: true,
+				sameSite: 'lax',
+				path: '/',
+				secure: process.env.NODE_ENV === 'production',
+			},
+		},
+		csrfToken: {
+			name: `next-auth.csrf-token`,
+			options: {
+				httpOnly: true,
+				sameSite: 'lax',
+				path: '/',
+				secure: process.env.NODE_ENV === 'production',
+			},
+		},
 	},
 });
 
