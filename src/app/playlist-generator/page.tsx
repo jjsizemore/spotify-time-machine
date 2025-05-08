@@ -1,15 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useSpotify } from '@/hooks/useSpotify';
-import LoadingSpinner from '@/components/LoadingSpinner';
+import { extractTopGenres, GenreCount } from '@/lib/genreUtils';
+import { Artist } from '@/hooks/useUserStats';
+import SharePlaylistButton from '@/components/SharePlaylistButton';
+import FormField from '@/components/FormField';
+import FilterSelector from '@/components/FilterSelector';
+import KeyboardShortcutInfo from '@/components/KeyboardShortcutInfo';
+import ActionButton from '@/components/ActionButton';
+import PageContainer from '@/components/PageContainer';
 import { format, isAfter, isBefore, parseISO } from 'date-fns';
-import Navigation from '@/components/Navigation';
+import { fetchAllLikedTracks, createPlaylist, SavedTrack } from '@/lib/spotifyTrackUtils';
 
 export default function PlaylistGeneratorPage() {
-  const { data: session, status } = useSession();
-  const spotifyApi = useSpotify();
+  const { status } = useSession();
+  const { spotifyApi, isReady } = useSpotify();
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -20,12 +27,70 @@ export default function PlaylistGeneratorPage() {
   const [playlistUrl, setPlaylistUrl] = useState('');
   const [trackCount, setTrackCount] = useState(0);
 
+  // Filter-related state
+  const [topGenres, setTopGenres] = useState<GenreCount[]>([]);
+  const [topArtists, setTopArtists] = useState<Artist[]>([]);
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
+  const [loadingFilters, setLoadingFilters] = useState(false);
+
+  // Fetch user's top artists and extract genres when the component mounts
+  useEffect(() => {
+    const fetchTopArtistsAndGenres = async () => {
+      if (!isReady) return;
+
+      try {
+        setLoadingFilters(true);
+
+        // Fetch user's top artists
+        const response = await spotifyApi.getMyTopArtists({ limit: 50 });
+        const artists = response.body.items as Artist[];
+        setTopArtists(artists);
+
+        // Extract genres from top artists
+        const genres = extractTopGenres(artists, 20);
+        setTopGenres(genres);
+      } catch (err) {
+        console.error('Error fetching artist/genre data:', err);
+      } finally {
+        setLoadingFilters(false);
+      }
+    };
+
+    if (isReady) {
+      fetchTopArtistsAndGenres();
+    }
+  }, [isReady]);
+
+  // Handle genre selection
+  const toggleGenre = (genre: string) => {
+    setSelectedGenres(prev =>
+      prev.includes(genre)
+        ? prev.filter(g => g !== genre)
+        : [...prev, genre]
+    );
+  };
+
+  // Handle artist selection
+  const toggleArtist = (artistId: string) => {
+    setSelectedArtists(prev =>
+      prev.includes(artistId)
+        ? prev.filter(id => id !== artistId)
+        : [...prev, artistId]
+    );
+  };
+
   // Generate the custom playlist
   const generatePlaylist = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!startDate || !endDate || !playlistName.trim()) {
-      setError('Please fill in all fields');
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    if (!isReady) {
+      setError('Spotify API is not ready. Please try again.');
       return;
     }
 
@@ -35,48 +100,75 @@ export default function PlaylistGeneratorPage() {
       setSuccess(false);
 
       // 1. Get all liked tracks
-      const tracks = await fetchAllLikedTracks();
+      const tracks = await fetchAllLikedTracks(spotifyApi);
 
       // 2. Filter tracks by date range
       const parsedStartDate = parseISO(startDate);
       const parsedEndDate = parseISO(endDate);
 
-      const filteredTracks = tracks.filter(track => {
+      let filteredTracks = tracks.filter(track => {
         const trackDate = new Date(track.added_at);
         return isAfter(trackDate, parsedStartDate) && isBefore(trackDate, parsedEndDate);
       });
 
+      // 3. Apply genre filters if any are selected
+      if (selectedGenres.length > 0) {
+        // We need to get the full track details to access artist genres
+        const trackDetails = await Promise.all(
+          filteredTracks.map(async (track) => {
+            try {
+              const artistIds = track.track.artists.map(artist => artist.id);
+              const artistsResponse = await spotifyApi.getArtists(artistIds);
+              return {
+                ...track,
+                artists: artistsResponse.body.artists
+              };
+            } catch (error) {
+              console.error('Error fetching artist details:', error);
+              return null;
+            }
+          })
+        );
+
+        // Filter tracks by genre
+        filteredTracks = filteredTracks.filter((_, index) => {
+          const trackWithArtists = trackDetails[index];
+          if (!trackWithArtists) return false;
+
+          const trackGenres = trackWithArtists.artists.flatMap(artist => artist.genres || []);
+          return selectedGenres.some(genre => trackGenres.includes(genre));
+        });
+      }
+
+      // 4. Apply artist filters if any are selected
+      if (selectedArtists.length > 0) {
+        filteredTracks = filteredTracks.filter(track => {
+          return track.track.artists.some(artist => selectedArtists.includes(artist.id));
+        });
+      }
+
       if (filteredTracks.length === 0) {
-        setError('No tracks found in the selected date range');
+        setError('No tracks found with the selected filters and date range');
         setIsLoading(false);
         return;
       }
 
       setTrackCount(filteredTracks.length);
 
-      // 3. Create a new playlist
-      const user = await spotifyApi.getMe();
+      // 5. Create a new playlist
       const dateRangeText = `${format(parsedStartDate, 'MMM d, yyyy')} - ${format(parsedEndDate, 'MMM d, yyyy')}`;
-
-      const playlist = await spotifyApi.createPlaylist(
-        user.body.id,
-        {
-          description: `Custom playlist for ${dateRangeText}. Created with Spotify Time Machine.`,
-          public: false
-        },
-        playlistName
-      );
-
-      // 4. Add tracks to the playlist (in batches of 100 due to API limits)
+      const description = `Custom playlist for ${dateRangeText}. Created with Spotify Time Machine.`;
       const trackUris = filteredTracks.map(track => `spotify:track:${track.track.id}`);
 
-      for (let i = 0; i < trackUris.length; i += 100) {
-        const batch = trackUris.slice(i, i + 100);
-        await spotifyApi.addTracksToPlaylist(playlist.body.id, batch);
-      }
+      const playlistUrl = await createPlaylist(
+        spotifyApi,
+        playlistName,
+        description,
+        trackUris
+      );
 
       setSuccess(true);
-      setPlaylistUrl(playlist.body.external_urls.spotify);
+      setPlaylistUrl(playlistUrl);
     } catch (err) {
       console.error('Error generating playlist:', err);
       setError('Failed to generate playlist. Please try again.');
@@ -85,140 +177,155 @@ export default function PlaylistGeneratorPage() {
     }
   };
 
-  // Helper function to fetch all liked tracks
-  const fetchAllLikedTracks = async () => {
-    const limit = 50;
-    let offset = 0;
-    let allTracks = [];
-    let total = 0;
+  // Add keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only apply shortcuts when in the playlist generator form
+      if (!document.querySelector('#playlist-generator-form')) return;
 
-    do {
-      const response = await spotifyApi.getMySavedTracks({ limit, offset });
-      allTracks = [...allTracks, ...response.body.items];
-      total = response.body.total;
-      offset += limit;
-    } while (offset < total);
+      // Submit form with Ctrl+Enter or Cmd+Enter
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !isLoading && !success) {
+        e.preventDefault();
+        const form = document.querySelector('#playlist-generator-form') as HTMLFormElement;
+        if (form) {
+          form.requestSubmit();
+        }
+      }
 
-    return allTracks;
-  };
+      // Reset form with Escape
+      if (e.key === 'Escape' && success) {
+        e.preventDefault();
+        setSuccess(false);
+        setPlaylistName('');
+        setStartDate('');
+        setEndDate('');
+        setSelectedGenres([]);
+        setSelectedArtists([]);
+      }
+    };
 
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-spotify-black flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLoading, success]);
 
   return (
-    <div className="min-h-screen bg-spotify-black">
-      {/* Top Navigation Bar */}
-      <Navigation user={session?.user} />
+    <PageContainer
+      title="Custom Playlist Generator"
+      description="Create a playlist from your liked songs within a specific date range."
+      isLoading={status === 'loading'}
+      maxWidth="3xl"
+    >
+      <div className="bg-spotify-dark-gray rounded-lg p-4 md:p-6">
+        {!success ? (
+          <form id="playlist-generator-form" onSubmit={generatePlaylist} className="space-y-4 md:space-y-6">
+            <FormField
+              id="playlistName"
+              label="Playlist Name"
+              type="text"
+              value={playlistName}
+              onChange={(e) => setPlaylistName(e.target.value)}
+              placeholder="My Awesome Playlist"
+              required
+            />
 
-      {/* Main Content */}
-      <main className="p-6 max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-spotify-light-gray mb-2">
-          Custom Playlist Generator
-        </h1>
-        <p className="text-spotify-light-gray mb-8">
-          Create a playlist from your liked songs within a specific date range.
-        </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                id="startDate"
+                label="Start Date"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                required
+              />
+              <FormField
+                id="endDate"
+                label="End Date"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                required
+              />
+            </div>
 
-        <div className="bg-spotify-dark-gray rounded-lg p-6">
-          {!success ? (
-            <form onSubmit={generatePlaylist} className="space-y-6">
-              <div>
-                <label htmlFor="playlistName" className="block text-spotify-white mb-2 font-medium">
-                  Playlist Name
-                </label>
-                <input
-                  type="text"
-                  id="playlistName"
-                  value={playlistName}
-                  onChange={(e) => setPlaylistName(e.target.value)}
-                  placeholder="My Awesome Playlist"
-                  className="w-full bg-spotify-black border border-spotify-medium-gray rounded-md p-3 text-spotify-white focus:outline-none focus:ring-2 focus:ring-spotify-green"
-                  required
-                />
-              </div>
+            {/* Genre Filter */}
+            <FilterSelector
+              title="Filter by Genre (Optional)"
+              items={topGenres}
+              selectedItems={selectedGenres}
+              isLoading={loadingFilters}
+              getItemId={(genre) => genre.name}
+              getItemName={(genre) => genre.name}
+              onToggleItem={toggleGenre}
+              emptyMessage="No genres found"
+            />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="startDate" className="block text-spotify-white mb-2 font-medium">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    id="startDate"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full bg-spotify-black border border-spotify-medium-gray rounded-md p-3 text-spotify-white focus:outline-none focus:ring-2 focus:ring-spotify-green"
-                    required
-                  />
-                </div>
+            {/* Artist Filter */}
+            <FilterSelector
+              title="Filter by Artist (Optional)"
+              items={topArtists}
+              selectedItems={selectedArtists}
+              isLoading={loadingFilters}
+              getItemId={(artist) => artist.id}
+              getItemName={(artist) => artist.name}
+              onToggleItem={toggleArtist}
+              emptyMessage="No artists found"
+              maxItems={20}
+            />
 
-                <div>
-                  <label htmlFor="endDate" className="block text-spotify-white mb-2 font-medium">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    id="endDate"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full bg-spotify-black border border-spotify-medium-gray rounded-md p-3 text-spotify-white focus:outline-none focus:ring-2 focus:ring-spotify-green"
-                    required
-                  />
-                </div>
-              </div>
+            {/* Keyboard shortcuts info */}
+            <KeyboardShortcutInfo
+              description="Press"
+              keys={[{ key: "Ctrl" }, { key: "Enter" }]}
+              className="mt-6"
+              align="right"
+            />
 
-              {error && (
-                <div className="bg-red-900/50 border border-red-700 text-spotify-white p-3 rounded-md">
-                  {error}
-                </div>
-              )}
-
-              <button
+            <div className="flex justify-end">
+              <ActionButton
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-spotify-green text-spotify-black font-bold py-3 px-4 rounded-full hover:bg-spotify-green/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                variant="primary"
               >
-                {isLoading ? <LoadingSpinner size="sm" /> : 'Generate Playlist'}
-              </button>
-            </form>
-          ) : (
-            <div className="text-center space-y-6 py-4">
-              <div className="bg-spotify-green/20 border border-spotify-green text-spotify-green p-4 rounded-md">
-                <h3 className="font-bold text-xl mb-2">Playlist Created Successfully!</h3>
-                <p>Added {trackCount} tracks from your saved songs.</p>
-              </div>
-
-              <div>
-                <a
-                  href={playlistUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block bg-spotify-green text-spotify-black font-bold py-3 px-6 rounded-full hover:bg-spotify-green/90 transition"
-                >
-                  Open Playlist in Spotify
-                </a>
-              </div>
-
-              <button
-                onClick={() => {
-                  setSuccess(false);
-                  setPlaylistName('');
-                  setStartDate('');
-                  setEndDate('');
-                }}
-                className="text-spotify-light-gray underline hover:text-spotify-white"
-              >
-                Create Another Playlist
-              </button>
+                {isLoading ? 'Generating...' : 'Generate Playlist'}
+              </ActionButton>
             </div>
-          )}
-        </div>
-      </main>
-    </div>
+          </form>
+        ) : (
+          <div className="text-center space-y-6 py-4">
+            <div className="bg-spotify-green/20 border border-spotify-green text-spotify-green p-4 rounded-md">
+              <h3 className="font-bold text-xl mb-2">Playlist Created Successfully!</h3>
+              <p>Added {trackCount} tracks from your saved songs.</p>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+              <ActionButton
+                onClick={() => window.open(playlistUrl, '_blank')}
+                variant="primary"
+              >
+                Open Playlist in Spotify
+              </ActionButton>
+              <SharePlaylistButton
+                playlistUrl={playlistUrl}
+                playlistName={playlistName}
+              />
+            </div>
+
+            {/* Keyboard shortcuts info */}
+            <KeyboardShortcutInfo
+              description="Press"
+              keys={[{ key: "Esc" }]}
+              className="mt-6"
+              align="center"
+            />
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-spotify-red text-spotify-white p-4 rounded-lg mt-4">
+            <p>{error}</p>
+          </div>
+        )}
+      </div>
+    </PageContainer>
   );
 }
