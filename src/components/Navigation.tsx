@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 interface NavigationProps {
   user?: {
@@ -12,38 +13,53 @@ interface NavigationProps {
 
 export default function Navigation({ user }: NavigationProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      sessionStorage.removeItem('sign_in_process_started'); // Clear sign-in attempt flag
+      // Clear any additional auth-related localStorage/sessionStorage
+      localStorage.removeItem('spotify-auth-state');
+      sessionStorage.removeItem('spotify-auth-state');
+
+      // Call our API to clear cookies
+      await fetch('/api/auth/clear-session');
+
+      // Sign out and redirect to thank you page
+      await signOut({
+        redirect: false,
+        callbackUrl: '/thank-you'
+      });
+
+      router.push('/thank-you');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Fallback to direct redirect in case of error
+      window.location.href = '/thank-you';
+    }
+  };
 
   return (
-    <nav className="bg-spotify-dark-gray px-6 py-4 flex flex-col md:flex-row md:items-center justify-between border-b border-spotify-medium-gray">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard">
-            <Image
-              src="/spotify-icon.png"
-              alt="Spotify Logo"
-              width={32}
-              height={32}
-              className="drop-shadow-lg"
-            />
-          </Link>
-          <h1 className="text-xl font-bold text-spotify-green">Time Machine</h1>
-        </div>
-
-        <div className="md:hidden flex items-center gap-4">
-          {user?.image && (
-            <Image
-              src={user.image}
-              alt="Profile"
-              width={32}
-              height={32}
-              className="rounded-full"
-            />
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mt-4 md:mt-0">
-        <div className="flex items-center gap-6 w-full md:w-auto">
+    <nav className="bg-spotify-dark-gray px-6 py-4 border-b border-spotify-medium-gray">
+      <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 items-center">
+        {/* Left navigation section */}
+        <div className="flex items-center justify-center md:justify-start gap-6 mb-4 md:mb-0 order-2 md:order-1">
           <Link
             href="/dashboard"
             className={`text-sm font-medium ${
@@ -76,17 +92,50 @@ export default function Navigation({ user }: NavigationProps) {
           </Link>
         </div>
 
-        <div className="hidden md:flex items-center gap-4">
-          {user?.image && (
+        {/* Center logo section */}
+        <div className="flex items-center justify-center order-1 md:order-2">
+          <Link href="/dashboard" className="flex items-center gap-3">
             <Image
-              src={user.image}
-              alt="Profile"
-              width={32}
-              height={32}
-              className="rounded-full"
+              src="/spotify-icon.png"
+              alt="Spotify Logo"
+              width={64}
+              height={64}
+              className="drop-shadow-lg"
             />
-          )}
-          <span className="text-spotify-light-gray">{user?.name}</span>
+            <h1 className="text-xl font-bold text-spotify-green">Time Machine</h1>
+          </Link>
+        </div>
+
+        {/* Right user section */}
+        <div className="flex items-center justify-center md:justify-end gap-4 mb-4 md:mb-0 order-3 relative">
+          <div
+            className="flex items-center gap-2 cursor-pointer relative"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            ref={dropdownRef}
+          >
+            {user?.image && (
+              <Image
+                src={user.image}
+                alt="Profile"
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
+            )}
+            <span className="text-spotify-light-gray hidden md:inline">{user?.name}</span>
+
+            {/* Dropdown Menu */}
+            {dropdownOpen && (
+              <div className="absolute top-full right-0 mt-2 bg-spotify-dark-gray border border-spotify-medium-gray shadow-lg rounded-md py-1 w-40 z-50">
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-spotify-light-gray hover:bg-spotify-medium-gray hover:text-spotify-white transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>
