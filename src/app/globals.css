@@ -2,9 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base theme variables */
 :root {
-	--background: #ffffff;
-	--foreground: #171717;
+	/* Spotify's default dark theme colors */
+	--bg-primary: #121212;
+	--bg-secondary: #181818;
+	--bg-tertiary: #282828;
+	--text-primary: #ffffff;
+	--text-secondary: #b3b3b3;
+	--accent-color: #1DB954;
+	--accent-hover: #1ed760;
+	--accent-disabled: #1aa34a;
+	--error-color: #e91429;
+	--border-color: #333333;
+}
+
+/* Light theme overrides */
+html.theme-light {
+	--bg-primary: #f8f8f8;
+	--bg-secondary: #ffffff;
+	--bg-tertiary: #e8e8e8;
+	--text-primary: #121212;
+	--text-secondary: #535353;
+	--border-color: #dddddd;
+}
+
+/* Custom utility classes */
+.bg-spotify-black {
+	background-color: var(--bg-primary);
+}
+
+.bg-spotify-dark-gray {
+	background-color: var(--bg-secondary);
+}
+
+.bg-spotify-medium-gray {
+	background-color: var(--bg-tertiary);
+}
+
+.text-spotify-white {
+	color: var(--text-primary);
+}
+
+.text-spotify-light-gray {
+	color: var(--text-secondary);
+}
+
+.bg-spotify-green {
+	background-color: var(--accent-color);
+}
+
+.text-spotify-green {
+	color: var(--accent-color);
+}
+
+.border-spotify-medium-gray {
+	border-color: var(--border-color);
+}
+
+.hover\:bg-spotify-green\/90:hover {
+	background-color: var(--accent-hover);
+}
+
+.bg-spotify-red {
+	background-color: var(--error-color);
+}
+
+@layer utilities {
+	/* Add any additional utility classes here */
 }
 
 @theme inline {
@@ -14,16 +79,7 @@
 	--font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		--background: #0a0a0a;
-		--foreground: #ededed;
-	}
-}
-
 body {
-	background: var(--background);
-	color: var(--foreground);
 	font-family: Arial, Helvetica, sans-serif;
 	@apply bg-spotify-black text-spotify-light-gray font-sans min-h-screen;
 }
@@ -40,4 +96,20 @@ body {
 ::-webkit-scrollbar-thumb {
 	background: #535353;
 	border-radius: 4px;
+}
+
+/* Update the slideDown animation */
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-slideDown {
+	animation: slideDown 0.2s ease-out forwards;
 }
