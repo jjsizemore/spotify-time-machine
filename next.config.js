@@ -2,7 +2,26 @@
 const nextConfig = {
 	reactStrictMode: true,
 	images: {
-		domains: ['i.scdn.co', 'mosaic.scdn.co', 'platform-lookaside.fbsbx.com'],
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: 'i.scdn.co',
+				port: '',
+				pathname: '/image/**',
+			},
+			{
+				protocol: 'https',
+				hostname: 'mosaic.scdn.co',
+				port: '',
+				pathname: '/image/**',
+			},
+			{
+				protocol: 'https',
+				hostname: 'platform-lookaside.fbsbx.com',
+				port: '',
+				pathname: '/image/**',
+			},
+		],
 	},
 };
 
