@@ -4,11 +4,13 @@ A Next.js application that lets you explore your Spotify listening history, crea
 
 ## Features
 
-- View your top artists, tracks, and genres
-- Generate monthly playlists from your listening history
-- Create custom playlists based on date ranges
-- Visualize your listening trends over time
-- Spotify authentication integration
+- View your top artists, tracks, genres, and recently played tracks.
+- **Comprehensive Dashboard:** Access overall listening statistics, top artists & genres, and visualizations for listening trends (monthly track counts) and genre evolution over time.
+- **Monthly Listening History:** Explore a chronological timeline of your liked tracks, grouped by month, with track details (title, artist, album, cover art, date liked).
+- **Generate Monthly Playlists:** Easily create Spotify playlists from your listening history for any given month directly from the history page.
+- **Custom Playlist Generator:** Craft playlists based on custom date ranges, with options to filter by your top genres and artists. Includes keyboard shortcuts for efficiency and a button to share your created playlist.
+- **Spotify Authentication:** Secure sign-in using Spotify OAuth 2.0, managed by NextAuth.js, including automatic token refresh and session persistence.
+- **Responsive Design:** Enjoy a consistent experience across desktop and mobile devices.
 
 ## Getting Started
 
@@ -27,6 +29,9 @@ SPOTIFY_CLIENT_ID=your_spotify_client_id
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your_nextauth_secret
+# For PKCE flow (recommended) - generate these values
+SPOTIFY_CODE_VERIFIER=your_generated_code_verifier
+SPOTIFY_CODE_CHALLENGE=your_generated_code_challenge
 ```
 
 ### Installation
@@ -50,22 +55,9 @@ npm run dev
 pnpm dev
 ```
 
-### Building CSS Styles
-
-This project uses Tailwind CSS for styling with custom components. To ensure styles are properly built:
-
-1. Make sure tailwind.config.js is properly configured with content paths
-2. Build the CSS files using the following command:
-
-```bash
-npx tailwindcss -i ./src/styles/main.css -o ./src/app/spotify.css --watch
-```
-
-3. This will generate the necessary Spotify-themed styles and keep watching for changes
-
 ## Project Structure
 
-- `src/app`: Next.js app router components and routes
+- `src/app`: Next.js app router components, pages, layouts, and API routes (e.g., `api/auth/...`).
 - `src/components`: Reusable UI components
 - `src/hooks`: Custom React hooks for data fetching
 - `src/lib`: Utility functions and API client setup
@@ -74,20 +66,24 @@ npx tailwindcss -i ./src/styles/main.css -o ./src/app/spotify.css --watch
 
 ## Styling System
 
-The project uses a custom Spotify-themed styling system with:
+The project uses Tailwind CSS for utility-first styling, combined with a custom Spotify-themed styling system:
 
-- Custom color palette matching Spotify's branding
-- Reusable component classes like `.spotify-button`
-- Responsive design for all device sizes
-- Custom scrollbar styling
+- **Global Styles & Theming:** Base styles, CSS custom properties (variables) for colors (e.g., `--spotify-green`, `--spotify-black`), and typography are defined in `src/app/globals.css`, ensuring a consistent Spotify-like look and feel.
+- **Tailwind CSS:** Leveraged extensively for applying styles directly in components and for responsive design.
+- **Reusable Component Classes:** Pre-defined classes for common elements like `.spotify-button` (though utility classes are preferred).
+- **Responsive Design:** Ensures adaptability across all device sizes.
+- Custom scrollbar styling for a more integrated appearance.
 
 ## Authentication
 
-Authentication is handled via NextAuth.js with the Spotify provider. The system includes:
+Authentication is handled via NextAuth.js with the Spotify provider, incorporating best practices:
 
-- Secure token management with automatic refresh
-- Session persistence
-- Error handling for authentication failures
+- Secure OAuth 2.0 flow.
+- JWT (JSON Web Tokens) are used for session management.
+- Automatic token refresh to maintain active sessions.
+- Session persistence across browser sessions.
+- Robust error handling for authentication failures.
+- Comprehensive logout process, including server-side session clearing.
 
 ## Learn More
 

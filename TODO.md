@@ -5,11 +5,12 @@
 ### 1. Authentication
 - [x] Implement Spotify OAuth 2.0 flow
 - [ ] Implement PKCE (Proof Key for Code Exchange) for Spotify OAuth
-  - [ ] Generate `code_verifier` and `code_challenge`
-  - [ ] Store `code_verifier` (e.g., HttpOnly cookie, server-side session)
-  - [ ] Add `code_challenge` and `code_challenge_method` to authorization request
-  - [ ] Add `code_verifier` to token exchange request
-  - [ ] Test PKCE flow thoroughly across different browsers
+  - [ ] Generate `code_verifier` (e.g., using `crypto.randomBytes`) and `code_challenge` (e.g., using `crypto.createHash('sha256')`) upon initiating authentication.
+  - [ ] Store `code_verifier` securely (e.g., HttpOnly, SameSite=Lax, Secure cookie; investigate best practices for Next.js middleware/API routes).
+  - [ ] Add `code_challenge` and `code_challenge_method='S256'` to the Spotify authorization request.
+  - [ ] Retrieve `code_verifier` and include it in the body of the token exchange request to Spotify.
+  - [ ] Update NextAuth.js configuration (`src/app/api/auth/[...nextauth]/route.ts`) and any relevant auth utility functions.
+  - [ ] Test PKCE flow thoroughly across different browsers and incognito modes.
 - [x] Secure token management
 - [x] Handle authentication errors gracefully
 - [x] Add session persistence
@@ -30,7 +31,11 @@
   - [x] All tracks the user has "liked" during that period
   - [x] Track information (title, artist, album, cover art)
   - [x] Date when track was liked
-  - [x] Play button for previews
+  - [ ] Play button for previews (within `TrackItem.tsx`)
+    - [ ] Implement UI for play/pause button in `TrackItem.tsx`.
+    - [ ] Fetch track preview URL from Spotify API (if available).
+    - [ ] Handle audio playback (e.g., using HTML5 `<audio>` element).
+    - [ ] Manage playback state (playing, paused, loading, error).
 - [x] Add infinite scrolling or pagination
 - [x] Handle edge cases (no liked songs, API limits)
 
@@ -63,32 +68,79 @@
 - [x] Create API routes for Spotify interaction
 - [x] Implement caching to minimize API calls
 - [ ] Add rate limiting protection
+  - [ ] Implement rate limiting for API routes in `src/middleware.ts` or dedicated API middleware (e.g., using `next-connect` or similar pattern if not using built-in Next.js API features directly).
+  - [ ] Consider strategies like token bucket or fixed window counters.
+  - [ ] Provide appropriate HTTP 429 responses.
 - [x] Set up error handling middleware
 
 ### Data Management
-- [ ] Store user preferences (localStorage)
+- [ ] Store user preferences (e.g., preferred time ranges, UI settings) using `localStorage` or server-side storage if sensitive.
 - [x] Implement secure token handling
 - [x] Create data fetching hooks/utilities
 
 ## Optional Enhancements
 
 ### User Experience
-- [x] Add audio previews directly in the app
-- [ ] Implement sharing capabilities for playlists
-- [ ] Create visualization for listening trends
+- [ ] Add audio previews directly in the app (corresponds to 'Play button for previews' in `TrackItem.tsx`)
+- [x] Implement sharing capabilities for playlists (basic version done; consider expanding, e.g., 'copy to clipboard' for playlist details, direct social media share options)
+- [x] Create visualization for listening trends
     - [ ] **Listening Trends:** Implement as a monthly bar chart showing liked track counts. Ensure bars are visible and correctly scaled. X-axis: Month/Year. Y-axis (implied): Track count. Uses `--spotify-green`.
     - [ ] **Genre Evolution:** Implement as a series of stacked horizontal bars per period (quarter/year). Segments represent top genre prevalence. Includes legend and filters for time range/granularity.
 - [ ] Add theme customization options
-- [ ] Implement keyboard shortcuts
+- [ ] Implement keyboard shortcuts (playlist generator has some; audit for other useful areas like navigation, modal dialogs)
 
 ### Performance
 - [x] Add Suspense boundaries for loading states
-- [ ] Implement SSR where beneficial
-- [x] Add client-side caching for API responses
-- [x] Optimize image loading and rendering
+- [ ] Implement SSR where beneficial (evaluate pages like dashboard or history for initial data)
+- [ ] Add client-side caching for API responses (e.g., using `swr` or `react-query` for more advanced caching beyond component state, or custom caching layer for `spotify-web-api-node` calls if `useSpotify` hook can be enhanced).
+- [x] Optimize image loading and rendering (Next.js `<Image>` component helps; ensure proper `sizes` and `priority` props where applicable).
 - [ ] Investigate and implement server-side data aggregation for `ListeningTrends.tsx` and `GenreTrendsVisualization.tsx` to reduce client-side load.
-- [ ] Explore using Web Workers to offload data processing for `ListeningTrends.tsx` and `GenreTrendsVisualization.tsx` to prevent UI blocking.
-- [ ] Implement progressive rendering/data chunking and user-controlled granularity (e.g., yearly vs. quarterly for "All Time") for `ListeningTrends.tsx` and `GenreTrendsVisualization.tsx` to improve perceived performance with large datasets.
+  - [ ] Create new API endpoint(s) to pre-process track data for these visualizations.
+  - [ ] Modify `useUserStats.ts` or create new hooks to fetch aggregated data from these endpoints.
+- [ ] Explore using Web Workers to offload data processing for `ListeningTrends.tsx` and `GenreTrendsVisualization.tsx` if server-side aggregation is not fully sufficient or for specific client-side calculations.
+- [ ] Implement progressive rendering/data chunking and user-controlled granularity (e.g., yearly vs. quarterly for "All Time") for `ListeningTrends.tsx` and `GenreTrendsVisualization.tsx` to improve perceived performance with large datasets (partially implemented with filters, can be enhanced).
+
+## Testing Strategy
+- [ ] **Unit Tests:**
+  - [ ] Test utility functions in `src/lib/spotifyTrackUtils.ts` (e.g., track grouping, playlist creation logic).
+  - [ ] Test utility functions in `src/lib/genreUtils.ts`.
+  - [ ] Test business logic within custom hooks (e.g., `useLikedTracks.ts`, `useUserStats.ts`) using `@testing-library/react-hooks` or similar.
+- [ ] **Component Tests:**
+  - [ ] Test critical UI components in `src/components/` (e.g., `TrackItem.tsx`, `MonthlyTrackList.tsx`, `FilterSelector.tsx`, `PageContainer.tsx`) for rendering and basic interactions using `@testing-library/react`.
+  - [ ] Test visualization components (`ListeningTrends.tsx`, `GenreTrendsVisualization.tsx`) with mock data.
+- [ ] **Integration Tests:**
+  - [ ] Test interaction between components (e.g., filter selection updating a list).
+  - [ ] Test NextAuth.js integration points and authentication flow locally.
+- [ ] **End-to-End (E2E) Tests:**
+  - [ ] Implement E2E tests for core user flows using Playwright or Cypress:
+    - [ ] User login and logout.
+    - [ ] Navigating to the dashboard and viewing stats.
+    - [ ] Navigating to the history page and viewing tracks.
+    - [ ] Creating a monthly playlist.
+    - [ ] Creating a custom playlist with filters.
+
+## Accessibility (a11y)
+- [ ] **Audit & Improvements:**
+  - [ ] Perform an accessibility audit using browser developer tools (e.g., Lighthouse, Axe DevTools) and manual testing.
+  - [ ] Ensure proper ARIA attributes are used for dynamic components and custom controls (e.g., `FilterSelector`, modals, custom dropdowns).
+  - [ ] Verify keyboard navigability for all interactive elements.
+  - [ ] Check color contrast ratios for text and UI elements against WCAG guidelines.
+  - [ ] Ensure all images have appropriate `alt` text or are marked as decorative if applicable.
+  - [ ] Add `aria-live` regions for dynamic content updates (e.g., loading states, error messages, playlist creation success).
+
+## Code Quality & Developer Experience (DevEx)
+- [ ] **Linting & Formatting:**
+  - [ ] Ensure ESLint and Prettier are configured and consistently used (add `lint` and `format` scripts to `package.json` if not present).
+  - [ ] Enforce stricter ESLint rules for code quality and best practices.
+- [ ] **Code Documentation:**
+  - [ ] Add JSDoc comments for complex functions, hooks, and components, especially those in `src/lib/` and `src/hooks/`.
+  - [ ] Review and improve existing comments for clarity.
+- [ ] **Refactoring:**
+  - [ ] Identify and refactor any overly complex components or functions.
+  - [ ] Review `spotifyTrackUtils.ts` for potential optimizations or further modularization if it becomes too large.
+- [ ] **Dependency Review:**
+  - [ ] Periodically review and update dependencies to their latest stable versions.
+  - [ ] Remove any unused dependencies.
 
 ## Implementation Notes
 

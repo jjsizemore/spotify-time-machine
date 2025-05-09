@@ -26,7 +26,7 @@
     - `ActionButton.tsx`: Versatile button component for primary and secondary actions.
     - `SpotifySignInButton.tsx`: Standardized Spotify sign-in button.
     - `FormField.tsx`: Consistent styling for form inputs.
-    - `TrackItem.tsx`: Displays individual track information, used in lists.
+    - `TrackItem.tsx`: Displays individual track information, used in lists (play button for previews currently **not implemented**).
     - `MonthlyTrackList.tsx`: Renders a list of tracks for a given month, with expansion and playlist creation features.
     - `FilterSelector.tsx`: UI for selecting multiple filter items (e.g., genres, artists).
     - `LoadingSpinner.tsx`, `ErrorDisplay.tsx`: Consistent feedback components for asynchronous operations.
@@ -88,7 +88,8 @@ CORE FUNCTIONALITY:
 
 2. User Dashboard (`src/app/dashboard/page.tsx`):
    - Displays overall listening statistics upon login using `PageContainer`.
-   - Shows top artists and genres fetched via `useUserStats` hook. Includes `GenreTrendsVisualization` and `ListeningTrends` components.
+   - Shows top artists, genres, **and recently played tracks** fetched via `useUserStats` hook (or a dedicated hook if `useUserStats` doesn't cover recently played).
+   - Includes `GenreTrendsVisualization` and `ListeningTrends` components.
    - Provides navigation to other sections using `FeatureCard` components.
    - Main app navigation managed by `Navigation.tsx`.
 
@@ -97,7 +98,7 @@ CORE FUNCTIONALITY:
    - Each month displays liked tracks (using `TrackItem`), with track information (title, artist, album, cover art, date liked).
    - Track processing and grouping by month handled by `src/lib/spotifyTrackUtils.ts`.
    - Uses `useLikedTracks` hook for data fetching and pagination (load more functionality).
-   - Play button for previews is a potential future enhancement (currently not implemented in `TrackItem`).
+   - Play button for previews in `TrackItem` is a **pending enhancement** (currently not implemented).
 
 4. Playlist Generation (Monthly):
    - "Create Monthly Playlist" button integrated within each `MonthlyTrackList` section on the History page.
@@ -142,7 +143,7 @@ USER EXPERIENCE:
 
 ADDITIONAL FEATURES (if time permits):
 
-1. Audio previews directly in the application (currently not in `TrackItem`).
+1. Audio previews directly in the application (target for `TrackItem.tsx`).
 2. Sharing capabilities for playlists (basic implementation with `SharePlaylistButton` on custom playlist generator; could be expanded).
 3. Listening trends and statistics visualization (initial version on dashboard with `GenreTrendsVisualization` and `ListeningTrends`).
 4. Theme customization options (foundational CSS variables are in place, making this feasible).
