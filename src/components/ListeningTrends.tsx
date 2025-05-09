@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import LoadingSpinner from './LoadingSpinner';
 import { useLikedTracks } from '@/hooks/useLikedTracks';
 import VisualizationContainer from './VisualizationContainer';
 import { getCachedData, setCachedData } from '../lib/cacheUtils';
+
+// ADDED: Type for time filter
+type TimeFilter = '1year' | '2years' | 'all';
 
 interface MonthlyData {
   month: string;
@@ -20,6 +22,7 @@ export default function ListeningTrends() {
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [maxCount, setMaxCount] = useState(0);
   const [processingData, setProcessingData] = useState(false);
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('all'); // ADDED: Time filter state
 
   const isMountedRef = useRef(true);
   const processingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -34,59 +37,74 @@ export default function ListeningTrends() {
     };
   }, []);
 
-  // Process data when tracks are loaded
+  // ADDED: Helper function to filter tracks by time
+  const filterTracksByTime = (tracksToFilter: typeof tracks, filter: TimeFilter) => {
+    if (filter === 'all') return tracksToFilter;
+
+    const now = new Date();
+    const cutoffDate = new Date();
+
+    if (filter === '1year') {
+      cutoffDate.setFullYear(now.getFullYear() - 1);
+    } else if (filter === '2years') {
+      cutoffDate.setFullYear(now.getFullYear() - 2);
+    }
+
+    return tracksToFilter.filter(item => new Date(item.added_at) >= cutoffDate);
+  };
+
+  // Process data when tracks are loaded or filter changes
   useEffect(() => {
     if (processingTimeoutRef.current) {
       clearTimeout(processingTimeoutRef.current);
     }
 
-    // Attempt to load from cache first, only if not already loading primary track data
-    // and if we don't already have monthlyData (e.g. from a previous run in this session)
-    if (!isLoading && monthlyData.length === 0) {
-      const cachedTrendsData = getCachedData<MonthlyData[]>(LISTENING_TRENDS_CACHE_KEY);
+    const currentCacheKey = `${LISTENING_TRENDS_CACHE_KEY}_${timeFilter}`; // MODIFIED: Dynamic cache key
+
+    // Attempt to load from cache first
+    if (!isLoading && monthlyData.length === 0) { // Keep this initial condition, or adjust if causing issues with filter changes
+      const cachedTrendsData = getCachedData<MonthlyData[]>(currentCacheKey);
       if (cachedTrendsData && cachedTrendsData.length > 0) {
         if (isMountedRef.current) {
           setMonthlyData(cachedTrendsData);
           setMaxCount(Math.max(0, ...cachedTrendsData.map((item: MonthlyData) => item.count)));
           setProcessingData(false);
-          console.log('ListeningTrends: Loaded data from cache');
-          // If we load from cache, we might not need to proceed with full processing below
-          // if the underlying 'tracks' haven't changed significantly or if cache is fresh enough.
-          // For simplicity, we'll return here. A more advanced setup might compare track count/timestamps.
+          console.log(`ListeningTrends: Loaded data from cache for ${timeFilter}`);
           return;
         }
       }
     }
 
-    if (isLoading && !tracks.length) {
+    // Filter tracks based on the current timeFilter
+    const filteredTracks = filterTracksByTime(tracks, timeFilter);
+
+
+    if (isLoading && !filteredTracks.length) { // MODIFIED: Use filteredTracks
       setMonthlyData([]);
       setMaxCount(0);
       setProcessingData(false);
       return;
     }
 
-    if (!isLoading && tracks.length === 0) {
+    if (!isLoading && filteredTracks.length === 0) { // MODIFIED: Use filteredTracks
       setMonthlyData([]);
       setMaxCount(0);
       setProcessingData(false);
       return;
     }
 
-    // If there are tracks, start or continue processing.
-    // isLoading might be true if paginating, but we have some tracks.
-    if (tracks.length > 0) {
-      // setProcessingData(true); // VisualizationContainer will handle this via isProcessing prop
+    if (filteredTracks.length > 0) { // MODIFIED: Use filteredTracks
+      setProcessingData(true);
 
-      // Initialize accumulators for this processing pass
       let currentTracksByMonth: Record<string, number> = {};
       let currentMaxVal = 0;
 
       const processChunk = (startIndex: number) => {
         if (!isMountedRef.current) return;
 
-        const endIndex = Math.min(startIndex + CHUNK_SIZE, tracks.length);
+        const endIndex = Math.min(startIndex + CHUNK_SIZE, filteredTracks.length); // MODIFIED: Use filteredTracks
         for (let i = startIndex; i < endIndex; i++) {
-          const item = tracks[i];
+          const item = filteredTracks[i]; // MODIFIED: Use filteredTracks
           const date = new Date(item.added_at);
           const month = (date.getMonth() + 1).toString().padStart(2, '0');
           const monthYear = `${date.getFullYear()}-${month}`;
@@ -112,34 +130,32 @@ export default function ListeningTrends() {
           setMaxCount(currentMaxVal);
         }
 
-        if (endIndex < tracks.length) {
+        if (endIndex < filteredTracks.length) { // MODIFIED: Use filteredTracks
           processingTimeoutRef.current = setTimeout(() => processChunk(endIndex), 0);
         } else {
           if (isMountedRef.current) {
             setProcessingData(false);
-            // Save to cache once all chunks are processed
-            setCachedData(LISTENING_TRENDS_CACHE_KEY, monthlyDataArray, LISTENING_TRENDS_CACHE_TTL_MINUTES);
-            console.log('ListeningTrends: Saved processed data to cache');
+            setCachedData(currentCacheKey, monthlyDataArray, LISTENING_TRENDS_CACHE_TTL_MINUTES); // MODIFIED: Dynamic cache key
+            console.log(`ListeningTrends: Saved processed data to cache for ${timeFilter}`);
           }
         }
       };
-
-      // Start processing from the beginning
-      // If previous data existed (e.g. from a smaller 'tracks' array),
-      // this effectively resets and re-processes with the new 'tracks' array.
       processChunk(0);
+    } else if (!isLoading) { // Handle case where filtered tracks are empty but not loading
+        setMonthlyData([]);
+        setMaxCount(0);
+        setProcessingData(false);
     }
 
+
     return () => {
-      // Cleanup for this effect instance if tracks/isLoading changes mid-process
       if (processingTimeoutRef.current) {
         clearTimeout(processingTimeoutRef.current);
       }
     };
-  }, [tracks, isLoading]);
+  }, [tracks, isLoading, timeFilter]); // MODIFIED: Add timeFilter to dependencies
 
   // Determine overall loading state for the container
-  // True if hook is loading AND there's no data yet to show (even partially)
   const isOverallLoading = isLoading && monthlyData.length === 0 && !error;
 
   // Determine if the container should show the processing overlay
@@ -160,6 +176,29 @@ export default function ListeningTrends() {
       isEmpty={!isOverallLoading && !error && tracks.length > 0 && monthlyData.length === 0 && !processingData}
       emptyDataMessage="No listening data available to visualize after processing."
     >
+      {/* ADDED: Time filter buttons */}
+      <div className="flex justify-end mb-4 space-x-2 text-sm">
+        {(['1year', '2years', 'all'] as TimeFilter[]).map((filter) => (
+          <button
+            key={filter}
+            onClick={() => {
+              setMonthlyData([]); // Clear current data to allow cache or new data to load
+              setMaxCount(0); // Reset max count
+              setTimeFilter(filter);
+            }}
+            className={`px-3 py-1 rounded-full ${
+              timeFilter === filter
+                ? 'bg-spotify-green text-black'
+                : 'bg-spotify-light-black text-spotify-light-gray'
+            }`}
+          >
+            {filter === '1year' && 'Past Year'}
+            {filter === '2years' && 'Past 2 Years'}
+            {filter === 'all' && 'All Time'}
+          </button>
+        ))}
+      </div>
+
       {/* Log a few values for debugging the bar heights */}
       {(() => {
         console.log(
@@ -170,31 +209,46 @@ export default function ListeningTrends() {
             processingData,
             error,
             maxCount,
-            monthlyDataSample: monthlyData.slice(0, 5),
-            fullMonthlyData: monthlyData // Log full data for more detail
+            // monthlyDataSample: monthlyData.slice(0, 5), // Reduced verbosity
+            // fullMonthlyData: monthlyData // Reduced verbosity
           }
         );
         return null; // Prevent rendering issue
       })()}
-      <div className="h-64 flex items-end space-x-2 overflow-x-auto pb-4">
-        {monthlyData.map((data) => {
-          // const barHeightPercentage = maxCount > 0 ? (data.count / maxCount) * 100 : 0;
-          // console.log(`Month: ${data.month}, Count: ${data.count}, Max: ${maxCount}, Height%: ${barHeightPercentage}`);
-          return (
-            <div key={data.month} className="flex flex-col items-center min-w-[50px]">
+      {/* NEW: Flex container for legend and chart */}
+      <div className="flex h-64"> {/* h-64 sets the overall height for this section */}
+        {/* Legend */}
+        <div className="flex items-center justify-center w-10 text-xs text-spotify-light-gray shrink-0 mr-2">
+          <span className="transform -rotate-90 whitespace-nowrap">
+            Tracks / Month
+          </span>
+        </div>
+
+        {/* Chart Content (Original container, now with flex-grow and h-full) */}
+        <div className="flex-grow h-full flex items-end space-x-2 overflow-x-auto pb-4">
+          {monthlyData.map((data) => {
+            // const barHeightPercentage = maxCount > 0 ? (data.count / maxCount) * 100 : 0; // Original debug line
+            // console.log(`Month: ${data.month}, Count: ${data.count}, Max: ${maxCount}, Height%: ${barHeightPercentage}`);
+            return (
               <div
-                className="w-8 bg-spotify-green rounded-t-md"
-                style={{
-                  height: `${(data.count / maxCount) * 100}%`,
-                  minHeight: '4px'
-                }}
-              />
-              <div className="text-xs text-spotify-light-gray mt-2 transform -rotate-45 origin-top-left whitespace-nowrap">
-                {formatMonthLabel(data.month)}
+                key={data.month}
+                className="flex flex-col items-center min-w-[50px] h-full justify-end"
+                title={`Month: ${formatMonthLabel(data.month)}\nTracks: ${data.count}`} // ADDED: Tooltip
+              >
+                <div
+                  className="w-8 bg-spotify-green rounded-t-md"
+                  style={{
+                    height: `${maxCount > 0 ? (data.count / maxCount) * 100 : 0}%`, // MODIFIED: Safeguard maxCount
+                    minHeight: '4px'
+                  }}
+                />
+                <div className="text-xs text-spotify-light-gray mt-1 transform -rotate-45 origin-top-left whitespace-nowrap">
+                  {formatMonthLabel(data.month)}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       <div className="flex justify-between text-sm text-spotify-light-gray mt-8">

@@ -38,7 +38,7 @@ export default function FilterSelector<T>({
         </div>
       ) : (
         <div className="w-full bg-spotify-black rounded-md p-2">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 max-h-40 overflow-y-auto content-start">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 max-h-50 py-1 overflow-y-auto content-start">
             {displayItems.map(item => {
               const id = getItemId(item);
               const name = getItemName(item);

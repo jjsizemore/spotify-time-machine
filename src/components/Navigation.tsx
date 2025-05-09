@@ -127,7 +127,7 @@ export default function Navigation({ user }: NavigationProps) {
 
             {/* Dropdown Menu */}
             {dropdownOpen && (
-              <div className="absolute top-full right-0 mt-2 bg-spotify-dark-gray border border-spotify-medium-gray shadow-lg rounded-md py-1 w-40 z-50 text-center">
+              <div className="absolute top-full right-0 mt-2 bg-spotify-dark-gray border border-spotify-medium-gray shadow-lg rounded-md px-2 py-1 z-50 text-center">
                 <ActionButton
                   onClick={handleLogout}
                   variant="primary"

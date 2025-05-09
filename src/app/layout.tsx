@@ -2,7 +2,7 @@ import React from 'react';
 import { NextAuthProvider } from '../components/providers/NextAuthProvider';
 import { LayoutContent } from '@/components/LayoutContent';
 import './spotify.css';
-
+import { Analytics } from '@vercel/analytics/react';
 // Root layout metadata (must be in server component)
 export const metadata = {
 	title: 'Spotify Time Machine',
@@ -26,6 +26,7 @@ export default function RootLayout({
 				<NextAuthProvider>
 					<LayoutContent>{children}</LayoutContent>
 				</NextAuthProvider>
+				<Analytics />
 			</body>
 		</html>
 	);

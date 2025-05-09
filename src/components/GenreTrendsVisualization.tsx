@@ -1,15 +1,26 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import LoadingSpinner from './LoadingSpinner';
 import { useLikedTracks } from '@/hooks/useLikedTracks';
 import VisualizationContainer from './VisualizationContainer';
+import { getCachedData, setCachedData } from '../lib/cacheUtils';
 
 interface GenreTimeData {
   genre: string;
   period: string; // Format: 'YYYY-Q1', 'YYYY-Q2', etc.
   count: number;
 }
+
+// ADDED: Structure for cached data
+interface CachedGenreData {
+  genreData: GenreTimeData[];
+  topGenres: string[];
+  periods: string[];
+}
+
+// ADDED: Cache constants
+const GENRE_TRENDS_CACHE_KEY_PREFIX = 'genreTrendsData';
+const GENRE_TRENDS_CACHE_TTL_MINUTES = 60; // 1 hour TTL
 
 type TimeFilter = '1year' | '2years' | 'all';
 
@@ -30,11 +41,34 @@ export default function GenreTrendsVisualization() {
 
   // Process the genre data once we have tracks and artist details
   useEffect(() => {
+    // ADDED: Dynamic cache key based on current filters - MOVED UP
+    const currentCacheKey = `${GENRE_TRENDS_CACHE_KEY_PREFIX}_${timeFilter}_${granularity}`;
+
+    // ADDED: Attempt to load from cache - MOVED UP & MODIFIED
+    const cachedData = getCachedData<CachedGenreData>(currentCacheKey);
+    if (cachedData) {
+      console.log(`GenreTrends: Cache HIT for ${timeFilter} - ${granularity}. Using cached data.`);
+      setGenreData(cachedData.genreData);
+      setTopGenres(cachedData.topGenres);
+      setPeriods(cachedData.periods);
+      setProcessingData(false); // Ensure processing is false if loaded from cache
+      return; // Return early if cache is successfully loaded
+    }
+
+    // If cache miss, proceed with checks and processing logic
+    console.log(`GenreTrends: Cache MISS for ${timeFilter} - ${granularity}. Checking dependencies.`);
+
     // Skip if still loading initial data or if artist details aren't ready yet
     if (isLoading || isLoadingArtists || tracks.length === 0 || artistsDetails.size === 0) {
+      console.log('GenreTrends: Dependencies not ready, clearing component state.');
+      setGenreData([]);
+      setTopGenres([]);
+      setPeriods([]);
+      setProcessingData(false); // Ensure processing is false if dependencies not met
       return;
     }
 
+    console.log(`GenreTrends: Dependencies READY for ${timeFilter} - ${granularity}. Processing data.`);
     setProcessingData(true);
 
     try {
@@ -99,7 +133,7 @@ export default function GenreTrendsVisualization() {
       const sortedGenres = Object.entries(genreCounts)
         .sort((a, b) => b[1] - a[1])
         .map(entry => entry[0])
-        .slice(0, 12); // Take top 12 genres
+        .slice(0, 20); // Take top 12 genres
 
       // Get unique periods and sort them chronologically
       const uniquePeriods = [...new Set(genreTimeData.map(item => item.period))].sort();
@@ -107,6 +141,11 @@ export default function GenreTrendsVisualization() {
       setTopGenres(sortedGenres);
       setPeriods(uniquePeriods);
       setGenreData(genreTimeData);
+
+      // ADDED: Save processed data to cache
+      setCachedData(currentCacheKey, { genreData: genreTimeData, topGenres: sortedGenres, periods: uniquePeriods }, GENRE_TRENDS_CACHE_TTL_MINUTES);
+      console.log(`GenreTrends: Saved processed data to cache for ${timeFilter} - ${granularity}`);
+
     } catch (err) {
       console.error('Error processing genre trends data:', err);
     } finally {
