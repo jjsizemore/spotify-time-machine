@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import SpotifySignInButton from '@/components/SpotifySignInButton';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import LoadingSpinner from '@/components/LoadingSpinner';
-import SpotifySignInButton from '@/components/SpotifySignInButton';
+import React, { useEffect } from 'react';
 
 export default function Home() {
 	const { status } = useSession();
@@ -41,7 +41,8 @@ export default function Home() {
 					Spotify Time Machine
 				</h1>
 				<p className="text-lg md:text-xl text-center mb-8 text-spotify-light-gray">
-					Relive your Spotify listening history, generate playlists by month or custom range, and explore your music journey.
+					Relive your Spotify listening history, generate playlists by month or
+					custom range, and explore your music journey.
 				</p>
 
 				<SpotifySignInButton

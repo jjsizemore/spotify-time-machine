@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import LoadingSpinner from '@/components/LoadingSpinner';
+import { Suspense, useEffect } from 'react';
 
 const SIGN_IN_PROCESS_STARTED_KEY = 'sign_in_process_started';
 
@@ -24,7 +24,8 @@ function SignInContent() {
 			return () => clearTimeout(timer);
 		}
 
-		const signInProcessAlreadyStarted = sessionStorage.getItem(SIGN_IN_PROCESS_STARTED_KEY) === 'true';
+		const signInProcessAlreadyStarted =
+			sessionStorage.getItem(SIGN_IN_PROCESS_STARTED_KEY) === 'true';
 
 		if (!signInProcessAlreadyStarted) {
 			sessionStorage.setItem(SIGN_IN_PROCESS_STARTED_KEY, 'true');
@@ -38,7 +39,9 @@ function SignInContent() {
 		return (
 			<div className="min-h-screen flex flex-col items-center justify-center bg-spotify-black">
 				<div className="text-center p-6">
-					<h2 className="text-2xl font-bold text-spotify-red mb-4">Authentication Error</h2>
+					<h2 className="text-2xl font-bold text-spotify-red mb-4">
+						Authentication Error
+					</h2>
 					<p className="text-spotify-light-gray mb-8">
 						There was a problem signing you in. Redirecting to home page...
 					</p>
@@ -53,9 +56,7 @@ function SignInContent() {
 		<div className="min-h-screen flex flex-col items-center justify-center bg-spotify-black">
 			<div className="text-center">
 				<LoadingSpinner size="lg" />
-				<p className="text-spotify-light-gray mt-4">
-					Connecting to Spotify...
-				</p>
+				<p className="text-spotify-light-gray mt-4">Connecting to Spotify...</p>
 			</div>
 		</div>
 	);
@@ -75,9 +76,7 @@ function SignInFallback() {
 		<div className="min-h-screen flex flex-col items-center justify-center bg-spotify-black">
 			<div className="text-center">
 				<LoadingSpinner size="lg" />
-				<p className="text-spotify-light-gray mt-4">
-					Loading sign-in page...
-				</p>
+				<p className="text-spotify-light-gray mt-4">Loading sign-in page...</p>
 			</div>
 		</div>
 	);

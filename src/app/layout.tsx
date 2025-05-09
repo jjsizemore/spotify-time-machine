@@ -1,6 +1,6 @@
+import { LayoutContent } from '@/components/LayoutContent';
 import React from 'react';
 import { NextAuthProvider } from '../components/providers/NextAuthProvider';
-import { LayoutContent } from '@/components/LayoutContent';
 import './spotify.css';
 import { Analytics } from '@vercel/analytics/react';
 // Root layout metadata (must be in server component)

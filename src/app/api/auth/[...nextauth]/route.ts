@@ -1,8 +1,7 @@
+import { createHash, randomBytes } from 'crypto';
 import { refreshAccessToken, scopes } from '@/lib/spotify';
 import NextAuth from 'next-auth';
 import SpotifyProvider from 'next-auth/providers/spotify';
-import { randomBytes, createHash } from 'crypto';
-
 
 const handler = NextAuth({
 	providers: [
@@ -34,7 +33,9 @@ const handler = NextAuth({
 
 			// Token has expired, refresh it
 			try {
-				const refreshedToken = await refreshAccessToken(token.refreshToken as string);
+				const refreshedToken = await refreshAccessToken(
+					token.refreshToken as string
+				);
 				token.accessToken = refreshedToken.accessToken;
 				token.expiresAt = refreshedToken.expiresAt;
 				return token;

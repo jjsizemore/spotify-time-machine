@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import KeyboardShortcuts from './KeyboardShortcuts';
-import Header from './Header';
+import React from 'react';
 import Footer from './Footer';
+import Header from './Header';
+import KeyboardShortcuts from './KeyboardShortcuts';
 
 export function LayoutContent({ children }: { children: React.ReactNode }) {
 	const { status } = useSession();
@@ -22,10 +22,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 		<div className="flex flex-col min-h-screen">
 			{showNavigation && <Header />}
 
-			<main className="flex-grow">
-				{children}
-			</main>
-		<Footer />
+			<main className="flex-grow">{children}</main>
+			<Footer />
 			{showNavigation && <KeyboardShortcuts />}
 		</div>
 	);
