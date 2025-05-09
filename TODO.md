@@ -4,6 +4,12 @@
 
 ### 1. Authentication
 - [x] Implement Spotify OAuth 2.0 flow
+- [ ] Implement PKCE (Proof Key for Code Exchange) for Spotify OAuth
+  - [ ] Generate `code_verifier` and `code_challenge`
+  - [ ] Store `code_verifier` (e.g., HttpOnly cookie, server-side session)
+  - [ ] Add `code_challenge` and `code_challenge_method` to authorization request
+  - [ ] Add `code_verifier` to token exchange request
+  - [ ] Test PKCE flow thoroughly across different browsers
 - [x] Secure token management
 - [x] Handle authentication errors gracefully
 - [x] Add session persistence
