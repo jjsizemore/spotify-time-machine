@@ -232,16 +232,17 @@ export default function ListeningTrends() {
             return (
               <div
                 key={data.month}
-                className="flex flex-col items-center min-w-[50px] h-full justify-end"
-                title={`Month: ${formatMonthLabel(data.month)}\nTracks: ${data.count}`} // ADDED: Tooltip
+                className="flex flex-col items-center min-w-[50px] h-full"
               >
-                <div
-                  className="w-8 bg-spotify-green rounded-t-md"
-                  style={{
-                    height: `${maxCount > 0 ? (data.count / maxCount) * 100 : 0}%`, // MODIFIED: Safeguard maxCount
-                    minHeight: '4px'
-                  }}
-                />
+                <div className="flex flex-col justify-end h-full w-full items-center">
+                  <div
+                    className="w-8 bg-spotify-green rounded-t-md"
+                    style={{
+                      height: `${maxCount > 0 ? (data.count / maxCount) * 100 : 0}%`,
+                      minHeight: '4px'
+                    }}
+                  />
+                </div>
                 <div className="text-xs text-spotify-light-gray mt-1 transform -rotate-45 origin-top-left whitespace-nowrap">
                   {formatMonthLabel(data.month)}
                 </div>

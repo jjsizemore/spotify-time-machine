@@ -25,8 +25,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 			<main className="flex-grow">
 				{children}
 			</main>
-
-			{showNavigation && <Footer />}
+		<Footer />
 			{showNavigation && <KeyboardShortcuts />}
 		</div>
 	);

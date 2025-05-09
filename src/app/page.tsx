@@ -50,9 +50,9 @@ export default function Home() {
 					callbackUrl="/dashboard"
 				/>
 
-				<div className="mt-10 w-full border-t border-spotify-medium-gray pt-8 text-center text-spotify-medium-gray text-sm">
+				{/* <div className="mt-10 w-full border-t border-spotify-medium-gray pt-8 text-center text-spotify-medium-gray text-sm">
 					<span>Built with Next.js, Tailwind CSS, and the Spotify Web API</span>
-				</div>
+				</div> */}
 			</div>
 		</main>
 	);

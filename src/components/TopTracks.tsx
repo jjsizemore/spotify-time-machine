@@ -42,8 +42,11 @@ export default function TopTracks({ tracks, isLoading, error, onRetry }: TopTrac
   return (
     <div className="space-y-3">
       {tracks.map((track) => (
-        <div
+        <a
           key={track.id}
+          href={`https://open.spotify.com/track/${track.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
           className="flex items-center p-2 rounded-md hover:bg-spotify-medium-gray/20 transition cursor-pointer"
         >
           <div className="w-12 h-12 shrink-0 relative mr-3 rounded overflow-hidden">
@@ -63,7 +66,7 @@ export default function TopTracks({ tracks, isLoading, error, onRetry }: TopTrac
           <div className="text-xs text-spotify-light-gray shrink-0 ml-2">
             {formatDuration(track.duration_ms)}
           </div>
-        </div>
+        </a>
       ))}
     </div>
   );
