@@ -64,7 +64,7 @@ const handler = NextAuth({
 			name: `next-auth.session-token`,
 			options: {
 				httpOnly: true,
-				sameSite: 'none',
+				sameSite: 'lax',
 				path: '/',
 				secure: process.env.NODE_ENV === 'production',
 			},
@@ -73,7 +73,7 @@ const handler = NextAuth({
 			name: `next-auth.callback-url`,
 			options: {
 				httpOnly: true,
-				sameSite: 'none',
+				sameSite: 'lax',
 				path: '/',
 				secure: process.env.NODE_ENV === 'production',
 			},
@@ -82,7 +82,7 @@ const handler = NextAuth({
 			name: `next-auth.csrf-token`,
 			options: {
 				httpOnly: true,
-				sameSite: 'none',
+				sameSite: 'lax',
 				path: '/',
 				secure: process.env.NODE_ENV === 'production',
 			},

@@ -1,3 +1,4 @@
+import { getCachedData, setCachedData } from '@/lib/cacheUtils';
 import { useCallback, useEffect, useState } from 'react';
 import { useSpotify } from './useSpotify';
 
@@ -21,207 +22,257 @@ export interface SavedTrack {
 	};
 }
 
-// Cache for artists data to prevent redundant API calls
-const artistsCache = new Map<string, any>();
+// Time ranges supported
+export type TimeRange = 'PAST_YEAR' | 'PAST_TWO_YEARS' | 'ALL_TIME';
 
-// Reinstate in-memory cache for liked tracks
-let likedTracksCache: SavedTrack[] | null = null;
-let lastFetchTime = 0;
-const LIKED_TRACKS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache lifetime
+// Multiple cache keys for progressive loading
+const CACHE_KEYS = {
+	PAST_YEAR: 'likedTracks_pastYear',
+	PAST_TWO_YEARS: 'likedTracks_pastTwoYears',
+	ALL_TIME: 'likedTracks_allTime',
+};
+
+// Cache TTL (24 hours in milliseconds)
+const CACHE_TTL = 24 * 60 * 60 * 1000;
+
+// In-memory cache for each time range
+const tracksCache = {
+	PAST_YEAR: null as SavedTrack[] | null,
+	PAST_TWO_YEARS: null as SavedTrack[] | null,
+	ALL_TIME: null as SavedTrack[] | null,
+};
+
+// For deduplicating fetch requests
+const ongoingFetches = {
+	PAST_YEAR: null as Promise<SavedTrack[]> | null,
+	PAST_TWO_YEARS: null as Promise<SavedTrack[]> | null,
+	ALL_TIME: null as Promise<SavedTrack[]> | null,
+};
 
 export function useLikedTracks() {
 	const { spotifyApi, isReady } = useSpotify();
 	const [tracks, setTracks] = useState<SavedTrack[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [loadingState, setLoadingState] = useState<Record<TimeRange, boolean>>({
+		PAST_YEAR: true,
+		PAST_TWO_YEARS: true,
+		ALL_TIME: true,
+	});
 	const [error, setError] = useState<string | null>(null);
-	const [artistsDetails, setArtistsDetails] = useState<Map<string, any>>(
-		new Map()
-	);
-	const [isLoadingArtists, setIsLoadingArtists] = useState(false);
+	const [currentTimeRange, setCurrentTimeRange] =
+		useState<TimeRange>('PAST_YEAR');
 
-	// Fetch all liked tracks from the Spotify API
-	const fetchLikedTracks = useCallback(
-		async (forceRefresh = false) => {
-			if (!isReady) {
-				return [];
+	// Helper function to get cutoff date for a time range
+	const getCutoffDate = useCallback((range: TimeRange) => {
+		const now = new Date();
+		const cutoffDate = new Date();
+
+		switch (range) {
+			case 'PAST_YEAR':
+				cutoffDate.setFullYear(now.getFullYear() - 1);
+				break;
+			case 'PAST_TWO_YEARS':
+				cutoffDate.setFullYear(now.getFullYear() - 2);
+				break;
+			case 'ALL_TIME':
+				return new Date(0); // Beginning of time
+		}
+		return cutoffDate;
+	}, []);
+
+	// Fetch tracks for a specific time range
+	const fetchTracksForRange = useCallback(
+		async (range: TimeRange): Promise<SavedTrack[]> => {
+			if (!isReady) return [];
+
+			// Check in-memory cache first
+			if (tracksCache[range]) {
+				console.log(`Using in-memory cache for ${range}`);
+				return tracksCache[range]!;
 			}
 
-			const now = Date.now();
-			// Check if data is in in-memory cache and still fresh
-			if (
-				!forceRefresh &&
-				likedTracksCache &&
-				now - lastFetchTime < LIKED_TRACKS_CACHE_TTL
-			) {
-				// Simulate API loading states briefly if cache is hit immediately
-				setIsLoading(true);
-				setError(null);
-				await new Promise((resolve) => setTimeout(resolve, 50)); // Ensure loading state is visible
-				setTracks(likedTracksCache); // Set tracks from in-memory cache
-				setIsLoading(false);
-				return likedTracksCache;
+			// Then check persistent cache
+			const cacheKey = CACHE_KEYS[range];
+			const cachedData = getCachedData<SavedTrack[]>(cacheKey);
+
+			if (cachedData) {
+				console.log(`Using persistent cache for ${range}`);
+				tracksCache[range] = cachedData;
+				return cachedData;
 			}
 
-			try {
-				setIsLoading(true);
-				setError(null);
-
-				const limit = 50;
-				let offset = 0;
-				let allTracks: SavedTrack[] = [];
-				let total = 0;
-
-				// Fetch all tracks with pagination
-				do {
-					const response = await spotifyApi.getMySavedTracks({ limit, offset });
-					allTracks = [...allTracks, ...(response.body.items as SavedTrack[])];
-					total = response.body.total;
-					offset += limit;
-				} while (offset < total);
-
-				// Update in-memory cache
-				likedTracksCache = allTracks;
-				lastFetchTime = now;
-				return allTracks;
-			} catch (err) {
-				console.error('Error fetching liked tracks:', err);
-				setError('Failed to load your liked tracks. Please try again later.');
-				return [];
-			} finally {
-				setIsLoading(false);
-			}
-		},
-		[isReady, spotifyApi]
-	);
-
-	// Fetch detailed information about artists
-	const fetchArtistsDetails = useCallback(
-		async (tracksToProcess: SavedTrack[]) => {
-			if (!isReady || tracksToProcess.length === 0) {
-				return;
+			// Check if fetch is already in progress
+			if (ongoingFetches[range]) {
+				console.log(`Waiting for ongoing fetch for ${range}`);
+				return ongoingFetches[range]!;
 			}
 
-			try {
-				setIsLoadingArtists(true);
+			// Prepare to fetch from API
+			const cutoffDate = getCutoffDate(range);
+			console.log(`Fetching ${range} tracks from API`);
 
-				// Collect unique artist IDs from all tracks
-				const artistIds = new Set<string>();
-				tracksToProcess.forEach((item) => {
-					item.track.artists.forEach((artist) => {
-						// Only fetch if not already in cache
-						if (!artistsCache.has(artist.id)) {
-							artistIds.add(artist.id);
+			const fetchPromise = (async (): Promise<SavedTrack[]> => {
+				try {
+					const limit = 50;
+					let offset = 0;
+					let allTracks: SavedTrack[] = [];
+					let total = 0;
+					let fetchedItemsCount = 0;
+					let reachedCutoff = false;
+
+					do {
+						const response = await spotifyApi.getMySavedTracks({
+							limit,
+							offset,
+						});
+						const newTracks = response.body.items as SavedTrack[];
+						fetchedItemsCount = newTracks.length;
+
+						// Check if we've reached the time cutoff
+						if (range !== 'ALL_TIME' && fetchedItemsCount > 0) {
+							const oldestTrackDate = new Date(
+								newTracks[fetchedItemsCount - 1].added_at
+							);
+							if (oldestTrackDate < cutoffDate) {
+								reachedCutoff = true;
+
+								// Filter out tracks older than cutoff
+								const filteredTracks = newTracks.filter(
+									(track) => new Date(track.added_at) >= cutoffDate
+								);
+								allTracks = [...allTracks, ...filteredTracks];
+								break;
+							}
 						}
-					});
-				});
 
-				// Skip if all artists are already cached
-				if (artistIds.size === 0) {
-					setArtistsDetails(new Map(artistsCache));
-					return;
+						allTracks = [...allTracks, ...newTracks];
+						total = response.body.total;
+						offset += limit;
+					} while (offset < total && fetchedItemsCount > 0 && !reachedCutoff);
+
+					// Cache the results
+					tracksCache[range] = allTracks;
+					setCachedData(cacheKey, allTracks, CACHE_TTL);
+					console.log(`Cached ${allTracks.length} tracks for ${range}`);
+
+					return allTracks;
+				} catch (err) {
+					console.error(`Error fetching tracks for ${range}:`, err);
+					throw err;
+				} finally {
+					ongoingFetches[range] = null;
 				}
+			})();
 
-				// Fetch artists details in batches (Spotify API limits to 50 per request)
-				const batchSize = 50;
-				const artistIdArray = Array.from(artistIds);
-
-				for (let i = 0; i < artistIdArray.length; i += batchSize) {
-					const batch = artistIdArray.slice(i, i + batchSize);
-					const response = await spotifyApi.getArtists(batch);
-
-					// Add to cache
-					response.body.artists.forEach((artist) => {
-						artistsCache.set(artist.id, artist);
-					});
-				}
-
-				// Update state with full cache
-				setArtistsDetails(new Map(artistsCache));
-			} catch (err) {
-				console.error('Error fetching artists details:', err);
-				// Not setting an error as this is secondary data
-			} finally {
-				setIsLoadingArtists(false);
-			}
+			ongoingFetches[range] = fetchPromise;
+			return fetchPromise;
 		},
-		[isReady, spotifyApi]
+		[isReady, spotifyApi, getCutoffDate]
 	);
 
-	// Main effect to load data
+	// Load tracks for current time range and start loading other ranges in the background
 	useEffect(() => {
 		let isMounted = true;
 
-		const loadData = async () => {
-			if (!isReady) {
-				// If not ready, try to load from in-memory cache if available
-				if (likedTracksCache && isMounted) {
-					setTracks(likedTracksCache);
-					// Artists details would need to be fetched if not also cached in memory or if dependent on fresh tracks
-					// For simplicity, we might re-fetch artists or ensure artistsCache is populated correctly elsewhere
-					fetchArtistsDetails(likedTracksCache);
-				}
-				return;
-			}
-
-			setIsLoading(true);
-			setError(null);
+		const loadTrackData = async () => {
+			if (!isReady) return;
 
 			try {
-				// First load tracks (either from cache or API)
-				// fetchLikedTracks will handle cache check internally if forceRefresh is false (default)
-				const loadedTracks = await fetchLikedTracks();
+				setIsLoading(true);
+				setError(null);
+
+				// First, prioritize loading data for current range
+				const currentRangeTracks = await fetchTracksForRange(currentTimeRange);
 
 				if (isMounted) {
-					setTracks(loadedTracks);
-					setIsLoading(false); // Set loading to false after tracks are set
+					setTracks(currentRangeTracks);
+					setIsLoading(false);
+					setLoadingState((prev) => ({ ...prev, [currentTimeRange]: false }));
+				}
 
-					// Then load artists details (staggered loading)
-					if (loadedTracks.length > 0) {
-						await fetchArtistsDetails(loadedTracks);
-					} else {
-						setIsLoadingArtists(false); // No artists to load
-					}
+				// Then load other ranges in the background, starting with the closest to current
+				if (currentTimeRange === 'PAST_YEAR') {
+					// If viewing past year, load past 2 years next, then all time
+					fetchTracksForRange('PAST_TWO_YEARS')
+						.then(() => {
+							if (isMounted)
+								setLoadingState((prev) => ({ ...prev, PAST_TWO_YEARS: false }));
+							return fetchTracksForRange('ALL_TIME');
+						})
+						.then(() => {
+							if (isMounted)
+								setLoadingState((prev) => ({ ...prev, ALL_TIME: false }));
+						})
+						.catch(console.error);
+				} else if (currentTimeRange === 'PAST_TWO_YEARS') {
+					// If viewing past 2 years, load past year first (might be faster), then all time
+					fetchTracksForRange('PAST_YEAR')
+						.then(() => {
+							if (isMounted)
+								setLoadingState((prev) => ({ ...prev, PAST_YEAR: false }));
+							return fetchTracksForRange('ALL_TIME');
+						})
+						.then(() => {
+							if (isMounted)
+								setLoadingState((prev) => ({ ...prev, ALL_TIME: false }));
+						})
+						.catch(console.error);
+				} else {
+					// If viewing all time, load past year first, then past 2 years
+					fetchTracksForRange('PAST_YEAR')
+						.then(() => {
+							if (isMounted)
+								setLoadingState((prev) => ({ ...prev, PAST_YEAR: false }));
+							return fetchTracksForRange('PAST_TWO_YEARS');
+						})
+						.then(() => {
+							if (isMounted)
+								setLoadingState((prev) => ({ ...prev, PAST_TWO_YEARS: false }));
+						})
+						.catch(console.error);
 				}
 			} catch (err) {
-				console.error('Error in useLikedTracks hook:', err);
+				console.error('Error in useLikedTracks:', err);
 				if (isMounted) {
 					setError('Failed to load your music data. Please try again later.');
 					setIsLoading(false);
-					setIsLoadingArtists(false);
+					setLoadingState({
+						PAST_YEAR: false,
+						PAST_TWO_YEARS: false,
+						ALL_TIME: false,
+					});
 				}
 			}
 		};
 
-		loadData();
+		loadTrackData();
 
 		return () => {
 			isMounted = false;
 		};
-	}, [isReady, fetchLikedTracks, fetchArtistsDetails]); // fetchLikedTracks is stable due to useCallback
+	}, [isReady, fetchTracksForRange, currentTimeRange]);
 
-	// Function to refresh data
-	const refresh = useCallback(async () => {
-		if (!isReady) return [];
-		setIsLoading(true);
-		// Clear in-memory cache for refresh
-		likedTracksCache = null;
-		lastFetchTime = 0;
-		const refreshedTracks = await fetchLikedTracks(true);
-		if (refreshedTracks) {
-			setTracks(refreshedTracks);
-			// artistsCache.clear(); // Optionally clear artist cache too for full refresh
-			await fetchArtistsDetails(refreshedTracks);
+	// Handler for changing time range
+	const setTimeRange = useCallback((range: TimeRange) => {
+		setCurrentTimeRange(range);
+
+		// If we already have data for this range, update immediately
+		if (tracksCache[range]) {
+			setTracks(tracksCache[range]!);
+			setIsLoading(false);
+		} else {
+			// Otherwise, show loading state
+			setIsLoading(true);
 		}
-		setIsLoading(false);
-		return refreshedTracks;
-	}, [isReady, fetchLikedTracks, fetchArtistsDetails]);
+	}, []);
 
 	return {
 		tracks,
 		isLoading,
-		isLoadingArtists,
+		isLoadingRange: loadingState,
 		error,
-		artistsDetails,
-		refresh,
+		currentTimeRange,
+		setTimeRange,
+		getTracksForRange: fetchTracksForRange, // Expose for useLikedArtists
 	};
 }
