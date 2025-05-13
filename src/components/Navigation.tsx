@@ -102,6 +102,7 @@ export default function Navigation({ user }: NavigationProps) {
 				{/* Center logo section */}
 				<div className="flex items-center justify-center order-1 md:order-2">
 					<Link href="/dashboard" className="flex items-center gap-3">
+						<h1 className="text-xl font-bold text-spotify-green">Jermaine's</h1>
 						<Image
 							src="/spotify-icon.png"
 							alt="Spotify Logo"

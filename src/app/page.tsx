@@ -38,7 +38,7 @@ export default function Home() {
 					className="mb-6 drop-shadow-lg"
 				/>
 				<h1 className="text-4xl md:text-5xl font-extrabold text-spotify-green mb-4 text-center">
-					Spotify Time Machine
+					Jermaine's Spotify Time Machine
 				</h1>
 				<p className="text-lg md:text-xl text-center mb-8 text-spotify-light-gray">
 					Relive your Spotify listening history, generate playlists by month or

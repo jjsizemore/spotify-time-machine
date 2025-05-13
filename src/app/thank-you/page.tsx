@@ -41,6 +41,9 @@ export default function ThankYouPage() {
 			<div className="max-w-lg mx-auto">
 				<div className="mb-8 flex justify-center">
 					<Link href="/" className="flex items-center gap-3">
+						<h1 className="text-2xl font-bold text-spotify-green">
+							Jermaine's
+						</h1>
 						<Image
 							src="/spotify-icon.png"
 							alt="Spotify Logo"
@@ -55,7 +58,7 @@ export default function ThankYouPage() {
 				</div>
 
 				<h2 className="text-3xl font-bold text-spotify-white mb-4">
-					Thanks for Using Spotify Time Machine!
+					Thanks for Using Jermaine's Spotify Time Machine!
 				</h2>
 				<p className="text-spotify-light-gray mb-8">
 					You have been successfully logged out. We hope you enjoyed exploring

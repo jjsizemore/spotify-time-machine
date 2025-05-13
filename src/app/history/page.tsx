@@ -5,6 +5,7 @@ import ErrorDisplay from '@/components/ErrorDisplay';
 import MonthlyTrackList from '@/components/MonthlyTrackList';
 import PageContainer from '@/components/PageContainer';
 import TrackItem from '@/components/TrackItem';
+import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
 import {
 	MonthlyTracks,
@@ -19,93 +20,27 @@ import React, { useState, useEffect } from 'react';
 export default function HistoryPage() {
 	const { status } = useSession();
 	const { spotifyApi, isReady } = useSpotify();
+	const {
+		tracks,
+		isLoading: isLoadingTracks,
+		error: tracksError,
+		currentTimeRange,
+		setTimeRange,
+	} = useLikedTracks();
 	const [monthlyTracks, setMonthlyTracks] = useState<MonthlyTracks[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [nextOffset, setNextOffset] = useState(0);
-	const [hasMore, setHasMore] = useState(true);
-	const [loadingMore, setLoadingMore] = useState(false);
 
-	// Initial load of saved tracks
+	// Process tracks into monthly groups whenever tracks change
 	useEffect(() => {
-		const fetchSavedTracks = async () => {
-			if (!isReady) return;
-
-			try {
-				setIsLoading(true);
-				setError(null);
-				const response = await spotifyApi.getMySavedTracks({
-					limit: 50,
-					offset: 0,
-				});
-
-				// Group tracks by month
-				const groupedTracks = processAndGroupTracks(response.body.items);
-
-				setMonthlyTracks(groupedTracks);
-				setNextOffset(response.body.items.length);
-				setHasMore(response.body.items.length < response.body.total);
-			} catch (err) {
-				console.error('Error fetching saved tracks:', err);
-				setError('Failed to load your saved tracks. Please try again later.');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchSavedTracks();
-	}, [spotifyApi, isReady]);
-
-	// Function to load more tracks
-	const loadMoreTracks = async () => {
-		if (!hasMore || loadingMore || !isReady) return;
-
-		try {
-			setLoadingMore(true);
-			const response = await spotifyApi.getMySavedTracks({
-				limit: 50,
-				offset: nextOffset,
-			});
-
-			// Group new tracks by month
-			const newGroupedTracks = processAndGroupTracks(response.body.items);
-
-			// Merge new tracks with existing months or add new months
-			setMonthlyTracks((prevMonths) => {
-				const updatedMonths = [...prevMonths];
-
-				newGroupedTracks.forEach((newMonth) => {
-					const existingMonthIndex = updatedMonths.findIndex(
-						(m) => m.month === newMonth.month
-					);
-
-					if (existingMonthIndex >= 0) {
-						// Merge tracks into existing month
-						updatedMonths[existingMonthIndex].tracks = [
-							...updatedMonths[existingMonthIndex].tracks,
-							...newMonth.tracks,
-						];
-					} else {
-						// Add new month
-						updatedMonths.push(newMonth);
-					}
-				});
-
-				// Sort months chronologically (newest first)
-				return updatedMonths.sort(
-					(a, b) => new Date(b.month).getTime() - new Date(a.month).getTime()
-				);
-			});
-
-			setNextOffset(nextOffset + response.body.items.length);
-			setHasMore(nextOffset + response.body.items.length < response.body.total);
-		} catch (err) {
-			console.error('Error loading more tracks:', err);
-			setError('Failed to load more tracks. Please try again.');
-		} finally {
-			setLoadingMore(false);
+		if (tracks.length > 0) {
+			const groupedTracks = processAndGroupTracks(tracks);
+			setMonthlyTracks(groupedTracks);
+			setIsLoading(false);
+		} else if (!isLoadingTracks) {
+			setIsLoading(false);
 		}
-	};
+	}, [tracks, isLoadingTracks]);
 
 	// Toggle expanded state for a month
 	const toggleMonth = (month: string) => {
@@ -127,7 +62,7 @@ export default function HistoryPage() {
 			// First create a new playlist
 			const formattedDate = format(new Date(month), 'MMMM yyyy');
 			const playlistName = `${formattedDate} Time Machine`;
-			const description = `Songs I liked during ${formattedDate}. Created with Spotify Time Machine.`;
+			const description = `Songs I liked during ${formattedDate}. Created with Jermaine's Spotify Time Machine.`;
 			const trackUris = tracks.map((t) => `spotify:track:${t.track.id}`);
 
 			await createPlaylist(spotifyApi, playlistName, description, trackUris);
@@ -151,10 +86,15 @@ export default function HistoryPage() {
 		);
 	};
 
-	if (error) {
+	if (error || tracksError) {
 		return (
 			<PageContainer>
-				<ErrorDisplay message={error} retry={() => window.location.reload()} />
+				<ErrorDisplay
+					message={
+						error || tracksError || 'Failed to load your listening history'
+					}
+					retry={() => window.location.reload()}
+				/>
 			</PageContainer>
 		);
 	}
@@ -162,9 +102,43 @@ export default function HistoryPage() {
 	return (
 		<PageContainer
 			title="Your Monthly Listening History"
-			isLoading={status === 'loading' || isLoading}
+			isLoading={status === 'loading' || isLoading || isLoadingTracks}
 			maxWidth="6xl"
 		>
+			{/* Time range selector */}
+			<div className="flex justify-end mb-6 space-x-2 text-sm">
+				<button
+					onClick={() => setTimeRange('PAST_YEAR')}
+					className={`px-3 py-1 rounded-full ${
+						currentTimeRange === 'PAST_YEAR'
+							? 'bg-spotify-green text-black'
+							: 'bg-spotify-light-black text-spotify-light-gray'
+					}`}
+				>
+					Past Year
+				</button>
+				<button
+					onClick={() => setTimeRange('PAST_TWO_YEARS')}
+					className={`px-3 py-1 rounded-full ${
+						currentTimeRange === 'PAST_TWO_YEARS'
+							? 'bg-spotify-green text-black'
+							: 'bg-spotify-light-black text-spotify-light-gray'
+					}`}
+				>
+					Past 2 Years
+				</button>
+				<button
+					onClick={() => setTimeRange('ALL_TIME')}
+					className={`px-3 py-1 rounded-full ${
+						currentTimeRange === 'ALL_TIME'
+							? 'bg-spotify-green text-black'
+							: 'bg-spotify-light-black text-spotify-light-gray'
+					}`}
+				>
+					All Time
+				</button>
+			</div>
+
 			{/* Timeline */}
 			<div className="space-y-6">
 				{monthlyTracks.map((month) => (
@@ -180,16 +154,10 @@ export default function HistoryPage() {
 				))}
 			</div>
 
-			{/* Load More Button */}
-			{hasMore && (
-				<div className="mt-8 text-center">
-					<ActionButton
-						onClick={loadMoreTracks}
-						disabled={loadingMore}
-						variant="secondary"
-					>
-						{loadingMore ? 'Loading...' : 'Load More Tracks'}
-					</ActionButton>
+			{/* Loading indicator */}
+			{isLoadingTracks && (
+				<div className="mt-8 text-center text-spotify-light-gray">
+					Loading your listening history...
 				</div>
 			)}
 		</PageContainer>

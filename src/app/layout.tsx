@@ -5,7 +5,7 @@ import './spotify.css';
 import { Analytics } from '@vercel/analytics/react';
 // Root layout metadata (must be in server component)
 export const metadata = {
-	title: 'Spotify Time Machine',
+	title: "Jermaine's Spotify Time Machine",
 	description: 'Your personal Spotify listening history and playlist generator',
 	icons: {
 		icon: '/favicon.svg',

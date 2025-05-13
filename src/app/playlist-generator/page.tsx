@@ -3,9 +3,9 @@
 import ActionButton from '@/components/ActionButton';
 import FilterSelector from '@/components/FilterSelector';
 import FormField from '@/components/FormField';
-import KeyboardShortcutInfo from '@/components/KeyboardShortcutInfo';
 import PageContainer from '@/components/PageContainer';
 import SharePlaylistButton from '@/components/SharePlaylistButton';
+import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
 import { Artist } from '@/hooks/useUserStats';
 import { GenreCount, extractTopGenres } from '@/lib/genreUtils';
@@ -21,6 +21,11 @@ import React, { useState, useEffect } from 'react';
 export default function PlaylistGeneratorPage() {
 	const { status } = useSession();
 	const { spotifyApi, isReady } = useSpotify();
+	const {
+		tracks,
+		isLoading: isLoadingTracks,
+		error: tracksError,
+	} = useLikedTracks();
 
 	const [startDate, setStartDate] = useState('');
 	const [endDate, setEndDate] = useState('');
@@ -96,15 +101,17 @@ export default function PlaylistGeneratorPage() {
 			return;
 		}
 
+		if (tracksError) {
+			setError('Failed to load your liked tracks. Please try again.');
+			return;
+		}
+
 		try {
 			setIsLoading(true);
 			setError(null);
 			setSuccess(false);
 
-			// 1. Get all liked tracks
-			const tracks = await fetchAllLikedTracks(spotifyApi);
-
-			// 2. Filter tracks by date range
+			// Filter tracks by date range
 			const parsedStartDate = parseISO(startDate);
 			const parsedEndDate = parseISO(endDate);
 
@@ -164,9 +171,9 @@ export default function PlaylistGeneratorPage() {
 
 			setTrackCount(filteredTracks.length);
 
-			// 5. Create a new playlist
+			// Create a new playlist
 			const dateRangeText = `${format(parsedStartDate, 'MMM d, yyyy')} - ${format(parsedEndDate, 'MMM d, yyyy')}`;
-			const description = `Custom playlist for ${dateRangeText}. Created with Spotify Time Machine.`;
+			const description = `Custom playlist for ${dateRangeText}. Created with Jermaine's Spotify Time Machine.`;
 			const trackUris = filteredTracks.map(
 				(track) => `spotify:track:${track.track.id}`
 			);
@@ -230,7 +237,7 @@ export default function PlaylistGeneratorPage() {
 		<PageContainer
 			title="Custom Playlist Generator"
 			description="Create a playlist from your liked songs within a specific date range."
-			isLoading={status === 'loading'}
+			isLoading={status === 'loading' || isLoadingTracks}
 			maxWidth="3xl"
 		>
 			<div className="bg-spotify-dark-gray rounded-lg p-4 md:p-6">
@@ -293,22 +300,17 @@ export default function PlaylistGeneratorPage() {
 							emptyMessage="No artists found"
 							maxItems={20}
 						/>
-
-						{/* Keyboard shortcuts info */}
-						<KeyboardShortcutInfo
-							description="Press"
-							keys={[{ key: 'Ctrl' }, { key: 'Enter' }]}
-							className="mt-6"
-							align="right"
-						/>
-
 						<div className="flex justify-end">
 							<ActionButton
 								type="submit"
-								disabled={isLoading}
+								disabled={isLoading || isLoadingTracks}
 								variant="primary"
 							>
-								{isLoading ? 'Generating...' : 'Generate Playlist'}
+								{isLoading
+									? 'Generating...'
+									: isLoadingTracks
+										? 'Loading Tracks...'
+										: 'Generate Playlist'}
 							</ActionButton>
 						</div>
 					</form>
@@ -333,20 +335,12 @@ export default function PlaylistGeneratorPage() {
 								playlistName={playlistName}
 							/>
 						</div>
-
-						{/* Keyboard shortcuts info */}
-						<KeyboardShortcutInfo
-							description="Press"
-							keys={[{ key: 'Esc' }]}
-							className="mt-6"
-							align="center"
-						/>
 					</div>
 				)}
 
-				{error && (
+				{(error || tracksError) && (
 					<div className="bg-spotify-red text-spotify-white p-4 rounded-lg mt-4">
-						<p>{error}</p>
+						<p>{error || tracksError}</p>
 					</div>
 				)}
 			</div>

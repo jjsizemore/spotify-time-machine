@@ -1,4 +1,4 @@
-# Spotify Time Machine
+# Jermaine's Spotify Time Machine
 
 A Next.js application that lets you explore your Spotify listening history, create playlists based on specific time periods, and visualize your music journey.
 

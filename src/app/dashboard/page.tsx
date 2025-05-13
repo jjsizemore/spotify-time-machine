@@ -52,7 +52,7 @@ export default function Dashboard() {
 			<div className="flex flex-col md:flex-row gap-6 mb-10 justify-around">
 				<FeatureCard
 					title="Time Machine"
-					description="Travel back in time and explore your listening history from any month."
+					description="Look back at your liked songs from any month, and quickly generate playlists from any month you like."
 					buttonText="Start Journey"
 					href="/history"
 					className="md:max-w-xs lg:max-w-sm"
@@ -60,7 +60,7 @@ export default function Dashboard() {
 
 				<FeatureCard
 					title="Playlist Generator"
-					description="Create custom playlists based on your favorite time periods."
+					description="Easily generate playlists of the songs that you liked during any timeframe you like, with an option to filter by your top genres or artists."
 					buttonText="Generate Playlist"
 					href="/playlist-generator"
 					className="md:max-w-xs lg:max-w-sm"

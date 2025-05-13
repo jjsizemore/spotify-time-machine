@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import React from 'react';
 import Footer from './Footer';
 import Header from './Header';
-import KeyboardShortcuts from './KeyboardShortcuts';
 
 export function LayoutContent({ children }: { children: React.ReactNode }) {
 	const { status } = useSession();
@@ -24,7 +23,6 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
 			<main className="flex-grow">{children}</main>
 			<Footer />
-			{showNavigation && <KeyboardShortcuts />}
 		</div>
 	);
 }

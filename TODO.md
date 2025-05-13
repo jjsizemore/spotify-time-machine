@@ -1,4 +1,4 @@
-# Spotify Time Machine: Feature Implementation Checklist
+# Jermaine's Spotify Time Machine: Feature Implementation Checklist
 
 ## Core Features
 

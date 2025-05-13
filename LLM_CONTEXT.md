@@ -1,4 +1,4 @@
-# Spotify Time Machine
+# Jermaine's Spotify Time Machine
 
 ## IMPORTANT INSTRUCTIONS
 - Check TODO.md at the project root for a detailed feature implementation checklist
@@ -32,7 +32,6 @@
     - `LoadingSpinner.tsx`, `ErrorDisplay.tsx`: Consistent feedback components for asynchronous operations.
     - `Navigation.tsx`: Main application navigation bar, including user profile dropdown and logout.
     - `FeatureCard.tsx`: Used on the dashboard to link to key application features.
-    - `KeyboardShortcutInfo.tsx`, `KeyboardShortcuts.tsx`: Components for displaying and potentially managing keyboard shortcuts.
 - **Global Styling:**
     - `src/app/globals.css`: Defines global styles, an extensive set of CSS variables for theming (Spotify-like colors: `--spotify-green`, `--spotify-black`, etc.), and base Tailwind configuration. All new UI should adhere to these variables.
     - Tailwind CSS: Used extensively for utility-first styling.
@@ -109,7 +108,6 @@ CORE FUNCTIONALITY:
    - Dedicated interface using `PageContainer` and `FormField` components for date pickers (start/end dates) and playlist name.
    - **Enhanced with filtering by top genres and artists** using `FilterSelector` components. Genre data from `src/lib/genreUtils.ts`.
    - Playlist creation logic from `src/lib/spotifyTrackUtils.ts`.
-   - **Keyboard shortcuts** (e.g., Ctrl/Cmd+Enter to submit) implemented, with visual cues via `KeyboardShortcutInfo`.
    - Success state includes a `SharePlaylistButton` (copies link/text for sharing).
 
 TECHNICAL REQUIREMENTS:
@@ -138,8 +136,7 @@ USER EXPERIENCE:
 1. Design a clean, intuitive interface with Spotify-inspired aesthetics. This is largely achieved through the new global styles, CSS variables, and consistent core components.
 2. Show loading states (`LoadingSpinner`) during API calls and asynchronous operations.
 3. Provide clear feedback for all user actions (e.g., playlist creation success/failure, logout). `ErrorDisplay` component used for errors.
-4. Include helpful tooltips for features, e.g., `KeyboardShortcutInfo` for playlist generator shortcuts.
-5. Implement robust error handling with user-friendly messages.
+4. Implement robust error handling with user-friendly messages.
 
 ADDITIONAL FEATURES (if time permits):
 
