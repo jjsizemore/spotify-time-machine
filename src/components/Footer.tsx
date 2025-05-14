@@ -67,9 +67,6 @@ export default function Footer() {
 						&copy; {new Date().getFullYear()} Jermaine Sizemore. All rights
 						reserved.
 					</p>
-					<p className="text-spotify-medium-gray text-center text-xs pb-6">
-						Built with Next.js, Tailwind CSS, and the Spotify Web API
-					</p>
 				</div>
 			</div>
 		</footer>

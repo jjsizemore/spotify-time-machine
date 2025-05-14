@@ -1,7 +1,7 @@
 'use client';
 
 import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
-import { CompactArtist, useLikedArtists } from '@/hooks/useLikedArtists';
+import { useLikedArtists } from '@/hooks/useLikedArtists';
 import React, { useState, useEffect } from 'react';
 
 interface GenreTimeData {
