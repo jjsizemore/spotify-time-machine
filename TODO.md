@@ -3,6 +3,7 @@
 ## Core Features
 
 ### 1. Authentication
+
 - [x] Implement Spotify OAuth 2.0 flow
 - [ ] Implement PKCE (Proof Key for Code Exchange) for Spotify OAuth
   - [ ] Generate `code_verifier` (e.g., using `crypto.randomBytes`) and `code_challenge` (e.g., using `crypto.createHash('sha256')`) upon initiating authentication.
@@ -16,6 +17,7 @@
 - [x] Add session persistence
 
 ### 2. User Dashboard
+
 - [x] Basic dashboard layout
 - [x] Display overall listening statistics
 - [x] Show top artists (fetch and display)
@@ -25,6 +27,7 @@
 - [x] Implement error handling for failed API requests
 
 ### 3. Monthly Listening History
+
 - [x] Create chronological timeline interface
 - [x] Implement collapsible sections for each month
 - [x] For each month display:
@@ -40,6 +43,7 @@
 - [x] Handle edge cases (no liked songs, API limits)
 
 ### 4. Playlist Generation
+
 - [x] Add "Create Monthly Playlist" button to each month
 - [x] Implement API call to create playlist in user's Spotify account
 - [x] Include all liked songs from selected month
@@ -47,6 +51,7 @@
 - [x] Handle error cases (API limits, etc.)
 
 ### 5. Custom Playlist Generator
+
 - [x] Create dedicated interface with:
   - [x] Date pickers for start and end dates
   - [x] Custom playlist naming field
@@ -58,6 +63,7 @@
 ## Technical Implementation
 
 ### Frontend
+
 - [x] Use Next.js App Router pattern
 - [x] Implement responsive design with Tailwind CSS
 - [x] Add transitions between views
@@ -65,6 +71,7 @@
 - [x] Optimize for mobile devices
 
 ### Backend
+
 - [x] Create API routes for Spotify interaction
 - [x] Implement caching to minimize API calls
 - [ ] Add rate limiting protection
@@ -74,6 +81,7 @@
 - [x] Set up error handling middleware
 
 ### Data Management
+
 - [ ] Store user preferences (e.g., preferred time ranges, UI settings) using `localStorage` or server-side storage if sensitive.
 - [x] Implement secure token handling
 - [x] Create data fetching hooks/utilities
@@ -81,15 +89,17 @@
 ## Optional Enhancements
 
 ### User Experience
+
 - [ ] Add audio previews directly in the app (corresponds to 'Play button for previews' in `TrackItem.tsx`)
 - [x] Implement sharing capabilities for playlists (basic version done; consider expanding, e.g., 'copy to clipboard' for playlist details, direct social media share options)
 - [x] Create visualization for listening trends
-    - [ ] **Listening Trends:** Implement as a monthly bar chart showing liked track counts. Ensure bars are visible and correctly scaled. X-axis: Month/Year. Y-axis (implied): Track count. Uses `--spotify-green`.
-    - [ ] **Genre Evolution:** Implement as a series of stacked horizontal bars per period (quarter/year). Segments represent top genre prevalence. Includes legend and filters for time range/granularity.
+  - [ ] **Listening Trends:** Implement as a monthly bar chart showing liked track counts. Ensure bars are visible and correctly scaled. X-axis: Month/Year. Y-axis (implied): Track count. Uses `--spotify-green`.
+  - [ ] **Genre Evolution:** Implement as a series of stacked horizontal bars per period (quarter/year). Segments represent top genre prevalence. Includes legend and filters for time range/granularity.
 - [ ] Add theme customization options
 - [ ] Implement keyboard shortcuts (playlist generator has some; audit for other useful areas like navigation, modal dialogs)
 
 ### Performance
+
 - [x] Add Suspense boundaries for loading states
 - [ ] Implement SSR where beneficial (evaluate pages like dashboard or history for initial data)
 - [ ] Add client-side caching for API responses (e.g., using `swr` or `react-query` for more advanced caching beyond component state, or custom caching layer for `spotify-web-api-node` calls if `useSpotify` hook can be enhanced).
@@ -101,6 +111,7 @@
 - [ ] Implement progressive rendering/data chunking and user-controlled granularity (e.g., yearly vs. quarterly for "All Time") for `ListeningTrends.tsx` and `GenreTrendsVisualization.tsx` to improve perceived performance with large datasets (partially implemented with filters, can be enhanced).
 
 ## Testing Strategy
+
 - [ ] **Unit Tests:**
   - [ ] Test utility functions in `src/lib/spotifyTrackUtils.ts` (e.g., track grouping, playlist creation logic).
   - [ ] Test utility functions in `src/lib/genreUtils.ts`.
@@ -120,6 +131,7 @@
     - [ ] Creating a custom playlist with filters.
 
 ## Accessibility (a11y)
+
 - [ ] **Audit & Improvements:**
   - [ ] Perform an accessibility audit using browser developer tools (e.g., Lighthouse, Axe DevTools) and manual testing.
   - [ ] Ensure proper ARIA attributes are used for dynamic components and custom controls (e.g., `FilterSelector`, modals, custom dropdowns).
@@ -129,6 +141,7 @@
   - [ ] Add `aria-live` regions for dynamic content updates (e.g., loading states, error messages, playlist creation success).
 
 ## Code Quality & Developer Experience (DevEx)
+
 - [ ] **Linting & Formatting:**
   - [ ] Ensure ESLint and Prettier are configured and consistently used (add `lint` and `format` scripts to `package.json` if not present).
   - [ ] Enforce stricter ESLint rules for code quality and best practices.

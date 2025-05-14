@@ -1,5 +1,4 @@
-@tailwind base;
-@tailwind components;
+@import "tailwindcss";
 @tailwind utilities;
 
 /* Base theme variables */
@@ -8,13 +7,16 @@
 	--bg-primary: #121212;
 	--bg-secondary: #181818;
 	--bg-tertiary: #282828;
+	--bg-tertiary-hover: rgba(40, 40, 40, 0.8);
 	--text-primary: #ffffff;
 	--text-secondary: #b3b3b3;
 	--accent-color: #1db954;
 	--accent-hover: #1ed760;
 	--accent-disabled: #1aa34a;
+	--text-on-accent: #191414;
 	--error-color: #e91429;
 	--border-color: #333333;
+	--scrollbar-thumb-color: #535353;
 }
 
 /* Light theme overrides */
@@ -38,6 +40,10 @@ html.theme-light {
 
 .bg-spotify-medium-gray {
 	background-color: var(--bg-tertiary);
+}
+
+.text-spotify-black {
+	color: var(--text-on-accent);
 }
 
 .text-spotify-white {
@@ -68,6 +74,10 @@ html.theme-light {
 	background-color: var(--error-color);
 }
 
+.hover\:bg-spotify-medium-gray-hover:hover {
+	background-color: var(--bg-tertiary-hover);
+}
+
 @layer utilities {
 	/* Add any additional utility classes here */
 }
@@ -81,20 +91,20 @@ html.theme-light {
 
 body {
 	font-family: Arial, Helvetica, sans-serif;
-	@apply bg-spotify-black text-spotify-light-gray font-sans min-h-screen;
+	@reference bg-spotify-black text-spotify-light-gray font-sans min-h-screen;
 }
 
 ::selection {
-	background: #1db954;
-	color: #191414;
+	background: var(--accent-color);
+	color: var(--text-on-accent);
 }
 
 ::-webkit-scrollbar {
 	width: 8px;
-	background: #121212;
+	background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-	background: #535353;
+	background: var(--scrollbar-thumb-color);
 	border-radius: 4px;
 }
 
@@ -112,4 +122,33 @@ body {
 
 .animate-slideDown {
 	animation: slideDown 0.2s ease-out forwards;
+}
+
+@layer components {
+	.spotify-button {
+		background-color: var(--accent-color);
+		color: var(--text-on-accent);
+		@reference font-bold px-6 py-3 rounded-full shadow-lg hover:bg-opacity-90 transition text-lg flex items-center gap-2;
+	}
+
+	.spotify-button:hover {
+		background-color: var(--accent-hover);
+	}
+
+	.card {
+		background-color: var(--bg-secondary);
+		@reference p-6 rounded-lg hover:bg-opacity-80 transition;
+	}
+	.card:hover {
+		background-color: rgba(var(--bg-secondary-rgb), 0.8);
+	}
+}
+
+/* Helper for card hover if bg-secondary is hex. This assumes --bg-secondary is #181818 */
+/* You might need to adjust if your bundler/CSS setup supports color manipulation or define another variable */
+
+@layer utilities {
+	.hover\:bg-bg-secondary-80:hover {
+		background-color: rgba(24, 24, 24, 0.8);
+	}
 }

@@ -1,8 +1,8 @@
 'use client';
 
-import { useLikedArtists } from '@/hooks/useLikedArtists';
+import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
+import { CompactArtist, useLikedArtists } from '@/hooks/useLikedArtists';
 import React, { useState, useEffect } from 'react';
-import VisualizationContainer from './VisualizationContainer';
 
 interface GenreTimeData {
 	genre: string;
@@ -20,6 +20,7 @@ export default function GenreTrendsVisualization() {
 		artistsDetails,
 		currentTimeRange,
 		setTimeRange,
+		getCompactArtists,
 	} = useLikedArtists();
 	const [genreData, setGenreData] = useState<GenreTimeData[]>([]);
 	const [topGenres, setTopGenres] = useState<string[]>([]);
@@ -64,6 +65,9 @@ export default function GenreTrendsVisualization() {
 		setProcessingData(true);
 
 		try {
+			// Get compact artists for better performance
+			const compactArtists = getCompactArtists();
+
 			// Group tracks by period
 			const genresByPeriod: Record<string, Record<string, number>> = {};
 
@@ -83,9 +87,9 @@ export default function GenreTrendsVisualization() {
 					genresByPeriod[periodKey] = {};
 				}
 
-				// Count genres for each track's artists
+				// Count genres for each track's artists using compact data
 				item.track.artists.forEach((artist: { id: string }) => {
-					const artistDetail = artistsDetails.get(artist.id);
+					const artistDetail = compactArtists.get(artist.id);
 					if (!artistDetail) return;
 
 					const genres: string[] = artistDetail.genres || [];
@@ -137,7 +141,13 @@ export default function GenreTrendsVisualization() {
 		} finally {
 			setProcessingData(false);
 		}
-	}, [tracks, artistsDetails, currentTimeRange, granularity]);
+	}, [
+		tracks,
+		artistsDetails,
+		currentTimeRange,
+		granularity,
+		getCompactArtists,
+	]);
 
 	// Reset granularity when time range changes away from 'ALL_TIME'
 	useEffect(() => {
@@ -162,84 +172,47 @@ export default function GenreTrendsVisualization() {
 	const hasPartialData =
 		!isOverallLoading && genreData.length > 0 && topGenres.length > 0;
 
+	const granularityControls = currentTimeRange === 'ALL_TIME' && (
+		<div className="flex items-center space-x-2 text-sm self-end sm:self-center">
+			<span className="text-spotify-light-gray text-xs">Granularity:</span>
+			<button
+				onClick={() => setGranularity('quarterly')}
+				className={`px-2 py-0.5 rounded-full text-xs ${
+					granularity === 'quarterly'
+						? 'bg-spotify-green text-black'
+						: 'bg-spotify-light-black text-spotify-light-gray'
+				}`}
+			>
+				Quarterly
+			</button>
+			<button
+				onClick={() => setGranularity('yearly')}
+				className={`px-2 py-0.5 rounded-full text-xs ${
+					granularity === 'yearly'
+						? 'bg-spotify-green text-black'
+						: 'bg-spotify-light-black text-spotify-light-gray'
+				}`}
+			>
+				Yearly
+			</button>
+		</div>
+	);
+
 	return (
-		<VisualizationContainer
+		<DataFetcherAndControlsWrapper
 			title="Your Genre Evolution"
 			isLoading={isOverallLoading}
 			isProcessing={isDataProcessing}
 			error={error}
 			isEmpty={noDataToShow}
 			emptyDataMessage="Not enough listening data to visualize genre trends."
+			currentTimeRange={currentTimeRange}
+			setTimeRange={setTimeRange}
+			isLoadingRange={isLoadingRange}
+			granularityControls={granularityControls}
 		>
-			{isLoadingRange[currentTimeRange] && (
-				<div className="mb-2 text-xs text-yellow-400">
-					This period is still loading. Data may be incomplete.
-				</div>
-			)}
 			{hasPartialData && (
 				<div className="flex flex-col">
-					<div className="flex flex-col items-start sm:flex-row sm:items-center sm:justify-end mb-4 sm:mb-6 space-y-2 sm:space-y-0 sm:space-x-2">
-						{currentTimeRange === 'ALL_TIME' && (
-							<div className="flex items-center space-x-2 text-sm self-end sm:self-center">
-								<span className="text-spotify-light-gray text-xs">
-									Granularity:
-								</span>
-								<button
-									onClick={() => setGranularity('quarterly')}
-									className={`px-2 py-0.5 rounded-full text-xs ${
-										granularity === 'quarterly'
-											? 'bg-spotify-green text-black'
-											: 'bg-spotify-light-black text-spotify-light-gray'
-									}`}
-								>
-									Quarterly
-								</button>
-								<button
-									onClick={() => setGranularity('yearly')}
-									className={`px-2 py-0.5 rounded-full text-xs ${
-										granularity === 'yearly'
-											? 'bg-spotify-green text-black'
-											: 'bg-spotify-light-black text-spotify-light-gray'
-									}`}
-								>
-									Yearly
-								</button>
-							</div>
-						)}
-						<div className="flex space-x-2 text-sm self-end sm:self-center">
-							<button
-								onClick={() => setTimeRange('PAST_YEAR')}
-								className={`px-3 py-1 rounded-full ${
-									currentTimeRange === 'PAST_YEAR'
-										? 'bg-spotify-green text-black'
-										: 'bg-spotify-light-black text-spotify-light-gray'
-								}`}
-							>
-								Past Year
-							</button>
-							<button
-								onClick={() => setTimeRange('PAST_TWO_YEARS')}
-								className={`px-3 py-1 rounded-full ${
-									currentTimeRange === 'PAST_TWO_YEARS'
-										? 'bg-spotify-green text-black'
-										: 'bg-spotify-light-black text-spotify-light-gray'
-								}`}
-							>
-								Past 2 Years
-							</button>
-							<button
-								onClick={() => setTimeRange('ALL_TIME')}
-								className={`px-3 py-1 rounded-full ${
-									currentTimeRange === 'ALL_TIME'
-										? 'bg-spotify-green text-black'
-										: 'bg-spotify-light-black text-spotify-light-gray'
-								}`}
-							>
-								All Time
-							</button>
-						</div>
-					</div>
-
 					<div className="overflow-x-auto pb-4">
 						<div className="min-w-[600px]">
 							{/* Legend */}
@@ -305,6 +278,6 @@ export default function GenreTrendsVisualization() {
 					</p>
 				</div>
 			)}
-		</VisualizationContainer>
+		</DataFetcherAndControlsWrapper>
 	);
 }

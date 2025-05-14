@@ -14,18 +14,68 @@ export interface ArtistDetail {
 		height?: number;
 		width?: number;
 	}>;
-	// Additional artist properties as needed
 }
+
+// Compact artist representation for genre trends
+export interface CompactArtist {
+	id: string;
+	name: string;
+	genres: string[];
+}
+
+// Maximum cache size for artists
+const MAX_ARTISTS_CACHE_SIZE = 1500;
 
 // Global artists cache - shared across all hook instances
 const artistsCache = new Map<string, ArtistDetail>();
+const compactArtistsCache = new Map<string, CompactArtist>();
 
-// Single cache key for artist data
+// Cache keys
 const ARTISTS_CACHE_KEY = 'likedArtists_details';
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const COMPACT_ARTISTS_CACHE_KEY = 'likedArtists_compact';
+const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 3 days
 
 // Track which artists we've already fetched details for
 const processedArtistIds = new Set<string>();
+
+// Helper to convert to compact format
+const toCompactArtist = (artist: ArtistDetail): CompactArtist => ({
+	id: artist.id,
+	name: artist.name,
+	genres: artist.genres,
+});
+
+// Helper to check and cleanup cache
+const checkAndCleanupCache = () => {
+	if (artistsCache.size > MAX_ARTISTS_CACHE_SIZE) {
+		console.log(
+			`Cleaning up artist cache (${artistsCache.size} > ${MAX_ARTISTS_CACHE_SIZE})`
+		);
+
+		// Keep only the most recently added artists
+		const entries = Array.from(artistsCache.entries());
+		const trimmedEntries = entries.slice(-MAX_ARTISTS_CACHE_SIZE);
+
+		// Clear and rebuild caches
+		artistsCache.clear();
+		compactArtistsCache.clear();
+		processedArtistIds.clear();
+
+		trimmedEntries.forEach(([id, artist]) => {
+			artistsCache.set(id, artist);
+			compactArtistsCache.set(id, toCompactArtist(artist));
+			processedArtistIds.add(id);
+		});
+
+		// Update persistent caches
+		const artistsObject = Object.fromEntries(artistsCache);
+		const compactArtistsObject = Object.fromEntries(compactArtistsCache);
+		setCachedData(ARTISTS_CACHE_KEY, artistsObject, CACHE_TTL);
+		setCachedData(COMPACT_ARTISTS_CACHE_KEY, compactArtistsObject, CACHE_TTL);
+
+		console.log(`Cache cleaned up. Now contains ${artistsCache.size} artists`);
+	}
+};
 
 export function useLikedArtists() {
 	// Leverage the base tracks hook - with progressive loading
@@ -62,14 +112,29 @@ export function useLikedArtists() {
 				if (artistsCache.size === 0) {
 					const cachedArtistData =
 						getCachedData<Record<string, ArtistDetail>>(ARTISTS_CACHE_KEY);
+					const cachedCompactData = getCachedData<
+						Record<string, CompactArtist>
+					>(COMPACT_ARTISTS_CACHE_KEY);
+
 					if (cachedArtistData) {
-						// Restore cache from structured object
+						// Restore full cache
 						Object.entries(cachedArtistData).forEach(([id, artist]) => {
 							artistsCache.set(id, artist);
 							processedArtistIds.add(id);
 						});
-						console.log(`Restored ${artistsCache.size} artists from cache`);
 					}
+
+					if (cachedCompactData) {
+						// Restore compact cache
+						Object.entries(cachedCompactData).forEach(([id, artist]) => {
+							compactArtistsCache.set(id, artist);
+						});
+					}
+
+					console.log(`Restored ${artistsCache.size} artists from cache`);
+
+					// Clean up cache after restoration if needed
+					checkAndCleanupCache();
 				}
 
 				// Collect artist IDs from these tracks that we haven't processed yet
@@ -99,17 +164,16 @@ export function useLikedArtists() {
 					const batch = artistIdArray.slice(i, i + batchSize);
 					const response = await spotifyApi.getArtists(batch);
 
-					// Add to cache and mark as processed
+					// Add to both caches and mark as processed
 					response.body.artists.forEach((artist: ArtistDetail) => {
 						artistsCache.set(artist.id, artist);
+						compactArtistsCache.set(artist.id, toCompactArtist(artist));
 						processedArtistIds.add(artist.id);
 					});
 				}
 
-				// Update the persistent cache
-				const artistsObject = Object.fromEntries(artistsCache);
-				setCachedData(ARTISTS_CACHE_KEY, artistsObject, CACHE_TTL);
-				console.log(`Updated cache with ${artistsCache.size} total artists`);
+				// Check and cleanup cache after fetching new artists
+				checkAndCleanupCache();
 
 				return new Map(artistsCache);
 			} catch (err) {
@@ -121,6 +185,11 @@ export function useLikedArtists() {
 		},
 		[isReady, spotifyApi]
 	);
+
+	// Get compact artists for genre trends
+	const getCompactArtists = useCallback((): Map<string, CompactArtist> => {
+		return new Map(compactArtistsCache);
+	}, []);
 
 	// Progressive loading effect - process artists as tracks become available
 	useEffect(() => {
@@ -213,5 +282,6 @@ export function useLikedArtists() {
 		currentTimeRange,
 		setTimeRange,
 		isLoadingRange,
+		getCompactArtists,
 	};
 }

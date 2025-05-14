@@ -1,11 +1,12 @@
 'use client';
 
+import FeatureShowcaseItem from '@/components/FeatureShowcaseItem';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SpotifySignInButton from '@/components/SpotifySignInButton';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 export default function Home() {
 	const { status } = useSession();
@@ -29,7 +30,45 @@ export default function Home() {
 
 	return (
 		<main className="flex flex-col min-h-screen items-center justify-center bg-spotify-black text-spotify-light-gray px-4">
-			<div className="flex flex-col items-center max-w-xl w-full py-12">
+			<div className="flex flex-col items-center w-full max-w-4xl xl:max-w-6xl py-12">
+				{/* Data Usage & Privacy Card */}
+				<div className="w-full md:w-1/2 max-w-lg mx-auto mb-8 bg-spotify-dark-gray rounded-lg p-4 shadow-lg">
+					<div className="flex flex-col">
+						<h2 className="text-xl font-bold text-spotify-white mb-3">
+							Your Data & Privacy
+						</h2>
+						<div className="space-y-3 text-sm text-spotify-light-gray">
+							<div>
+								<strong className="text-spotify-white">What we access:</strong>
+								<ul className="list-disc list-inside mt-1 space-y-1">
+									<li>Your liked tracks and when you liked them</li>
+									<li>Your top artists and genres</li>
+									<li>Your recently played tracks</li>
+									<li>Ability to create playlists in your Spotify account</li>
+								</ul>
+							</div>
+							<div>
+								<strong className="text-spotify-white">
+									What we don't access:
+								</strong>
+								<ul className="list-disc list-inside mt-1 space-y-1">
+									<li>Your personal information (email, name, etc.)</li>
+									<li>
+										Your playlists (unless you create them through our app)
+									</li>
+									<li>Your listening activity outside of liked tracks</li>
+									<li>Your payment information or account settings</li>
+								</ul>
+							</div>
+							<p className="mt-3 text-xs">
+								We only use your Spotify data to provide you with insights and
+								create playlists. Your data is never shared with third parties
+								or used for any other purpose.
+							</p>
+						</div>
+					</div>
+				</div>
+
 				<Image
 					src="/spotify-icon.png"
 					alt="Spotify Logo"
@@ -47,13 +86,42 @@ export default function Home() {
 
 				<SpotifySignInButton
 					size="lg"
-					className="spotify-button"
+					className="spotify-button mb-12"
 					callbackUrl="/dashboard"
 				/>
 
-				{/* <div className="mt-10 w-full border-t border-spotify-medium-gray pt-8 text-center text-spotify-medium-gray text-sm">
-					<span>Built with Next.js, Tailwind CSS, and the Spotify Web API</span>
-				</div> */}
+				{/* Feature Showcase */}
+				<div className="w-full space-y-16">
+					<FeatureShowcaseItem
+						title="Interactive Dashboard"
+						description="Get insights into your listening habits with an interactive dashboard. Track your top artists, genres, and tracks over time."
+						imageUrl="/previews/dashboard-preview.jpeg"
+						imageAlt="Dashboard Preview"
+						previewUrl="/previews/dashboard-preview.jpeg"
+						imageWidth={400}
+						imageHeight={450}
+					/>
+
+					<FeatureShowcaseItem
+						title="Monthly History"
+						description="Travel back in time and explore your liked tracks month by month. Create playlists instantly from any time period with a single click."
+						imageUrl="/previews/history-preview.jpeg"
+						imageAlt="History Preview"
+						previewUrl="/previews/history-preview.jpeg"
+						imageWidth={400}
+						imageHeight={450}
+					/>
+
+					<FeatureShowcaseItem
+						title="Custom Playlist Generator"
+						description="Create personalized playlists by selecting custom date ranges and filtering by your favorite genres and artists. Share your playlists with friends instantly."
+						imageUrl="/previews/playlist-generator-preview.jpeg"
+						imageAlt="Playlist Generator Preview"
+						previewUrl="/previews/playlist-generator-preview.jpeg"
+						imageWidth={400}
+						imageHeight={450}
+					/>
+				</div>
 			</div>
 		</main>
 	);

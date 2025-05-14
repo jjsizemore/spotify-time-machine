@@ -23,7 +23,7 @@ export default function ActionButton({
 	const variantStyles =
 		variant === 'primary'
 			? 'bg-spotify-green text-spotify-black hover:bg-spotify-green/90'
-			: 'bg-spotify-medium-gray text-spotify-white hover:bg-spotify-medium-gray/80';
+			: 'bg-spotify-medium-gray text-spotify-white hover:bg-spotify-medium-gray-hover';
 
 	return (
 		<button

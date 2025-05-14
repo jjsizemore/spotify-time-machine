@@ -1,8 +1,8 @@
 'use client';
 
-import { useLikedTracks } from '@/hooks/useLikedTracks';
+import { CompactTrack, useLikedTracks } from '@/hooks/useLikedTracks';
 import React, { useState, useEffect, useRef } from 'react';
-import VisualizationContainer from './VisualizationContainer';
+import DataFetcherAndControlsWrapper from './DataFetcherAndControlsWrapper';
 
 interface MonthlyData {
 	month: string;
@@ -19,6 +19,7 @@ export default function ListeningTrends() {
 		error,
 		currentTimeRange,
 		setTimeRange,
+		getCompactTracks,
 	} = useLikedTracks();
 	const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
 	const [maxCount, setMaxCount] = useState(0);
@@ -55,15 +56,20 @@ export default function ListeningTrends() {
 		if (tracks.length > 0) {
 			setProcessingData(true);
 
+			// Use compact tracks for trends
+			const compactTracks: CompactTrack[] = getCompactTracks(currentTimeRange);
 			let currentTracksByMonth: Record<string, number> = {};
 			let currentMaxVal = 0;
 
 			const processChunk = (startIndex: number) => {
 				if (!isMountedRef.current) return;
 
-				const endIndex = Math.min(startIndex + CHUNK_SIZE, tracks.length);
+				const endIndex = Math.min(
+					startIndex + CHUNK_SIZE,
+					compactTracks.length
+				);
 				for (let i = startIndex; i < endIndex; i++) {
-					const item = tracks[i];
+					const item = compactTracks[i];
 					const date = new Date(item.added_at);
 					const month = (date.getMonth() + 1).toString().padStart(2, '0');
 					const monthYear = `${date.getFullYear()}-${month}`;
@@ -94,7 +100,7 @@ export default function ListeningTrends() {
 					setMaxCount(currentMaxVal);
 				}
 
-				if (endIndex < tracks.length) {
+				if (endIndex < compactTracks.length) {
 					processingTimeoutRef.current = setTimeout(
 						() => processChunk(endIndex),
 						0
@@ -109,7 +115,7 @@ export default function ListeningTrends() {
 			// Start processing immediately
 			processChunk(0);
 		}
-	}, [tracks, isLoading]);
+	}, [tracks, isLoading, currentTimeRange, getCompactTracks]);
 
 	// Determine UI states
 	const isOverallLoading = isLoading && tracks.length === 0;
@@ -122,55 +128,19 @@ export default function ListeningTrends() {
 	};
 
 	return (
-		<VisualizationContainer
+		<DataFetcherAndControlsWrapper
 			title="Your Listening Trends"
 			isLoading={isOverallLoading}
 			isProcessing={isIncrementallyProcessing}
 			error={error}
 			isEmpty={!isOverallLoading && !error && !hasData && !processingData}
 			emptyDataMessage="No listening data available to visualize after processing."
+			currentTimeRange={currentTimeRange}
+			setTimeRange={setTimeRange}
+			isLoadingRange={isLoadingRange}
 		>
-			{isLoadingRange[currentTimeRange] && (
-				<div className="mb-2 text-xs text-yellow-400">
-					This period is still loading. Data may be incomplete.
-				</div>
-			)}
 			{hasData && (
 				<>
-					{/* Time filter buttons */}
-					<div className="flex justify-end mb-4 space-x-2 text-sm">
-						<button
-							onClick={() => setTimeRange('PAST_YEAR')}
-							className={`px-3 py-1 rounded-full ${
-								currentTimeRange === 'PAST_YEAR'
-									? 'bg-spotify-green text-black'
-									: 'bg-spotify-light-black text-spotify-light-gray'
-							}`}
-						>
-							Past Year
-						</button>
-						<button
-							onClick={() => setTimeRange('PAST_TWO_YEARS')}
-							className={`px-3 py-1 rounded-full ${
-								currentTimeRange === 'PAST_TWO_YEARS'
-									? 'bg-spotify-green text-black'
-									: 'bg-spotify-light-black text-spotify-light-gray'
-							}`}
-						>
-							Past 2 Years
-						</button>
-						<button
-							onClick={() => setTimeRange('ALL_TIME')}
-							className={`px-3 py-1 rounded-full ${
-								currentTimeRange === 'ALL_TIME'
-									? 'bg-spotify-green text-black'
-									: 'bg-spotify-light-black text-spotify-light-gray'
-							}`}
-						>
-							All Time
-						</button>
-					</div>
-
 					{/* Chart Content */}
 					<div className="flex h-64">
 						<div className="flex items-center justify-center w-10 text-xs text-spotify-light-gray shrink-0 mr-2">
@@ -210,6 +180,6 @@ export default function ListeningTrends() {
 					</div>
 				</>
 			)}
-		</VisualizationContainer>
+		</DataFetcherAndControlsWrapper>
 	);
 }

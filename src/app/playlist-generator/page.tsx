@@ -9,11 +9,7 @@ import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
 import { Artist } from '@/hooks/useUserStats';
 import { GenreCount, extractTopGenres } from '@/lib/genreUtils';
-import {
-	SavedTrack,
-	createPlaylist,
-	fetchAllLikedTracks,
-} from '@/lib/spotifyTrackUtils';
+import { createPlaylist } from '@/lib/spotifyTrackUtils';
 import { format, isAfter, isBefore, parseISO } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import React, { useState, useEffect } from 'react';
@@ -334,6 +330,20 @@ export default function PlaylistGeneratorPage() {
 								playlistUrl={playlistUrl}
 								playlistName={playlistName}
 							/>
+						</div>
+
+						<div className="mt-6">
+							<ActionButton
+								onClick={() => {
+									setSuccess(false);
+									setPlaylistUrl('');
+									setPlaylistName('');
+									setTrackCount(0);
+								}}
+								variant="secondary"
+							>
+								Generate Another Playlist
+							</ActionButton>
 						</div>
 					</div>
 				)}

@@ -22,6 +22,13 @@ export interface SavedTrack {
 	};
 }
 
+// Compact track representation for trends
+export interface CompactTrack {
+	id: string;
+	added_at: string;
+	artist_ids: string[];
+}
+
 // Time ranges supported
 export type TimeRange = 'PAST_YEAR' | 'PAST_TWO_YEARS' | 'ALL_TIME';
 
@@ -30,10 +37,16 @@ const CACHE_KEYS = {
 	PAST_YEAR: 'likedTracks_pastYear',
 	PAST_TWO_YEARS: 'likedTracks_pastTwoYears',
 	ALL_TIME: 'likedTracks_allTime',
+	COMPACT_PAST_YEAR: 'compactTracks_pastYear',
+	COMPACT_PAST_TWO_YEARS: 'compactTracks_pastTwoYears',
+	COMPACT_ALL_TIME: 'compactTracks_allTime',
 };
 
 // Cache TTL (24 hours in milliseconds)
 const CACHE_TTL = 24 * 60 * 60 * 1000;
+
+// Maximum cache size (in number of tracks)
+const MAX_CACHE_SIZE = 15000;
 
 // In-memory cache for each time range
 const tracksCache = {
@@ -42,11 +55,42 @@ const tracksCache = {
 	ALL_TIME: null as SavedTrack[] | null,
 };
 
+// Compact cache for trends
+const compactCache = {
+	PAST_YEAR: null as CompactTrack[] | null,
+	PAST_TWO_YEARS: null as CompactTrack[] | null,
+	ALL_TIME: null as CompactTrack[] | null,
+};
+
 // For deduplicating fetch requests
 const ongoingFetches = {
 	PAST_YEAR: null as Promise<SavedTrack[]> | null,
 	PAST_TWO_YEARS: null as Promise<SavedTrack[]> | null,
 	ALL_TIME: null as Promise<SavedTrack[]> | null,
+};
+
+// Helper to convert to compact format
+const toCompactTrack = (track: SavedTrack): CompactTrack => ({
+	id: track.track.id,
+	added_at: track.added_at,
+	artist_ids: track.track.artists.map((a) => a.id),
+});
+
+// Helper to check cache size and cleanup if needed
+const checkAndCleanupCache = (range: TimeRange) => {
+	const cacheKey = CACHE_KEYS[range];
+	const compactCacheKey = CACHE_KEYS[`COMPACT_${range}`];
+
+	const cachedData = getCachedData<SavedTrack[]>(cacheKey);
+	if (cachedData && cachedData.length > MAX_CACHE_SIZE) {
+		// Keep only the most recent tracks
+		const trimmedData = cachedData.slice(0, MAX_CACHE_SIZE);
+		setCachedData(cacheKey, trimmedData, CACHE_TTL);
+
+		// Update compact cache
+		const compactData = trimmedData.map(toCompactTrack);
+		setCachedData(compactCacheKey, compactData, CACHE_TTL);
+	}
 };
 
 export function useLikedTracks() {
@@ -98,6 +142,12 @@ export function useLikedTracks() {
 			if (cachedData) {
 				console.log(`Using persistent cache for ${range}`);
 				tracksCache[range] = cachedData;
+
+				// Update compact cache
+				const compactData = cachedData.map(toCompactTrack);
+				compactCache[range] = compactData;
+				setCachedData(CACHE_KEYS[`COMPACT_${range}`], compactData, CACHE_TTL);
+
 				return cachedData;
 			}
 
@@ -155,6 +205,9 @@ export function useLikedTracks() {
 					setCachedData(cacheKey, allTracks, CACHE_TTL);
 					console.log(`Cached ${allTracks.length} tracks for ${range}`);
 
+					// After fetching, check and cleanup cache
+					checkAndCleanupCache(range);
+
 					return allTracks;
 				} catch (err) {
 					console.error(`Error fetching tracks for ${range}:`, err);
@@ -169,6 +222,31 @@ export function useLikedTracks() {
 		},
 		[isReady, spotifyApi, getCutoffDate]
 	);
+
+	// Get compact tracks for trends
+	const getCompactTracks = useCallback((range: TimeRange): CompactTrack[] => {
+		if (compactCache[range]) {
+			return compactCache[range]!;
+		}
+
+		const compactCacheKey = CACHE_KEYS[`COMPACT_${range}`];
+		const cachedData = getCachedData<CompactTrack[]>(compactCacheKey);
+
+		if (cachedData) {
+			compactCache[range] = cachedData;
+			return cachedData;
+		}
+
+		// If no compact cache, convert from full tracks
+		if (tracksCache[range]) {
+			const compactData = tracksCache[range]!.map(toCompactTrack);
+			compactCache[range] = compactData;
+			setCachedData(compactCacheKey, compactData, CACHE_TTL);
+			return compactData;
+		}
+
+		return [];
+	}, []);
 
 	// Load tracks for current time range and start loading other ranges in the background
 	useEffect(() => {
@@ -273,6 +351,7 @@ export function useLikedTracks() {
 		error,
 		currentTimeRange,
 		setTimeRange,
-		getTracksForRange: fetchTracksForRange, // Expose for useLikedArtists
+		getTracksForRange: fetchTracksForRange,
+		getCompactTracks, // Expose compact tracks for trends
 	};
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import ActionButton from '@/components/ActionButton';
+import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import MonthlyTrackList from '@/components/MonthlyTrackList';
 import PageContainer from '@/components/PageContainer';
@@ -22,25 +23,28 @@ export default function HistoryPage() {
 	const { spotifyApi, isReady } = useSpotify();
 	const {
 		tracks,
-		isLoading: isLoadingTracks,
+		isLoading: isLoadingTracksFromHook,
 		error: tracksError,
 		currentTimeRange,
 		setTimeRange,
+		isLoadingRange,
 	} = useLikedTracks();
 	const [monthlyTracks, setMonthlyTracks] = useState<MonthlyTracks[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const [isProcessingMonthlyTracks, setIsProcessingMonthlyTracks] =
+		useState(true);
 
 	// Process tracks into monthly groups whenever tracks change
 	useEffect(() => {
 		if (tracks.length > 0) {
+			setIsProcessingMonthlyTracks(true);
 			const groupedTracks = processAndGroupTracks(tracks);
 			setMonthlyTracks(groupedTracks);
-			setIsLoading(false);
-		} else if (!isLoadingTracks) {
-			setIsLoading(false);
+			setIsProcessingMonthlyTracks(false);
+		} else if (!isLoadingTracksFromHook) {
+			setMonthlyTracks([]);
+			setIsProcessingMonthlyTracks(false);
 		}
-	}, [tracks, isLoadingTracks]);
+	}, [tracks, isLoadingTracksFromHook]);
 
 	// Toggle expanded state for a month
 	const toggleMonth = (month: string) => {
@@ -86,13 +90,27 @@ export default function HistoryPage() {
 		);
 	};
 
-	if (error || tracksError) {
+	// Combined loading state for the wrapper
+	const isOverallLoading =
+		status === 'loading' || (isLoadingTracksFromHook && tracks.length === 0);
+	const isProcessingData = isProcessingMonthlyTracks && !isOverallLoading;
+
+	// Determine if the page is empty
+	const isEmpty =
+		!isOverallLoading &&
+		!isProcessingData &&
+		!tracksError &&
+		monthlyTracks.length === 0;
+
+	if (tracksError) {
+		const errorMessage =
+			typeof tracksError === 'string'
+				? tracksError
+				: (tracksError as Error).message;
 		return (
 			<PageContainer>
 				<ErrorDisplay
-					message={
-						error || tracksError || 'Failed to load your listening history'
-					}
+					message={errorMessage || 'Failed to load your listening history'}
 					retry={() => window.location.reload()}
 				/>
 			</PageContainer>
@@ -100,66 +118,39 @@ export default function HistoryPage() {
 	}
 
 	return (
-		<PageContainer
+		<DataFetcherAndControlsWrapper
 			title="Your Monthly Listening History"
-			isLoading={status === 'loading' || isLoading || isLoadingTracks}
-			maxWidth="6xl"
+			isLoading={isOverallLoading}
+			isProcessing={isProcessingData}
+			error={tracksError}
+			isEmpty={isEmpty}
+			emptyDataMessage="No listening history found for the selected period."
+			currentTimeRange={currentTimeRange}
+			setTimeRange={setTimeRange}
+			isLoadingRange={isLoadingRange}
 		>
-			{/* Time range selector */}
-			<div className="flex justify-end mb-6 space-x-2 text-sm">
-				<button
-					onClick={() => setTimeRange('PAST_YEAR')}
-					className={`px-3 py-1 rounded-full ${
-						currentTimeRange === 'PAST_YEAR'
-							? 'bg-spotify-green text-black'
-							: 'bg-spotify-light-black text-spotify-light-gray'
-					}`}
-				>
-					Past Year
-				</button>
-				<button
-					onClick={() => setTimeRange('PAST_TWO_YEARS')}
-					className={`px-3 py-1 rounded-full ${
-						currentTimeRange === 'PAST_TWO_YEARS'
-							? 'bg-spotify-green text-black'
-							: 'bg-spotify-light-black text-spotify-light-gray'
-					}`}
-				>
-					Past 2 Years
-				</button>
-				<button
-					onClick={() => setTimeRange('ALL_TIME')}
-					className={`px-3 py-1 rounded-full ${
-						currentTimeRange === 'ALL_TIME'
-							? 'bg-spotify-green text-black'
-							: 'bg-spotify-light-black text-spotify-light-gray'
-					}`}
-				>
-					All Time
-				</button>
-			</div>
-
-			{/* Timeline */}
-			<div className="space-y-6">
-				{monthlyTracks.map((month) => (
-					<MonthlyTrackList
-						key={month.month}
-						month={month.month}
-						tracks={month.tracks}
-						expanded={month.expanded}
-						onToggle={toggleMonth}
-						onCreatePlaylist={createMonthlyPlaylist}
-						renderTrackItem={renderTrackItem}
-					/>
-				))}
-			</div>
-
-			{/* Loading indicator */}
-			{isLoadingTracks && (
-				<div className="mt-8 text-center text-spotify-light-gray">
-					Loading your listening history...
+			{/* Display content only if not in initial overall loading and not empty */}
+			{!isOverallLoading && !isEmpty && (
+				<div className="space-y-6">
+					{monthlyTracks.map((month) => (
+						<MonthlyTrackList
+							key={month.month}
+							month={month.month}
+							tracks={month.tracks}
+							expanded={month.expanded}
+							onToggle={toggleMonth}
+							onCreatePlaylist={createMonthlyPlaylist}
+							renderTrackItem={renderTrackItem}
+						/>
+					))}
 				</div>
 			)}
-		</PageContainer>
+			{/* Show a loading text if tracks are still being fetched by the hook but not for the initial load handled by wrapper*/}
+			{isLoadingTracksFromHook && tracks.length > 0 && !isOverallLoading && (
+				<div className="mt-8 text-center text-spotify-light-gray">
+					Updating your listening history...
+				</div>
+			)}
+		</DataFetcherAndControlsWrapper>
 	);
 }
