@@ -132,7 +132,9 @@ export default function ListeningTrends() {
 			title="Your Listening Trends"
 			isLoading={isOverallLoading}
 			isProcessing={isIncrementallyProcessing}
-			error={error}
+			error={
+				error ? (typeof error === 'string' ? new Error(error) : error) : null
+			}
 			isEmpty={!isOverallLoading && !error && !hasData && !processingData}
 			emptyDataMessage="No listening data available to visualize after processing."
 			currentTimeRange={currentTimeRange}

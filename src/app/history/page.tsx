@@ -122,7 +122,13 @@ export default function HistoryPage() {
 			title="Your Monthly Listening History"
 			isLoading={isOverallLoading}
 			isProcessing={isProcessingData}
-			error={tracksError}
+			error={
+				tracksError
+					? typeof tracksError === 'string'
+						? new Error(tracksError)
+						: tracksError
+					: null
+			}
 			isEmpty={isEmpty}
 			emptyDataMessage="No listening history found for the selected period."
 			currentTimeRange={currentTimeRange}

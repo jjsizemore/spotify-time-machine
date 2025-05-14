@@ -203,7 +203,9 @@ export default function GenreTrendsVisualization() {
 			title="Your Genre Evolution"
 			isLoading={isOverallLoading}
 			isProcessing={isDataProcessing}
-			error={error}
+			error={
+				error ? (typeof error === 'string' ? new Error(error) : error) : null
+			}
 			isEmpty={noDataToShow}
 			emptyDataMessage="Not enough listening data to visualize genre trends."
 			currentTimeRange={currentTimeRange}
