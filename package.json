@@ -32,7 +32,7 @@
 		"spotify-web-api-node": "^5.0.2"
 	},
 	"devDependencies": {
-		"@types/node": "^22.15.17",
+		"@types/node": "^22.15.18",
 		"@types/puppeteer": "^7.0.4",
 		"@types/react": "19.1.4",
 		"@types/react-dom": "19.1.5",
