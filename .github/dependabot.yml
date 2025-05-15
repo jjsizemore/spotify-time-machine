@@ -9,3 +9,13 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Automatically merge minor and patch updates if CI passes
+    automerge:
+      minor: true
+      patch: true
+    # Group dependencies to organize pull requests
+    groups:
+      production-dependencies:
+        dependency-type: production
+      development-dependencies:
+        dependency-type: development
