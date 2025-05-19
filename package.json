@@ -41,7 +41,7 @@
 		"postcss": "^8.5.3",
 		"prisma": "^6.7.0",
 		"puppeteer": "^24.8.2",
-		"tailwindcss": "^4.1.6",
+		"tailwindcss": "^4.1.7",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.8.3"
 	},
