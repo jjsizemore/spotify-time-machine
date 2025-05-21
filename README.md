@@ -29,9 +29,6 @@ SPOTIFY_CLIENT_ID=your_spotify_client_id
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your_nextauth_secret
-# For PKCE flow (recommended) - generate these values
-SPOTIFY_CODE_VERIFIER=your_generated_code_verifier
-SPOTIFY_CODE_CHALLENGE=your_generated_code_challenge
 ```
 
 ### Installation
