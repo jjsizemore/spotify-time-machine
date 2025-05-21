@@ -19,7 +19,6 @@ updates:
       - jjsizemore
     labels:
       - dependencies
-    commit-message-template: "chore: update {dependency-type} {dependency-name} to {new-version}"
     # Group dependencies to organize pull requests
     groups:
       production-dependencies:
