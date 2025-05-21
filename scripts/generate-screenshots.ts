@@ -31,6 +31,10 @@ const SCREENSHOTS = [
 	},
 ];
 
+function createPngPath(dir: string, filename: string): `${string}.png` {
+	return join(dir, `${filename}.png`) as `${string}.png`;
+}
+
 async function generateScreenshots() {
 	// Ensure screenshots directory exists
 	if (!existsSync(SCREENSHOTS_DIR)) {
@@ -82,7 +86,7 @@ async function generateScreenshots() {
 			await new Promise((resolve) => setTimeout(resolve, 2000));
 
 			// Take the screenshot
-			const screenshotPath = join(SCREENSHOTS_DIR, `${screenshot.name}.png`);
+			const screenshotPath = createPngPath(SCREENSHOTS_DIR, screenshot.name);
 			await page.screenshot({
 				path: screenshotPath,
 				fullPage: false,
