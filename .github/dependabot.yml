@@ -9,10 +9,15 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    # Automatically merge minor and patch updates if CI passes
-    automerge:
-      minor: true
-      patch: true
+      day: monday
+      time: 09:00
+    reviewers:
+      - jjsizemore
+    assignees:
+      - jjsizemore
+    labels:
+      - dependencies
+    commit-message-template: "chore: update {dependency-type} {dependency-name} to {new-version}"
     # Group dependencies to organize pull requests
     groups:
       production-dependencies:
