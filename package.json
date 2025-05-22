@@ -17,7 +17,7 @@
 	},
 	"dependencies": {
 		"@auth/prisma-adapter": "^2.9.1",
-		"@prisma/client": "^6.7.0",
+		"@prisma/client": "^6.8.2",
 		"@tailwindcss/cli": "^4.1.6",
 		"@tailwindcss/postcss": "^4.1.6",
 		"@tanstack/react-query": "^5.76.0",
