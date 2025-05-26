@@ -2,13 +2,15 @@
 
 import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
 import { useLikedArtists } from '@/hooks/useLikedArtists';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface GenreTimeData {
 	genre: string;
 	period: string; // Format: 'YYYY-Q1', 'YYYY-Q2', etc.
 	count: number;
 }
+
+const CHUNK_SIZE = 250; // Process 250 tracks per chunk
 
 export default function GenreTrendsVisualization() {
 	const {
@@ -29,6 +31,8 @@ export default function GenreTrendsVisualization() {
 	const [granularity, setGranularity] = useState<'quarterly' | 'yearly'>(
 		'quarterly'
 	);
+	const isMountedRef = useRef(true);
+	const processingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	// Color palette for genres
 	const colorPalette = [
@@ -54,6 +58,16 @@ export default function GenreTrendsVisualization() {
 		'bg-purple-400',
 	];
 
+	useEffect(() => {
+		isMountedRef.current = true;
+		return () => {
+			isMountedRef.current = false;
+			if (processingTimeoutRef.current) {
+				clearTimeout(processingTimeoutRef.current);
+			}
+		};
+	}, []);
+
 	// Process the genre data whenever we get new tracks or artist details
 	useEffect(() => {
 		// Skip if we don't have the minimum data needed
@@ -70,75 +84,101 @@ export default function GenreTrendsVisualization() {
 
 			// Group tracks by period
 			const genresByPeriod: Record<string, Record<string, number>> = {};
+			let currentGenreTimeData: GenreTimeData[] = [];
+			let currentTopGenres: string[] = [];
+			let currentPeriods: string[] = [];
 
-			tracks.forEach((item) => {
-				const date = new Date(item.added_at);
-				const year = date.getFullYear();
-				let periodKey: string;
+			const processChunk = (startIndex: number) => {
+				if (!isMountedRef.current) return;
 
-				if (currentTimeRange === 'ALL_TIME' && granularity === 'yearly') {
-					periodKey = String(year);
-				} else {
-					const quarter = Math.floor(date.getMonth() / 3) + 1;
-					periodKey = `${year}-Q${quarter}`;
-				}
+				const endIndex = Math.min(startIndex + CHUNK_SIZE, tracks.length);
 
-				if (!genresByPeriod[periodKey]) {
-					genresByPeriod[periodKey] = {};
-				}
+				// Process current chunk
+				for (let i = startIndex; i < endIndex; i++) {
+					const item = tracks[i];
+					const date = new Date(item.added_at);
+					const year = date.getFullYear();
+					let periodKey: string;
 
-				// Count genres for each track's artists using compact data
-				item.track.artists.forEach((artist: { id: string }) => {
-					const artistDetail = compactArtists.get(artist.id);
-					if (!artistDetail) return;
+					if (currentTimeRange === 'ALL_TIME' && granularity === 'yearly') {
+						periodKey = String(year);
+					} else {
+						const quarter = Math.floor(date.getMonth() / 3) + 1;
+						periodKey = `${year}-Q${quarter}`;
+					}
 
-					const genres: string[] = artistDetail.genres || [];
-					genres.forEach((genre: string) => {
-						if (!genresByPeriod[periodKey][genre]) {
-							genresByPeriod[periodKey][genre] = 0;
-						}
-						genresByPeriod[periodKey][genre]++;
+					if (!genresByPeriod[periodKey]) {
+						genresByPeriod[periodKey] = {};
+					}
+
+					// Count genres for each track's artists using compact data
+					item.track.artists.forEach((artist: { id: string }) => {
+						const artistDetail = compactArtists.get(artist.id);
+						if (!artistDetail) return;
+
+						const genres: string[] = artistDetail.genres || [];
+						genres.forEach((genre: string) => {
+							if (!genresByPeriod[periodKey][genre]) {
+								genresByPeriod[periodKey][genre] = 0;
+							}
+							genresByPeriod[periodKey][genre]++;
+						});
 					});
+				}
+
+				// Convert to array format for current state
+				currentGenreTimeData = [];
+				for (const period in genresByPeriod) {
+					for (const genre in genresByPeriod[period]) {
+						currentGenreTimeData.push({
+							period,
+							genre,
+							count: genresByPeriod[period][genre],
+						});
+					}
+				}
+
+				// Get top genres overall for current state
+				const genreCounts: Record<string, number> = {};
+				currentGenreTimeData.forEach((item) => {
+					if (!genreCounts[item.genre]) {
+						genreCounts[item.genre] = 0;
+					}
+					genreCounts[item.genre] += item.count;
 				});
-			});
 
-			// Convert to array format
-			const genreTimeData: GenreTimeData[] = [];
-			for (const period in genresByPeriod) {
-				for (const genre in genresByPeriod[period]) {
-					genreTimeData.push({
-						period,
-						genre,
-						count: genresByPeriod[period][genre],
-					});
+				currentTopGenres = Object.entries(genreCounts)
+					.sort((a, b) => b[1] - a[1])
+					.map((entry) => entry[0])
+					.slice(0, 20); // Take top 20 genres
+
+				// Get unique periods and sort them chronologically
+				currentPeriods = [
+					...new Set(currentGenreTimeData.map((item) => item.period)),
+				].sort();
+
+				if (isMountedRef.current) {
+					setTopGenres(currentTopGenres);
+					setPeriods(currentPeriods);
+					setGenreData(currentGenreTimeData);
 				}
-			}
 
-			// Get top genres overall
-			const genreCounts: Record<string, number> = {};
-			genreTimeData.forEach((item) => {
-				if (!genreCounts[item.genre]) {
-					genreCounts[item.genre] = 0;
+				if (endIndex < tracks.length) {
+					processingTimeoutRef.current = setTimeout(
+						() => processChunk(endIndex),
+						0
+					);
+				} else {
+					if (isMountedRef.current) {
+						setProcessingData(false);
+					}
 				}
-				genreCounts[item.genre] += item.count;
-			});
+			};
 
-			const sortedGenres = Object.entries(genreCounts)
-				.sort((a, b) => b[1] - a[1])
-				.map((entry) => entry[0])
-				.slice(0, 20); // Take top 20 genres
-
-			// Get unique periods and sort them chronologically
-			const uniquePeriods = [
-				...new Set(genreTimeData.map((item) => item.period)),
-			].sort();
-
-			setTopGenres(sortedGenres);
-			setPeriods(uniquePeriods);
-			setGenreData(genreTimeData);
+			// Start processing immediately
+			processChunk(0);
 		} catch (err) {
 			console.error('Error processing genre trends data:', err);
-		} finally {
 			setProcessingData(false);
 		}
 	}, [
