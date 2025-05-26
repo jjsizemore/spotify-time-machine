@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import LoadingSpinner from './LoadingSpinner'; // Assuming LoadingSpinner is available
 
 type VisualizationContainerProps = {
@@ -49,21 +49,62 @@ export default function VisualizationContainer({
 	isEmpty = false,
 	emptyDataMessage = 'No data available to display.',
 }: VisualizationContainerProps) {
+	// Add state to track minimum loading time and initial mount
+	const [showLoading, setShowLoading] = useState(true); // Start with loading true
+	const [showProcessing, setShowProcessing] = useState(false);
+	const [isInitialMount, setIsInitialMount] = useState(true);
+
+	// Handle initial mount
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setIsInitialMount(false);
+		}, 1000); // Keep initial loading state for 1 second
+		return () => clearTimeout(timer);
+	}, []);
+
+	// Handle loading state
+	useEffect(() => {
+		let loadingTimer: NodeJS.Timeout;
+		if (isLoading || isInitialMount) {
+			setShowLoading(true);
+		} else {
+			// Keep loading visible for at least 500ms after initial mount
+			loadingTimer = setTimeout(() => {
+				setShowLoading(false);
+			}, 500);
+		}
+		return () => clearTimeout(loadingTimer);
+	}, [isLoading, isInitialMount]);
+
+	// Handle processing state
+	useEffect(() => {
+		let processingTimer: NodeJS.Timeout;
+		if (isProcessing) {
+			setShowProcessing(true);
+		} else {
+			// Keep processing visible for at least 300ms
+			processingTimer = setTimeout(() => {
+				setShowProcessing(false);
+			}, 300);
+		}
+		return () => clearTimeout(processingTimer);
+	}, [isProcessing]);
+
 	return (
 		<div
 			className={`${className} bg-spotify-dark-gray rounded-lg p-6 w-full relative`}
 		>
 			<h3 className="text-xl font-bold text-spotify-white mb-6">{title}</h3>
 
-			{isLoading && <VisualizationSkeleton />}
+			{showLoading && <VisualizationSkeleton />}
 
-			{!isLoading && error && <ErrorDisplay message={error} />}
+			{!showLoading && error && <ErrorDisplay message={error} />}
 
-			{!isLoading && !error && isEmpty && (
+			{!showLoading && !error && isEmpty && (
 				<EmptyDataDisplay message={emptyDataMessage} />
 			)}
 
-			{!isLoading && !error && !isEmpty && (
+			{!showLoading && !error && !isEmpty && (
 				<Suspense
 					fallback={
 						<div className="h-64 flex justify-center items-center">
@@ -72,8 +113,8 @@ export default function VisualizationContainer({
 					}
 				>
 					{children}
-					{isProcessing && (
-						<div className="absolute inset-0 bg-spotify-dark-gray/50 flex flex-col justify-center items-center rounded-lg z-10">
+					{showProcessing && (
+						<div className="absolute inset-0 bg-spotify-dark-gray/80 flex flex-col justify-center items-center rounded-lg z-50">
 							<LoadingSpinner size="md" />
 							<p className="text-spotify-light-gray mt-2 text-sm">
 								Processing data...

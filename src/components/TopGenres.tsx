@@ -18,7 +18,7 @@ export default function TopGenres({
 	onRetry,
 }: TopGenresProps) {
 	const topGenres = useMemo(() => {
-		return extractTopGenres(artists, 10);
+		return extractTopGenres(artists, 20);
 	}, [artists]);
 
 	if (isLoading) {

@@ -1,3 +1,4 @@
+import '@/lib/init';
 import { LayoutContent } from '@/components/LayoutContent';
 import React from 'react';
 import { NextAuthProvider } from '../components/providers/NextAuthProvider';
