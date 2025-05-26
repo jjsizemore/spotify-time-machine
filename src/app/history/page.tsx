@@ -13,7 +13,7 @@ import {
 	createPlaylist,
 	processAndGroupTracks,
 } from '@/lib/spotifyTrackUtils';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import React, { useState, useEffect } from 'react';
 
@@ -62,8 +62,9 @@ export default function HistoryPage() {
 		}
 
 		try {
-			// First create a new playlist
-			const formattedDate = format(new Date(month), 'MMMM yyyy');
+			// Parse the month string using date-fns parse function
+			const parsedDate = parse(month, 'MMMM yyyy', new Date());
+			const formattedDate = format(parsedDate, 'MMMM yyyy');
 			const playlistName = `${formattedDate} Time Machine`;
 			const description = `Songs I liked during ${formattedDate}. Created with Jermaine's Spotify Time Machine.`;
 			const trackUris = tracks.map((t) => `spotify:track:${t.track.id}`);

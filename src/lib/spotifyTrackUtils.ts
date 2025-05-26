@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 
 export interface Track {
 	id: string;
@@ -63,7 +63,12 @@ export function groupTracksByMonth(tracks: SavedTrack[]): MonthlyTracks[] {
 	const months: { [key: string]: SavedTrack[] } = {};
 
 	tracks.forEach((item) => {
-		const added_at = new Date(item.added_at);
+		// Parse the ISO date string using date-fns
+		const added_at = parse(
+			item.added_at,
+			"yyyy-MM-dd'T'HH:mm:ss'Z'",
+			new Date()
+		);
 		const monthName = format(added_at, 'MMMM yyyy');
 
 		if (!months[monthName]) {
@@ -80,7 +85,12 @@ export function groupTracksByMonth(tracks: SavedTrack[]): MonthlyTracks[] {
 			tracks,
 			expanded: false,
 		}))
-		.sort((a, b) => new Date(b.month).getTime() - new Date(a.month).getTime());
+		.sort((a, b) => {
+			// Parse the month strings using date-fns
+			const dateA = parse(a.month, 'MMMM yyyy', new Date());
+			const dateB = parse(b.month, 'MMMM yyyy', new Date());
+			return dateB.getTime() - dateA.getTime();
+		});
 }
 
 /**
