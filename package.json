@@ -12,7 +12,7 @@
 		"lint": "next lint",
 		"css:build": "npx @tailwindcss/cli -i ./src/app/globals.css -o ./src/app/spotify.css",
 		"css:watch": "npx @tailwindcss/cli -i ./src/app/globals.css -o ./src/app/spotify.css --watch",
-		"postinstall": "prisma generate",
+		"postinstall": "prisma generate && flowbite-react patch",
 		"screenshots": "NODE_OPTIONS='--loader ts-node/esm' ts-node --project scripts/tsconfig.json scripts/generate-screenshots.ts"
 	},
 	"dependencies": {
@@ -24,6 +24,8 @@
 		"@vercel/analytics": "^1.5.0",
 		"@vercel/functions": "^2.1.0",
 		"date-fns": "^4.1.0",
+		"flowbite": "^3.1.2",
+		"flowbite-react": "^0.11.7",
 		"next": "15.3.2",
 		"next-auth": "^4.24.11",
 		"react": "19.1.0",
@@ -46,7 +48,7 @@
 		"ts-node": "^10.9.2",
 		"typescript": "^5.8.3"
 	},
-	"packageManager": "pnpm@10.10.0",
+	"packageManager": "pnpm@10.11.0",
 	"pnpm": {
 		"overrides": {
 			"@types/react": "19.1.5",
