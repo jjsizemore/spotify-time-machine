@@ -7,9 +7,43 @@ import { Analytics } from '@vercel/analytics/react';
 // Root layout metadata (must be in server component)
 export const metadata = {
 	title: "Jermaine's Spotify Time Machine",
-	description: 'Your personal Spotify listening history and playlist generator',
+	description:
+		'Your personal Spotify listening history and playlist generator. Relive your music journey, create custom playlists, and explore your listening habits over time.',
+	keywords:
+		'Spotify, music history, playlist generator, music analytics, Spotify stats, music journey',
+	authors: [{ name: 'Jermaine Sizemore' }],
+	openGraph: {
+		title: "Jermaine's Spotify Time Machine",
+		description:
+			'Your personal Spotify listening history and playlist generator. Relive your music journey, create custom playlists, and explore your listening habits over time.',
+		type: 'website',
+		images: [
+			{
+				url: '/previews/dashboard-preview.jpeg',
+				width: 1200,
+				height: 630,
+				alt: 'Spotify Time Machine Dashboard Preview',
+			},
+		],
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: "Jermaine's Spotify Time Machine",
+		description:
+			'Your personal Spotify listening history and playlist generator',
+		images: ['/previews/dashboard-preview.jpeg'],
+	},
 	icons: {
 		icon: '/favicon.svg',
+		apple: '/favicon.svg',
+	},
+	robots: {
+		index: true,
+		follow: true,
+		googleBot: {
+			index: true,
+			follow: true,
+		},
 	},
 };
 
