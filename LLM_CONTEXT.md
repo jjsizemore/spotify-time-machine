@@ -55,11 +55,27 @@
 - **Routing:** Next.js App Router pattern is used (`src/app` directory for pages and layouts).
 - **Configuration:**
 
-  - `next.config.ts`: (File extension updated from `.js`) Includes updated image remote patterns for Spotify images.
+  - `next.config.ts`: (File extension updated from `.js`) Includes updated image remote patterns for Spotify images and Flowbite React plugin.
   - `postcss.config.mjs`: (Filename updated from `postcss.config.js` and switched to ESM) Standard PostCSS setup for Tailwind CSS and Autoprefixer.
   - `prettier.config.js`: New Prettier configuration file added for consistent code formatting.
   - `tsconfig.json`: Updated to include `postcss.config.mjs`.
   - `.trunk/trunk.yaml`: Updated Prettier version.
+  - `flowbite-react.config.js`: Configuration for Flowbite React components and theme customization.
+  - `.vscode/extensions.json`: VS Code extension recommendations for development.
+  - `.vscode/settings.json`: VS Code settings for Tailwind CSS development.
+
+- **UI Framework Integration:**
+  - Flowbite React: Integrated for enhanced UI components and consistent design patterns.
+  - Configuration in `flowbite-react.config.js` for component customization.
+  - Tailwind CSS integration with Flowbite for utility-first styling.
+  - SVG-based LoadingSpinner component for better accessibility and performance.
+
+- **SEO and Metadata:**
+  - Comprehensive metadata generation for all pages.
+  - Structured data for better search engine visibility.
+  - Robots.txt configuration for search engine crawling.
+  - Sitemap generation for site structure.
+  - Enhanced OpenGraph and Twitter card support.
 
 - **Dashboard Visualizations:**
   - **`ListeningTrends.tsx` (Your Listening Trends):**
