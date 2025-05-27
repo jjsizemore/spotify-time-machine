@@ -29,12 +29,21 @@ export default function Home() {
 	}
 
 	return (
-		<main className="flex flex-col min-h-screen items-center justify-center bg-spotify-black text-spotify-light-gray px-4">
+		<main
+			className="flex flex-col min-h-screen items-center justify-center bg-spotify-black text-spotify-light-gray px-4"
+			role="main"
+		>
 			<div className="flex flex-col items-center w-full max-w-4xl xl:max-w-6xl py-12">
 				{/* Data Usage & Privacy Card */}
-				<div className="w-full md:w-1/2 max-w-lg mx-auto mb-8 bg-spotify-dark-gray rounded-lg p-4 shadow-lg">
+				<section
+					aria-labelledby="privacy-heading"
+					className="w-full md:w-1/2 max-w-lg mx-auto mb-8 bg-spotify-dark-gray rounded-lg p-4 shadow-lg"
+				>
 					<div className="flex flex-col">
-						<h2 className="text-xl font-bold text-spotify-white mb-3">
+						<h2
+							id="privacy-heading"
+							className="text-xl font-bold text-spotify-white mb-3"
+						>
 							Your Data & Privacy
 						</h2>
 						<div className="space-y-3 text-sm text-spotify-light-gray">
@@ -67,31 +76,36 @@ export default function Home() {
 							</p>
 						</div>
 					</div>
-				</div>
+				</section>
 
-				<Image
-					src="/spotify-icon.png"
-					alt="Spotify Logo"
-					width={72}
-					height={72}
-					className="mb-6 drop-shadow-lg"
-				/>
-				<h1 className="text-4xl md:text-5xl font-extrabold text-spotify-green mb-4 text-center">
-					Jermaine's Spotify Time Machine
-				</h1>
-				<p className="text-lg md:text-xl text-center mb-8 text-spotify-light-gray">
-					Relive your Spotify listening history, generate playlists by month or
-					custom range, and explore your music journey.
-				</p>
+				<header className="flex flex-col items-center justify-center mb-12">
+					<Image
+						src="/spotify-icon.png"
+						alt="Spotify Logo"
+						width={72}
+						height={72}
+						className="mb-6 drop-shadow-lg"
+					/>
+					<h1 className="text-4xl md:text-5xl font-extrabold text-spotify-green mb-4 text-center">
+						Jermaine's Spotify Time Machine
+					</h1>
+					<p className="text-lg md:text-xl text-center mb-8 text-spotify-light-gray">
+						Relive your Spotify listening history, generate playlists by month
+						or custom range, and explore your music journey.
+					</p>
 
-				<SpotifySignInButton
-					size="lg"
-					className="spotify-button mb-12"
-					callbackUrl="/dashboard"
-				/>
+					<SpotifySignInButton
+						size="lg"
+						className="spotify-button mb-12"
+						callbackUrl="/dashboard"
+					/>
+				</header>
 
 				{/* Feature Showcase */}
-				<div className="w-full space-y-16">
+				<section
+					aria-labelledby="features-heading"
+					className="w-full space-y-16"
+				>
 					<FeatureShowcaseItem
 						title="Interactive Dashboard"
 						description="Get insights into your listening habits with an interactive dashboard. Track your top artists, genres, and tracks over time."
@@ -121,7 +135,7 @@ export default function Home() {
 						imageWidth={400}
 						imageHeight={450}
 					/>
-				</div>
+				</section>
 			</div>
 		</main>
 	);
