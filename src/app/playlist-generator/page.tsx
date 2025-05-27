@@ -5,6 +5,7 @@ import FilterSelector from '@/components/FilterSelector';
 import FormField from '@/components/FormField';
 import PageContainer from '@/components/PageContainer';
 import SharePlaylistButton from '@/components/SharePlaylistButton';
+import Toast from '@/components/Toast';
 import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
 import { Artist } from '@/hooks/useUserStats';
@@ -33,6 +34,7 @@ export default function PlaylistGeneratorPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [playlistUrl, setPlaylistUrl] = useState('');
 	const [trackCount, setTrackCount] = useState(0);
+	const [showToast, setShowToast] = useState(false);
 
 	// Filter-related state
 	const [topGenres, setTopGenres] = useState<GenreCount[]>([]);
@@ -239,6 +241,8 @@ export default function PlaylistGeneratorPage() {
 
 			setSuccess(true);
 			setPlaylistUrl(playlistUrl);
+			setShowToast(true);
+			setTimeout(() => setShowToast(false), 3000);
 		} catch (err) {
 			console.error('Error generating playlist:', err);
 			setError('Failed to generate playlist. Please try again.');
@@ -302,6 +306,13 @@ export default function PlaylistGeneratorPage() {
 			/>
 
 			<main className="bg-spotify-dark-gray rounded-lg p-4 md:p-6" role="main">
+				{showToast && (
+					<Toast
+						message={`Playlist "${playlistName}" has been created in your Spotify library!`}
+						onDismiss={() => setShowToast(false)}
+						type="success"
+					/>
+				)}
 				{!success ? (
 					<form
 						id="playlist-generator-form"
@@ -398,13 +409,11 @@ export default function PlaylistGeneratorPage() {
 						</section>
 
 						{error && (
-							<div
-								className="text-red-500 text-sm"
-								role="alert"
-								aria-live="polite"
-							>
-								{error}
-							</div>
+							<Toast
+								message={error}
+								onDismiss={() => setError(null)}
+								type="error"
+							/>
 						)}
 
 						<ActionButton type="submit" disabled={isLoading} className="w-full">
@@ -416,13 +425,11 @@ export default function PlaylistGeneratorPage() {
 						className="text-center space-y-4"
 						aria-label="Success message"
 					>
-						<h2 className="text-2xl font-bold text-spotify-green">
-							Playlist Created Successfully!
-						</h2>
-						<p className="text-spotify-light-gray">
-							Your playlist "{playlistName}" has been created with {trackCount}{' '}
-							tracks.
-						</p>
+						<Toast
+							message={`Playlist "${playlistName}" has been created with ${trackCount} tracks.`}
+							onDismiss={() => setSuccess(false)}
+							type="success"
+						/>
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
 							<SharePlaylistButton
 								playlistUrl={playlistUrl}

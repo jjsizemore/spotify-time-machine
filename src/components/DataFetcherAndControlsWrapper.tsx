@@ -7,8 +7,8 @@ import {
 	mapToInternalTimeRange,
 	mapToSpotifyTimeRange,
 } from '@/lib/timeRanges';
-import { Toast } from 'flowbite-react';
 import React, { useState } from 'react';
+import Toast from './Toast';
 import VisualizationContainer from './VisualizationContainer';
 
 interface DataFetcherAndControlsWrapperProps {
@@ -95,49 +95,11 @@ export default function DataFetcherAndControlsWrapper({
 			{/* Toast notification */}
 			{toast && (
 				<div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-					<Toast className="flex items-center w-full max-w-xs p-4 bg-spotify-dark-gray text-spotify-yellow rounded-lg shadow-sm pointer-events-auto relative">
-						{/* Icon */}
-						<div className="inline-flex items-center justify-center shrink-0 w-8 h-8 text-spotify-green bg-spotify-black rounded-lg">
-							<svg
-								className="w-5 h-5"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-								viewBox="0 0 24 24"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"
-								/>
-							</svg>
-						</div>
-						{/* Message */}
-						<div className="ml-3 text-sm font-normal">{toast}</div>
-						{/* Dismiss Button */}
-						<button
-							type="button"
-							onClick={() => setToast(null)}
-							className="ms-auto -mx-1.5 -my-1.5 bg-spotify-dark-gray text-spotify-yellow hover:text-spotify-green rounded-lg focus:ring-2 focus:ring-spotify-green p-1.5 hover:bg-spotify-medium-gray/40 inline-flex items-center justify-center h-8 w-8 absolute top-2 right-2"
-							aria-label="Close"
-							style={{ lineHeight: 0 }}
-						>
-							<span className="sr-only">Close</span>
-							<svg
-								className="w-3 h-3"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-								viewBox="0 0 14 14"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									d="M1 1l12 12M13 1L1 13"
-								/>
-							</svg>
-						</button>
-					</Toast>
+					<Toast
+						message={toast}
+						onDismiss={() => setToast(null)}
+						type="warning"
+					/>
 				</div>
 			)}
 

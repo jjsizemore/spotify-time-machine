@@ -4,6 +4,7 @@ import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWr
 import ErrorDisplay from '@/components/ErrorDisplay';
 import MonthlyTrackList from '@/components/MonthlyTrackList';
 import PageContainer from '@/components/PageContainer';
+import Toast from '@/components/Toast';
 import TrackItem from '@/components/TrackItem';
 import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
@@ -39,6 +40,8 @@ export default function HistoryPage() {
 	const [monthlyTracks, setMonthlyTracks] = useState<MonthlyTracks[]>([]);
 	const [isProcessingMonthlyTracks, setIsProcessingMonthlyTracks] =
 		useState(true);
+	const [showToast, setShowToast] = useState(false);
+	const [toastMessage, setToastMessage] = useState('');
 
 	// Process tracks into monthly groups whenever tracks change
 	useEffect(() => {
@@ -65,7 +68,9 @@ export default function HistoryPage() {
 	// Create a playlist for a specific month
 	const createMonthlyPlaylist = async (month: string, tracks: SavedTrack[]) => {
 		if (!isReady) {
-			alert('Cannot create playlist. Spotify API is not ready.');
+			setToastMessage('Cannot create playlist. Spotify API is not ready.');
+			setShowToast(true);
+			setTimeout(() => setShowToast(false), 3000);
 			return;
 		}
 
@@ -79,10 +84,16 @@ export default function HistoryPage() {
 
 			await createPlaylist(spotifyApi, playlistName, description, trackUris);
 
-			alert(`Playlist "${playlistName}" created successfully!`);
+			setToastMessage(
+				`Playlist "${playlistName}" has been created in your Spotify library!`
+			);
+			setShowToast(true);
+			setTimeout(() => setShowToast(false), 3000);
 		} catch (err) {
 			console.error('Error creating playlist:', err);
-			alert('Failed to create playlist. Please try again later.');
+			setToastMessage('Failed to create playlist. Please try again later.');
+			setShowToast(true);
+			setTimeout(() => setShowToast(false), 3000);
 		}
 	};
 
@@ -161,6 +172,18 @@ export default function HistoryPage() {
 					__html: JSON.stringify(generateStructuredData()),
 				}}
 			/>
+
+			{showToast && (
+				<Toast
+					message={toastMessage}
+					onDismiss={() => setShowToast(false)}
+					type={
+						toastMessage.includes('Failed') || toastMessage.includes('Cannot')
+							? 'error'
+							: 'success'
+					}
+				/>
+			)}
 
 			{/* Display content only if not in initial overall loading and not empty */}
 			{!isOverallLoading && !isEmpty && (

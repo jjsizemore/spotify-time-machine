@@ -79,16 +79,19 @@ export default function Home() {
 				</section>
 
 				<header className="flex flex-col items-center justify-center mb-12">
-					<Image
-						src="/spotify-icon.png"
-						alt="Spotify Logo"
-						width={72}
-						height={72}
-						className="mb-6 drop-shadow-lg"
-					/>
-					<h1 className="text-4xl md:text-5xl font-extrabold text-spotify-green mb-4 text-center">
-						Jermaine's Spotify Time Machine
-					</h1>
+					<span className="text-4xl md:text-5xl font-extrabold text-spotify-green mb-4 text-center">
+						<div className="flex items-center justify-center order-1 md:order-2">
+							<h1 className="mr-4">Jermaine's</h1>
+							<Image
+								src="/spotify-icon.png"
+								alt="Spotify Logo"
+								width={128}
+								height={128}
+								className="drop-shadow-lg mx-4"
+							/>
+							<h1 className="ml-4">Time Machine</h1>
+						</div>
+					</span>
 					<p className="text-lg md:text-xl text-center mb-8 text-spotify-light-gray">
 						Relive your Spotify listening history, generate playlists by month
 						or custom range, and explore your music journey.
