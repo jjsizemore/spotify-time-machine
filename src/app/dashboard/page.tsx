@@ -1,5 +1,6 @@
 'use client';
 
+import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
 import FeatureCard from '@/components/FeatureCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import PageContainer from '@/components/PageContainer';
@@ -23,6 +24,20 @@ const GenreTrendsVisualization = lazy(
 
 type Tab = 'artists' | 'tracks' | 'recent' | 'genres';
 
+// Map Spotify API time ranges to our internal time ranges
+const mapTimeRange = (
+	range: TimeRange
+): 'PAST_YEAR' | 'PAST_TWO_YEARS' | 'ALL_TIME' => {
+	switch (range) {
+		case 'short_term':
+			return 'PAST_YEAR';
+		case 'medium_term':
+			return 'PAST_TWO_YEARS';
+		case 'long_term':
+			return 'ALL_TIME';
+	}
+};
+
 export default function Dashboard() {
 	const { status } = useSession();
 	const [timeRange, setTimeRange] = useState<TimeRange>('medium_term');
@@ -39,7 +54,11 @@ export default function Dashboard() {
 	}, [status, refresh]);
 
 	return (
-		<PageContainer isLoading={status === 'loading'} maxWidth="7xl">
+		<PageContainer
+			isLoading={status === 'loading'}
+			maxWidth="7xl"
+			className="min-h-screen pb-20"
+		>
 			{/* Structured Data */}
 			<Script
 				id="structured-data"
@@ -72,33 +91,47 @@ export default function Dashboard() {
 			</nav>
 
 			{/* Visualizations */}
-			<section aria-label="Listening trends" className="space-y-8 mb-10">
+			<section aria-label="Visualizations" className="space-y-8 mb-10">
 				<ListeningTrends />
 				<GenreTrendsVisualization />
 			</section>
 
 			{/* Stats Section */}
-			<section
-				id="stats"
-				aria-label="Your Spotify statistics"
-				className="bg-spotify-dark-gray rounded-lg p-6 mb-8"
+			<DataFetcherAndControlsWrapper
+				title="Your Spotify Stats"
+				isLoading={isLoading}
+				isProcessing={false}
+				error={
+					error ? (typeof error === 'string' ? new Error(error) : error) : null
+				}
+				isEmpty={
+					!isLoading &&
+					!error &&
+					!topArtists?.length &&
+					!topTracks?.length &&
+					!recentlyPlayed?.length
+				}
+				emptyDataMessage="No stats available for the selected time period."
+				currentTimeRange={mapTimeRange(timeRange)}
+				setTimeRange={(range) =>
+					setTimeRange(
+						range === 'PAST_YEAR'
+							? 'short_term'
+							: range === 'PAST_TWO_YEARS'
+								? 'medium_term'
+								: 'long_term'
+					)
+				}
+				isLoadingRange={{
+					PAST_YEAR: false,
+					PAST_TWO_YEARS: false,
+					ALL_TIME: false,
+				}}
 			>
-				<h2 className="text-2xl font-bold text-spotify-light-gray mb-6">
-					Your Spotify Stats
-				</h2>
+				<div className="flex flex-col min-h-[400px]">
+					<StatsTabs activeTab={activeTab} onChange={setActiveTab} />
 
-				<TimeRangeSelector
-					onChange={setTimeRange}
-					initialTimeRange={timeRange}
-				/>
-				<StatsTabs activeTab={activeTab} onChange={setActiveTab} />
-
-				{isLoading ? (
-					<div className="flex justify-center items-center py-20">
-						<LoadingSpinner size="lg" />
-					</div>
-				) : (
-					<>
+					<div className="flex-1 space-y-6 mt-6">
 						{activeTab === 'artists' && (
 							<article aria-label="Top artists">
 								<TopArtists
@@ -142,9 +175,9 @@ export default function Dashboard() {
 								/>
 							</article>
 						)}
-					</>
-				)}
-			</section>
+					</div>
+				</div>
+			</DataFetcherAndControlsWrapper>
 		</PageContainer>
 	);
 }
