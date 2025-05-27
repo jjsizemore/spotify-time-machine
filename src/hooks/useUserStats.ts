@@ -1,8 +1,8 @@
+import { SpotifyTimeRange } from '@/lib/timeRanges';
 import { useCallback, useEffect, useState } from 'react';
-import SpotifyWebApi from 'spotify-web-api-node';
 import { useSpotify } from './useSpotify';
 
-export type TimeRange = 'short_term' | 'medium_term' | 'long_term';
+export type TimeRange = SpotifyTimeRange;
 
 export interface Artist {
 	id: string;

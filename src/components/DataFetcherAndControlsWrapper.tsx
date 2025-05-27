@@ -1,5 +1,12 @@
 'use client';
 
+import {
+	InternalTimeRange,
+	SpotifyTimeRange,
+	TimeRangeDisplay,
+	mapToInternalTimeRange,
+	mapToSpotifyTimeRange,
+} from '@/lib/timeRanges';
 import { Toast } from 'flowbite-react';
 import React, { useState } from 'react';
 import VisualizationContainer from './VisualizationContainer';
@@ -11,12 +18,14 @@ interface DataFetcherAndControlsWrapperProps {
 	error: Error | null | undefined;
 	isEmpty: boolean;
 	emptyDataMessage: string;
-	currentTimeRange: 'PAST_YEAR' | 'PAST_TWO_YEARS' | 'ALL_TIME';
-	setTimeRange: (range: 'PAST_YEAR' | 'PAST_TWO_YEARS' | 'ALL_TIME') => void;
-	isLoadingRange: Record<'PAST_YEAR' | 'PAST_TWO_YEARS' | 'ALL_TIME', boolean>;
+	currentTimeRange: SpotifyTimeRange | InternalTimeRange;
+	setTimeRange: (range: SpotifyTimeRange | InternalTimeRange) => void;
+	isLoadingRange: Record<InternalTimeRange, boolean>;
 	children: React.ReactNode;
 	// Optional props for elements specific to certain visualizations, like granularity controls
 	granularityControls?: React.ReactNode;
+	// Time range display configuration
+	timeRangeDisplay?: TimeRangeDisplay[];
 }
 
 export default function DataFetcherAndControlsWrapper({
@@ -31,19 +40,42 @@ export default function DataFetcherAndControlsWrapper({
 	isLoadingRange,
 	children,
 	granularityControls,
+	timeRangeDisplay,
 }: DataFetcherAndControlsWrapperProps) {
 	const [toast, setToast] = useState<string | null>(null);
 
-	const handleTimeRangeClick = (
-		range: 'PAST_YEAR' | 'PAST_TWO_YEARS' | 'ALL_TIME'
-	) => {
-		if (isLoadingRange[range]) {
+	const handleTimeRangeClick = (spotifyRange: SpotifyTimeRange) => {
+		// Determine if we should use internal or Spotify ranges based on current time range
+		const isUsingInternalRange =
+			typeof currentTimeRange === 'string' &&
+			['PAST_YEAR', 'PAST_TWO_YEARS', 'ALL_TIME'].includes(currentTimeRange);
+
+		// Convert to internal range for checking loading state
+		const internalRange = mapToInternalTimeRange(spotifyRange);
+
+		if (isLoadingRange[internalRange]) {
 			setToast('Data for this period is still loading…');
 			setTimeout(() => setToast(null), 2500);
 			return;
 		}
-		setTimeRange(range);
+
+		// Set the appropriate range type based on what the component is using
+		setTimeRange(isUsingInternalRange ? internalRange : spotifyRange);
 	};
+
+	// Use provided display configuration or default to Spotify's time ranges
+	const displayConfig = timeRangeDisplay || [
+		{ value: 'short_term', label: 'Last 4 Weeks' },
+		{ value: 'medium_term', label: 'Last 6 Months' },
+		{ value: 'long_term', label: 'All Time' },
+	];
+
+	// Convert current time range to Spotify range for display comparison
+	const currentSpotifyRange =
+		typeof currentTimeRange === 'string' &&
+		['PAST_YEAR', 'PAST_TWO_YEARS', 'ALL_TIME'].includes(currentTimeRange)
+			? mapToSpotifyTimeRange(currentTimeRange as InternalTimeRange)
+			: (currentTimeRange as SpotifyTimeRange);
 
 	return (
 		<VisualizationContainer
@@ -54,7 +86,7 @@ export default function DataFetcherAndControlsWrapper({
 			isEmpty={isEmpty}
 			emptyDataMessage={emptyDataMessage}
 		>
-			{isLoadingRange[currentTimeRange] && (
+			{isLoadingRange[mapToInternalTimeRange(currentSpotifyRange)] && (
 				<div className="mb-2 text-xs text-yellow-400">
 					This period is still loading. Data may be incomplete.
 				</div>
@@ -112,24 +144,23 @@ export default function DataFetcherAndControlsWrapper({
 			<div className="flex flex-col items-start sm:flex-row sm:items-center sm:justify-end mb-4 sm:mb-6 space-y-2 sm:space-y-0 sm:space-x-2">
 				{granularityControls}
 				<div className="flex space-x-2 text-sm self-end sm:self-center">
-					<button
-						onClick={() => handleTimeRangeClick('PAST_YEAR')}
-						className={`px-3 py-1 rounded-full transition font-medium ${currentTimeRange === 'PAST_YEAR' ? 'bg-spotify-green text-black' : 'bg-spotify-light-black text-spotify-light-gray hover:bg-spotify-medium-gray/50'}${isLoadingRange['PAST_YEAR'] ? ' opacity-60 grayscale cursor-not-allowed' : ' cursor-pointer'}`}
-					>
-						Past Year
-					</button>
-					<button
-						onClick={() => handleTimeRangeClick('PAST_TWO_YEARS')}
-						className={`px-3 py-1 rounded-full transition font-medium ${currentTimeRange === 'PAST_TWO_YEARS' ? 'bg-spotify-green text-black' : 'bg-spotify-light-black text-spotify-light-gray hover:bg-spotify-medium-gray/50'}${isLoadingRange['PAST_TWO_YEARS'] ? ' opacity-60 grayscale cursor-not-allowed' : ' cursor-pointer'}`}
-					>
-						Past 2 Years
-					</button>
-					<button
-						onClick={() => handleTimeRangeClick('ALL_TIME')}
-						className={`px-3 py-1 rounded-full transition font-medium ${currentTimeRange === 'ALL_TIME' ? 'bg-spotify-green text-black' : 'bg-spotify-light-black text-spotify-light-gray hover:bg-spotify-medium-gray/50'}${isLoadingRange['ALL_TIME'] ? ' opacity-60 grayscale cursor-not-allowed' : ' cursor-pointer'}`}
-					>
-						All Time
-					</button>
+					{displayConfig.map(({ value, label }) => (
+						<button
+							key={value}
+							onClick={() => handleTimeRangeClick(value)}
+							className={`px-3 py-1 rounded-full transition font-medium ${
+								currentSpotifyRange === value
+									? 'bg-spotify-green text-black'
+									: 'bg-spotify-light-black text-spotify-light-gray hover:bg-spotify-medium-gray/50'
+							}${
+								isLoadingRange[mapToInternalTimeRange(value)]
+									? ' opacity-60 grayscale cursor-not-allowed'
+									: ' cursor-pointer'
+							}`}
+						>
+							{label}
+						</button>
+					))}
 				</div>
 			</div>
 

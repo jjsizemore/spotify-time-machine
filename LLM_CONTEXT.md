@@ -6,6 +6,29 @@
 - The TODO.md file contains the current implementation status and priorities
 - **Refer to "Key Architectural Patterns & Components" below for current development best practices and available tools within this project.**
 
+## Current Development Focus
+
+### High Priority Features
+1. **PKCE Implementation for Spotify OAuth**
+   - Enhancing security of the authentication flow
+   - Implementation in progress in `src/app/api/auth/[...nextauth]/route.ts`
+   - Requires careful handling of code verifier/challenge
+
+2. **Audio Preview Feature**
+   - Implementation in `TrackItem.tsx`
+   - Requires Spotify Web Playback SDK integration
+   - Needs to handle audio state management
+
+3. **Rate Limiting Protection**
+   - Implementation in `src/middleware.ts`
+   - Using token bucket algorithm
+   - Protecting both API routes and authentication endpoints
+
+4. **Server-Side Data Aggregation**
+   - Optimizing visualization data processing
+   - Moving heavy computations from client to server
+   - Implementing new API endpoints for aggregated data
+
 ## Optimization Preferences
 
 - Prioritize simplicity and speed of implementation while maintaining code quality
@@ -21,6 +44,7 @@
 
 ## Key Architectural Patterns & Components
 
+### Component Architecture
 - **Component-Driven UI:** The frontend is built with a strong emphasis on reusable React components located in `src/components/`. Key examples include:
   - `PageContainer.tsx`: Standard wrapper for page content, providing consistent layout and loading states.
   - `LayoutContent.tsx`: Manages the overall page structure within `RootLayout.tsx`, often including `Header.tsx` and `Footer.tsx`.
@@ -36,148 +60,153 @@
   - `FeatureShowcaseItem.tsx`: Component for displaying feature details with title, description, image, and optional reversed layout.
   - `VisualizationContainer.tsx`: A wrapper for data visualizations, managing title, loading, processing, error, and empty states.
   - `DataFetcherAndControlsWrapper.tsx`: A key component that standardizes data fetching and UI controls (e.g., time range selectors, granularity controls) for visualizations. It wraps `VisualizationContainer` and manages the presentation of loading states related to specific data ranges.
-- **Global Styling:**
-  - `src/app/globals.css`: Defines global styles, an extensive set of CSS variables for theming (Spotify-like colors: `--spotify-green`, `--spotify-black`, etc., and new theme variables), hover effects, and base Tailwind configuration. All new UI should adhere to these variables.
-  - Tailwind CSS: Used extensively for utility-first styling. Configuration in `tailwind.config.ts`.
-- **State Management & Hooks:**
-  - `src/hooks/useSpotify.ts`: Central hook for interacting with the Spotify API via `spotify-web-api-node`. **Crucially, it now returns an `isReady` boolean flag that MUST be checked before attempting API calls that require authentication.**
-  - `src/hooks/useUserStats.ts`: Fetches and manages user's top artists/tracks/genres for the dashboard.
-  - `src/hooks/useLikedTracks.ts`: Manages fetching, **caching (with multiple cache keys for progressive loading, TTL, and max size)**, and pagination of user's liked tracks. It provides both full track data and a `CompactTrack` representation for trends. Simulates API loading states and includes helper functions for time range calculations.
-  - `src/hooks/useLikedArtists.ts`: Fetches and **caches artist details for liked tracks, with progressive loading and cache management (TTL, max size)**. Leverages `useLikedTracks` and `useSpotify`.
-- **Utility Libraries:**
-  - `src/lib/spotifyTrackUtils.ts`: Contains functions for fetching all liked tracks, processing/grouping tracks by month, and creating playlists (both monthly and custom).
-  - `src/lib/genreUtils.ts`: Includes functions for extracting and processing genre information, primarily used for playlist filtering.
-- **Authentication & Authorization:**
-  - NextAuth.js: Manages the Spotify OAuth flow. Configuration in `src/app/api/auth/[...nextauth]/route.ts` (uses JWT strategy, **updated `sameSite` cookie settings to `lax` for enhanced security**).
-  - `src/middleware.ts`: Protects routes (pages and API endpoints defined in its `matcher` config) and implements API rate limiting. Unauthenticated users are redirected.
-  - Automatic Sign-in: The `/auth/signin` page (`src/app/auth/signin/page.tsx`) attempts to initiate sign-in automatically and shows a loading state.
-  - Session Clearing: Logout flow (initiated from `Navigation.tsx`) is comprehensive, involving client-side state clearing, an API call to `src/app/api/auth/clear-session/route.ts` to clear auth cookies, NextAuth\'s `signOut`, and redirection to `/thank-you`.
-- **Routing:** Next.js App Router pattern is used (`src/app` directory for pages and layouts).
-- **Configuration:**
 
-  - `next.config.ts`: (File extension updated from `.js`) Includes updated image remote patterns for Spotify images and Flowbite React plugin.
-  - `postcss.config.mjs`: (Filename updated from `postcss.config.js` and switched to ESM) Standard PostCSS setup for Tailwind CSS and Autoprefixer.
-  - `prettier.config.js`: New Prettier configuration file added for consistent code formatting.
-  - `tsconfig.json`: Updated to include `postcss.config.mjs`.
-  - `.trunk/trunk.yaml`: Updated Prettier version.
-  - `flowbite-react.config.js`: Configuration for Flowbite React components and theme customization.
-  - `.vscode/extensions.json`: VS Code extension recommendations for development.
-  - `.vscode/settings.json`: VS Code settings for Tailwind CSS development.
+### Data Management & Caching
+- **Advanced Caching System:**
+  - `useLikedTracks` hook implements:
+    - Progressive loading with multiple cache keys
+    - TTL (Time To Live) for cache entries
+    - Maximum cache size limits
+    - Compact track representation for trends
+  - `useLikedArtists` hook provides:
+    - Cached artist details for liked tracks
+    - Progressive loading strategy
+    - Cache management with TTL and size limits
+  - Both hooks leverage `useSpotify` for API access
 
-- **UI Framework Integration:**
-  - Flowbite React: Integrated for enhanced UI components and consistent design patterns.
-  - Configuration in `flowbite-react.config.js` for component customization.
-  - Tailwind CSS integration with Flowbite for utility-first styling.
-  - SVG-based LoadingSpinner component for better accessibility and performance.
+### State Management
+- **Custom Hooks:**
+  - `useSpotify.ts`: Central hook for Spotify API interaction
+    - Returns `isReady` boolean flag (MUST be checked before API calls)
+    - Handles token management and refresh
+  - `useUserStats.ts`: Manages user's top artists/tracks/genres
+  - `useLikedTracks.ts`: Handles liked tracks with caching
+  - `useLikedArtists.ts`: Manages artist data with caching
 
-- **SEO and Metadata:**
-  - Comprehensive metadata generation for all pages.
-  - Structured data for better search engine visibility.
-  - Robots.txt configuration for search engine crawling.
-  - Sitemap generation for site structure.
-  - Enhanced OpenGraph and Twitter card support.
+### Visualization Components
+- **`ListeningTrends.tsx`:**
+  - Monthly bar chart for liked track counts
+  - Uses `--spotify-green` for bars
+  - Implements horizontal scrolling for long timelines
+  - Leverages `DataFetcherAndControlsWrapper` for controls
 
-- **Dashboard Visualizations:**
-  - **`ListeningTrends.tsx` (Your Listening Trends):**
-    - **Purpose:** To display the number of tracks liked by the user each month over time.
-    - **Appearance:** A bar chart where each bar represents a month.
-      - X-axis: Month and year (e.g., "Jan 2023", "Feb 2023"). Rotated labels for readability if space is tight.
-      - Y-axis (implied): Number of tracks liked.
-      - Bars: Height proportional to the number of tracks liked in that month, normalized against the month with the highest count. Bars should have a minimum visible height (e.g., 4px) even for low counts.
-      - Color: Uses `--spotify-green` for bars.
-      - Interaction: Horizontal scrolling if the timeline exceeds viewport width.
-    - **Data:** Derived from the `added_at` timestamp of liked tracks, using `CompactTrack` representation from `useLikedTracks`.
-    - **Loading/Empty States:** Handled by `DataFetcherAndControlsWrapper` and `VisualizationContainer`. Shows total track count below the chart.
-    - **Optimization:** Uses client-side chunked processing for large datasets to maintain UI responsiveness. Leverages cached data from `useLikedTracks`.
-  - **`GenreTrendsVisualization.tsx` (Your Genre Evolution):**
-    - **Purpose:** To show how the user's preferences for top genres have changed over time (quarterly or yearly).
-    - **Appearance:** A series of stacked horizontal bars, where each row represents a time period (e.g., "2023-Q1" or "2023").
-      - Rows: Labelled with the period.
-      - Stacked Bars: Each row/period consists of a horizontal bar segmented by colors. Each segment represents a top genre, and its width is proportional to that genre's prevalence (count) within that period, relative to other top genres in the same period.
-      - Legend: Displays the top N (e.g., 8) genres and their corresponding colors, taken from a predefined palette.
-      - Filters: Allows users to select time range ("Past Year", "Past 2 Years", "All Time") and granularity for "All Time" view ("Quarterly", "Yearly").
-    - **Data:** Derived from genres associated with artists of liked tracks, grouped by period. Uses `useLikedArtists` for artist data and `useLikedTracks` for track data.
-    - **Loading/Empty States:** Handled by `DataFetcherAndControlsWrapper` and `VisualizationContainer`.
-    - **Data Fetching & Processing:** Refactored to use `useLikedArtists` and `useLikedTracks` hooks, with optimized data processing and removal of previous local cache logic in favor of the hooks' caching.
+- **`GenreTrendsVisualization.tsx`:**
+  - Stacked horizontal bars for genre evolution
+  - Supports quarterly/yearly views
+  - Includes interactive legend
+  - Uses predefined color palette
 
-Create a comprehensive web application that integrates with Spotify's API to provide users with detailed insights into their listening history. The application should:
+## Performance Optimization
 
-CORE FUNCTIONALITY:
+### Data Processing
+1. **Server-Side Aggregation:**
+   - New API endpoints for pre-processed visualization data
+   - Reduces client-side computation
+   - Implements chunked data delivery
 
-1. Authentication:
+2. **Web Workers:**
+   - Offloads heavy data processing
+   - Improves UI responsiveness
+   - Used for visualization calculations
 
-   - Implemented Spotify OAuth 2.0 flow via NextAuth.js.
-   - Sign-in page (`src/app/auth/signin/page.tsx`) features automatic sign-in initiation with loading and error states.
-   - NextAuth configuration (`src/app/api/auth/[...nextauth]/route.ts`) uses JWT strategy with specific cookie settings for enhanced security (updated `sameSite` to `lax`).
-   - A dedicated session clearing API endpoint (`src/app/api/auth/clear-session/route.ts`) ensures robust cookie removal.
-   - Comprehensive logout flow accessible via user dropdown in `Navigation.tsx`, redirecting to a `/thank-you` page. Personalized with "Jermaine's" in navigation and page titles.
+3. **Progressive Rendering:**
+   - Implements data chunking
+   - User-controlled granularity
+   - Optimized for large datasets
 
-2. User Dashboard (`src/app/dashboard/page.tsx`):
+### Caching Strategy
+1. **API Response Caching:**
+   - TTL-based cache invalidation
+   - Size-limited cache storage
+   - Progressive loading patterns
 
-   - Displays overall listening statistics upon login using `PageContainer`.
-   - Shows top artists, genres, **and recently played tracks** fetched via `useUserStats` hook (or a dedicated hook if `useUserStats` doesn't cover recently played).
-   - Includes `GenreTrendsVisualization` and `ListeningTrends` components, now utilizing `DataFetcherAndControlsWrapper` for consistent loading and controls.
-   - Provides navigation to other sections using `FeatureCard` components with updated descriptions.
-   - Main app navigation managed by `Navigation.tsx`.
-   - Homepage (`src/app/page.tsx`) updated with `FeatureShowcaseItem` for better presentation.
+2. **Client-Side State:**
+   - Optimized re-renders
+   - Memoized computations
+   - Efficient data structures
 
-3. Monthly Listening History (`src/app/history/page.tsx`):
+## Testing Strategy
 
-   - Chronological timeline interface using `MonthlyTrackList` component for collapsible sections per month.
-   - Each month displays liked tracks (using `TrackItem`), with track information (title, artist, album, cover art, date liked).
-   - Track processing and grouping by month handled by `src/lib/spotifyTrackUtils.ts`.
-   - Uses `useLikedTracks` hook for data fetching (with caching and progressive loading) and pagination (load more functionality). Employs `DataFetcherAndControlsWrapper` for UI consistency.
-   - Play button for previews in `TrackItem` is a **pending enhancement** (currently not implemented).
+### Unit Tests
+- Utility functions in `src/lib/`
+- Custom hooks using `@testing-library/react-hooks`
+- Business logic validation
 
-4. Playlist Generation (Monthly):
+### Component Tests
+- UI components using `@testing-library/react`
+- Visualization components with mock data
+- Interaction testing
 
-   - "Create Monthly Playlist" button integrated within each `MonthlyTrackList` section on the History page.
-   - Clicking automatically creates a playlist in the user\'s Spotify account using logic from `src/lib/spotifyTrackUtils.ts`.
-   - Shows a success confirmation.
-   - Now uses `useLikedTracks` for accessing liked track data needed for filtering.
+### Integration Tests
+- Component interaction flows
+- Authentication integration
+- API route testing
 
-5. Custom Playlist Generator (`src/app/playlist-generator/page.tsx`):
-   - Dedicated interface using `PageContainer` and `FormField` components for date pickers (start/end dates) and playlist name.
-   - **Enhanced with filtering by top genres and artists** using `FilterSelector` components. Genre data from `src/lib/genreUtils.ts`.
-   - Playlist creation logic from `src/lib/spotifyTrackUtils.ts`.
-   - Success state includes a `SharePlaylistButton` (copies link/text for sharing).
+### E2E Tests
+- Core user flows using Playwright
+- Authentication scenarios
+- Playlist creation workflows
 
-TECHNICAL REQUIREMENTS:
+## Accessibility (a11y)
 
-1. Frontend:
+### Current Focus
+1. **ARIA Implementation:**
+   - Dynamic components
+   - Custom controls
+   - Live regions
 
-   - Modern JavaScript framework: React with Next.js (App Router).
-   - Responsive design for desktop and mobile, primarily achieved via Tailwind CSS.
-   - Styling heavily relies on global CSS variables in `src/app/globals.css` (with new theme variables) and Tailwind utility classes. `tailwind.config.ts` and `postcss.config.mjs` updated.
-   - Core reusable components are located in `src/components/` (see "Key Architectural Patterns & Components", including new `DataFetcherAndControlsWrapper` and `FeatureShowcaseItem`).
-   - `react-icons` library added and used for iconography.
-   - The `useSpotify` hook returns an `isReady` flag; **ensure this is true before making authenticated API calls.**
-   - Smooth transitions between views are a general goal.
-   - Code formatting enforced by Prettier (`prettier.config.js`).
+2. **Keyboard Navigation:**
+   - Focus management
+   - Shortcut support
+   - Navigation patterns
 
-2. Backend:
+3. **Visual Accessibility:**
+   - Color contrast
+   - Text alternatives
+   - Responsive design
 
-   - NextAuth.js handles Spotify API authentication securely (cookies updated to `sameSite='lax'`).
-   - Middleware (`src/middleware.ts`) provides route protection for authenticated pages and API routes, plus basic API rate limiting.
-   - Data caching significantly enhanced via `useLikedTracks` and `useLikedArtists` hooks, implementing progressive loading, TTL, and cache size limits to minimize API calls and improve performance.
-   - Error handling for API limits and failures is implemented in UI components (`ErrorDisplay`) and hooks.
-   - Puppeteer script added for generating page screenshots (`scripts/generate-screenshots.ts`).
+## Code Quality & Developer Experience
 
-3. Data Management:
-   - User preferences are not explicitly stored locally yet beyond session information.
-   - Sensitive Spotify tokens are managed by NextAuth.js and are not directly stored insecurely by custom client-side code. The `useSpotify` hook abstracts token access.
+### Tooling
+- Trunk for unified development workflow and code quality
+- Prettier for formatting
+- ESLint for linting
+- TypeScript for type safety
+- VS Code configuration
 
-USER EXPERIENCE:
+### Documentation
+- JSDoc comments
+- Component documentation
+- API documentation
 
-1. Design a clean, intuitive interface with Spotify-inspired aesthetics. This is largely achieved through the new global styles in `globals.css`, CSS variables, consistent core components, and updated hover effects.
-2. Show loading states (`LoadingSpinner`, and nuanced loading via `DataFetcherAndControlsWrapper`) during API calls and asynchronous operations.
-3. Provide clear feedback for all user actions (e.g., playlist creation success/failure, logout). `ErrorDisplay` component used for errors.
-4. Implement robust error handling with user-friendly messages.
+### Development Workflow
+- Feature branches
+- Code review process
+- Testing requirements
+- Deployment pipeline
 
-ADDITIONAL FEATURES (if time permits):
+## Configuration
 
-1. Audio previews directly in the application (target for `TrackItem.tsx`).
-2. Sharing capabilities for playlists (basic implementation with `SharePlaylistButton` on custom playlist generator; could be expanded).
-3. Listening trends and statistics visualization (enhanced on dashboard with `DataFetcherAndControlsWrapper`, improved caching, and data processing in `GenreTrendsVisualization` and `ListeningTrends`).
-4. Theme customization options (foundational CSS variables are in place, making this feasible).
-5. **Project tooling improved with Prettier for formatting and a screenshot generation script.**
+- `next.config.ts`: Image patterns and Flowbite plugin
+- `postcss.config.mjs`: Tailwind and Autoprefixer
+- `prettier.config.js`: Code formatting
+- `tsconfig.json`: TypeScript configuration
+- `.trunk/trunk.yaml`: Tool configuration
+- `flowbite-react.config.js`: UI component theme
+- `.vscode/`: Editor settings
+
+## SEO and Metadata
+
+- Page metadata
+- Structured data
+- Robots.txt
+- Sitemap generation
+- Social media cards
+
+## Implementation Notes
+
+- Each feature should be implemented incrementally
+- Follow Spotify design patterns for consistency
+- Prioritize core functionality before enhancements
+- Use established libraries for complex components
+- Test thoroughly with different user accounts and edge cases

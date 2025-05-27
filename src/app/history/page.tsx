@@ -13,6 +13,12 @@ import {
 	createPlaylist,
 	processAndGroupTracks,
 } from '@/lib/spotifyTrackUtils';
+import {
+	InternalTimeRange,
+	SpotifyTimeRange,
+	mapToInternalTimeRange,
+	timeRangeDisplays,
+} from '@/lib/timeRanges';
 import { format, parse } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';
@@ -27,7 +33,7 @@ export default function HistoryPage() {
 		isLoading: isLoadingTracksFromHook,
 		error: tracksError,
 		currentTimeRange,
-		setTimeRange,
+		setTimeRange: setInternalTimeRange,
 		isLoadingRange,
 	} = useLikedTracks();
 	const [monthlyTracks, setMonthlyTracks] = useState<MonthlyTracks[]>([]);
@@ -104,6 +110,15 @@ export default function HistoryPage() {
 		!tracksError &&
 		monthlyTracks.length === 0;
 
+	const setTimeRange = (range: SpotifyTimeRange | InternalTimeRange) => {
+		const internalRange =
+			typeof range === 'string' &&
+			['short_term', 'medium_term', 'long_term'].includes(range)
+				? mapToInternalTimeRange(range as SpotifyTimeRange)
+				: (range as InternalTimeRange);
+		setInternalTimeRange(internalRange);
+	};
+
 	if (tracksError) {
 		const errorMessage =
 			typeof tracksError === 'string'
@@ -136,6 +151,7 @@ export default function HistoryPage() {
 			currentTimeRange={currentTimeRange}
 			setTimeRange={setTimeRange}
 			isLoadingRange={isLoadingRange}
+			timeRangeDisplay={timeRangeDisplays.visualization}
 		>
 			{/* Structured Data */}
 			<Script

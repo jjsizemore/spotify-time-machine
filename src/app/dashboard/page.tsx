@@ -2,15 +2,14 @@
 
 import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
 import FeatureCard from '@/components/FeatureCard';
-import LoadingSpinner from '@/components/LoadingSpinner';
 import PageContainer from '@/components/PageContainer';
 import RecentlyPlayed from '@/components/RecentlyPlayed';
 import StatsTabs from '@/components/StatsTabs';
-import TimeRangeSelector from '@/components/TimeRangeSelector';
 import TopArtists from '@/components/TopArtists';
 import TopGenres from '@/components/TopGenres';
 import TopTracks from '@/components/TopTracks';
 import { TimeRange, useUserStats } from '@/hooks/useUserStats';
+import { SpotifyTimeRange, timeRangeDisplays } from '@/lib/timeRanges';
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';
 import React, { useState, useEffect, lazy, Suspense } from 'react';
@@ -23,20 +22,6 @@ const GenreTrendsVisualization = lazy(
 );
 
 type Tab = 'artists' | 'tracks' | 'recent' | 'genres';
-
-// Map Spotify API time ranges to our internal time ranges
-const mapTimeRange = (
-	range: TimeRange
-): 'PAST_YEAR' | 'PAST_TWO_YEARS' | 'ALL_TIME' => {
-	switch (range) {
-		case 'short_term':
-			return 'PAST_YEAR';
-		case 'medium_term':
-			return 'PAST_TWO_YEARS';
-		case 'long_term':
-			return 'ALL_TIME';
-	}
-};
 
 export default function Dashboard() {
 	const { status } = useSession();
@@ -112,21 +97,14 @@ export default function Dashboard() {
 					!recentlyPlayed?.length
 				}
 				emptyDataMessage="No stats available for the selected time period."
-				currentTimeRange={mapTimeRange(timeRange)}
-				setTimeRange={(range) =>
-					setTimeRange(
-						range === 'PAST_YEAR'
-							? 'short_term'
-							: range === 'PAST_TWO_YEARS'
-								? 'medium_term'
-								: 'long_term'
-					)
-				}
+				currentTimeRange={timeRange}
+				setTimeRange={(range) => setTimeRange(range as SpotifyTimeRange)}
 				isLoadingRange={{
 					PAST_YEAR: false,
 					PAST_TWO_YEARS: false,
 					ALL_TIME: false,
 				}}
+				timeRangeDisplay={timeRangeDisplays.spotify}
 			>
 				<div className="flex flex-col min-h-[400px]">
 					<StatsTabs activeTab={activeTab} onChange={setActiveTab} />

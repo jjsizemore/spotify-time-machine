@@ -2,6 +2,7 @@
 
 import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
 import { useLikedArtists } from '@/hooks/useLikedArtists';
+import { timeRangeDisplays } from '@/lib/timeRanges';
 import React, { useState, useEffect, useRef } from 'react';
 
 interface GenreTimeData {
@@ -254,6 +255,7 @@ export default function GenreTrendsVisualization() {
 			setTimeRange={setTimeRange}
 			isLoadingRange={isLoadingRange}
 			granularityControls={granularityControls}
+			timeRangeDisplay={timeRangeDisplays.visualization}
 		>
 			{hasPartialData && (
 				<div className="flex flex-col">

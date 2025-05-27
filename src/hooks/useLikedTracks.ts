@@ -1,4 +1,9 @@
 import { getCachedData, setCachedData } from '@/lib/cacheUtils';
+import {
+	InternalTimeRange,
+	SpotifyTimeRange,
+	mapToInternalTimeRange,
+} from '@/lib/timeRanges';
 import { useCallback, useEffect, useState } from 'react';
 import { useSpotify } from './useSpotify';
 
@@ -30,7 +35,7 @@ export interface CompactTrack {
 }
 
 // Time ranges supported
-export type TimeRange = 'PAST_YEAR' | 'PAST_TWO_YEARS' | 'ALL_TIME';
+export type TimeRange = InternalTimeRange | SpotifyTimeRange;
 
 // Multiple cache keys for progressive loading
 const CACHE_KEYS = {
@@ -76,10 +81,19 @@ const toCompactTrack = (track: SavedTrack): CompactTrack => ({
 	artist_ids: track.track.artists.map((a) => a.id),
 });
 
+// Helper to map any TimeRange to InternalTimeRange
+const toInternalRange = (range: TimeRange): InternalTimeRange => {
+	if (['PAST_YEAR', 'PAST_TWO_YEARS', 'ALL_TIME'].includes(range)) {
+		return range as InternalTimeRange;
+	}
+	return mapToInternalTimeRange(range as SpotifyTimeRange);
+};
+
 // Helper to check cache size and cleanup if needed
 const checkAndCleanupCache = (range: TimeRange) => {
-	const cacheKey = CACHE_KEYS[range];
-	const compactCacheKey = CACHE_KEYS[`COMPACT_${range}`];
+	const internalRange = toInternalRange(range);
+	const cacheKey = CACHE_KEYS[internalRange];
+	const compactCacheKey = CACHE_KEYS[`COMPACT_${internalRange}`];
 
 	const cachedData = getCachedData<SavedTrack[]>(cacheKey);
 	if (cachedData && cachedData.length > MAX_CACHE_SIZE) {
@@ -97,7 +111,9 @@ export function useLikedTracks() {
 	const { spotifyApi, isReady } = useSpotify();
 	const [tracks, setTracks] = useState<SavedTrack[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const [loadingState, setLoadingState] = useState<Record<TimeRange, boolean>>({
+	const [loadingState, setLoadingState] = useState<
+		Record<InternalTimeRange, boolean>
+	>({
 		PAST_YEAR: true,
 		PAST_TWO_YEARS: true,
 		ALL_TIME: true,
@@ -129,32 +145,38 @@ export function useLikedTracks() {
 		async (range: TimeRange): Promise<SavedTrack[]> => {
 			if (!isReady) return [];
 
+			const internalRange = toInternalRange(range);
+
 			// Check in-memory cache first
-			if (tracksCache[range]) {
+			if (tracksCache[internalRange]) {
 				console.log(`Using in-memory cache for ${range}`);
-				return tracksCache[range]!;
+				return tracksCache[internalRange]!;
 			}
 
 			// Then check persistent cache
-			const cacheKey = CACHE_KEYS[range];
+			const cacheKey = CACHE_KEYS[internalRange];
 			const cachedData = getCachedData<SavedTrack[]>(cacheKey);
 
 			if (cachedData) {
 				console.log(`Using persistent cache for ${range}`);
-				tracksCache[range] = cachedData;
+				tracksCache[internalRange] = cachedData;
 
 				// Update compact cache
 				const compactData = cachedData.map(toCompactTrack);
-				compactCache[range] = compactData;
-				setCachedData(CACHE_KEYS[`COMPACT_${range}`], compactData, CACHE_TTL);
+				compactCache[internalRange] = compactData;
+				setCachedData(
+					CACHE_KEYS[`COMPACT_${internalRange}`],
+					compactData,
+					CACHE_TTL
+				);
 
 				return cachedData;
 			}
 
 			// Check if fetch is already in progress
-			if (ongoingFetches[range]) {
+			if (ongoingFetches[internalRange]) {
 				console.log(`Waiting for ongoing fetch for ${range}`);
-				return ongoingFetches[range]!;
+				return ongoingFetches[internalRange]!;
 			}
 
 			// Prepare to fetch from API
@@ -201,7 +223,7 @@ export function useLikedTracks() {
 					} while (offset < total && fetchedItemsCount > 0 && !reachedCutoff);
 
 					// Cache the results
-					tracksCache[range] = allTracks;
+					tracksCache[internalRange] = allTracks;
 					setCachedData(cacheKey, allTracks, CACHE_TTL);
 					console.log(`Cached ${allTracks.length} tracks for ${range}`);
 
@@ -213,11 +235,11 @@ export function useLikedTracks() {
 					console.error(`Error fetching tracks for ${range}:`, err);
 					throw err;
 				} finally {
-					ongoingFetches[range] = null;
+					ongoingFetches[internalRange] = null;
 				}
 			})();
 
-			ongoingFetches[range] = fetchPromise;
+			ongoingFetches[internalRange] = fetchPromise;
 			return fetchPromise;
 		},
 		[isReady, spotifyApi, getCutoffDate]
@@ -225,22 +247,23 @@ export function useLikedTracks() {
 
 	// Get compact tracks for trends
 	const getCompactTracks = useCallback((range: TimeRange): CompactTrack[] => {
-		if (compactCache[range]) {
-			return compactCache[range]!;
+		const internalRange = toInternalRange(range);
+		if (compactCache[internalRange]) {
+			return compactCache[internalRange]!;
 		}
 
-		const compactCacheKey = CACHE_KEYS[`COMPACT_${range}`];
+		const compactCacheKey = CACHE_KEYS[`COMPACT_${internalRange}`];
 		const cachedData = getCachedData<CompactTrack[]>(compactCacheKey);
 
 		if (cachedData) {
-			compactCache[range] = cachedData;
+			compactCache[internalRange] = cachedData;
 			return cachedData;
 		}
 
 		// If no compact cache, convert from full tracks
-		if (tracksCache[range]) {
-			const compactData = tracksCache[range]!.map(toCompactTrack);
-			compactCache[range] = compactData;
+		if (tracksCache[internalRange]) {
+			const compactData = tracksCache[internalRange]!.map(toCompactTrack);
+			compactCache[internalRange] = compactData;
 			setCachedData(compactCacheKey, compactData, CACHE_TTL);
 			return compactData;
 		}
@@ -265,7 +288,10 @@ export function useLikedTracks() {
 				if (isMounted) {
 					setTracks(currentRangeTracks);
 					setIsLoading(false);
-					setLoadingState((prev) => ({ ...prev, [currentTimeRange]: false }));
+					setLoadingState((prev) => ({
+						...prev,
+						[toInternalRange(currentTimeRange)]: false,
+					}));
 				}
 
 				// Then load other ranges in the background, starting with the closest to current
@@ -333,10 +359,11 @@ export function useLikedTracks() {
 	// Handler for changing time range
 	const setTimeRange = useCallback((range: TimeRange) => {
 		setCurrentTimeRange(range);
+		const internalRange = toInternalRange(range);
 
 		// If we already have data for this range, update immediately
-		if (tracksCache[range]) {
-			setTracks(tracksCache[range]!);
+		if (tracksCache[internalRange]) {
+			setTracks(tracksCache[internalRange]!);
 			setIsLoading(false);
 		} else {
 			// Otherwise, show loading state

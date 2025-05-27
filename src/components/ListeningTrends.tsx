@@ -1,6 +1,7 @@
 'use client';
 
 import { CompactTrack, useLikedTracks } from '@/hooks/useLikedTracks';
+import { timeRangeDisplays } from '@/lib/timeRanges';
 import React, { useState, useEffect, useRef } from 'react';
 import DataFetcherAndControlsWrapper from './DataFetcherAndControlsWrapper';
 
@@ -183,6 +184,7 @@ export default function ListeningTrends() {
 			setTimeRange={setTimeRange}
 			isLoadingRange={isLoadingRange}
 			granularityControls={granularityControls}
+			timeRangeDisplay={timeRangeDisplays.visualization}
 		>
 			{hasData && (
 				<>
