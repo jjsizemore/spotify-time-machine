@@ -69,7 +69,7 @@ export default function PageContainer({
 
 	return (
 		<div className="min-h-screen bg-spotify-black">
-			<main className={`p-6 ${maxWidthClass} mx-auto ${className}`}>
+			<main className={`p-6 ${maxWidthClass} mx-auto ${className} pb-20`}>
 				{title && (
 					<h1 className="text-3xl font-bold text-spotify-light-gray mb-2">
 						{title}
