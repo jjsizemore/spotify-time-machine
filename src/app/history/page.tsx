@@ -15,7 +15,9 @@ import {
 } from '@/lib/spotifyTrackUtils';
 import { format, parse } from 'date-fns';
 import { useSession } from 'next-auth/react';
+import Script from 'next/script';
 import React, { useState, useEffect } from 'react';
+import { generateStructuredData } from './metadata';
 
 export default function HistoryPage() {
 	const { status } = useSession();
@@ -135,25 +137,38 @@ export default function HistoryPage() {
 			setTimeRange={setTimeRange}
 			isLoadingRange={isLoadingRange}
 		>
+			{/* Structured Data */}
+			<Script
+				id="structured-data"
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(generateStructuredData()),
+				}}
+			/>
+
 			{/* Display content only if not in initial overall loading and not empty */}
 			{!isOverallLoading && !isEmpty && (
-				<div className="space-y-6">
+				<main className="space-y-6" role="main">
 					{monthlyTracks.map((month) => (
-						<MonthlyTrackList
+						<article
 							key={month.month}
-							month={month.month}
-							tracks={month.tracks}
-							expanded={month.expanded}
-							onToggle={toggleMonth}
-							onCreatePlaylist={createMonthlyPlaylist}
-							renderTrackItem={renderTrackItem}
-						/>
+							aria-label={`Tracks from ${month.month}`}
+						>
+							<MonthlyTrackList
+								month={month.month}
+								tracks={month.tracks}
+								expanded={month.expanded}
+								onToggle={toggleMonth}
+								onCreatePlaylist={createMonthlyPlaylist}
+								renderTrackItem={renderTrackItem}
+							/>
+						</article>
 					))}
-				</div>
+				</main>
 			)}
 			{/* Show a loading text if tracks are still being fetched by the hook but not for the initial load handled by wrapper*/}
 			{isLoadingTracksFromHook && tracks.length > 0 && !isOverallLoading && (
-				<div className="mt-8 text-center text-spotify-light-gray">
+				<div className="mt-8 text-center text-spotify-light-gray" role="status">
 					Updating your listening history...
 				</div>
 			)}

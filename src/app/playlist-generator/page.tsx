@@ -12,7 +12,9 @@ import { GenreCount, extractTopGenres } from '@/lib/genreUtils';
 import { createPlaylist } from '@/lib/spotifyTrackUtils';
 import { format, isAfter, isBefore, parseISO } from 'date-fns';
 import { useSession } from 'next-auth/react';
+import Script from 'next/script';
 import React, { useState, useEffect } from 'react';
+import { generateStructuredData } from './metadata';
 
 export default function PlaylistGeneratorPage() {
 	const { status } = useSession();
@@ -38,6 +40,7 @@ export default function PlaylistGeneratorPage() {
 	const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
 	const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
 	const [loadingFilters, setLoadingFilters] = useState(false);
+	const [artistCache, setArtistCache] = useState<Record<string, Artist>>({});
 
 	// Fetch user's top artists and extract genres when the component mounts
 	useEffect(() => {
@@ -49,8 +52,29 @@ export default function PlaylistGeneratorPage() {
 
 				// Fetch user's top artists
 				const response = await spotifyApi.getMyTopArtists({ limit: 50 });
-				const artists = response.body.items as Artist[];
+				const artists = response.body.items.map((artist) => ({
+					id: artist.id,
+					name: artist.name,
+					images: artist.images.map((img) => ({
+						url: img.url,
+						height: img.height || 0,
+						width: img.width || 0,
+					})),
+					genres: artist.genres,
+					popularity: artist.popularity,
+					external_urls: artist.external_urls,
+				}));
 				setTopArtists(artists);
+
+				// Cache artist data
+				const artistCacheMap = artists.reduce(
+					(acc, artist) => {
+						acc[artist.id] = artist;
+						return acc;
+					},
+					{} as Record<string, Artist>
+				);
+				setArtistCache(artistCacheMap);
 
 				// Extract genres from top artists
 				const genres = extractTopGenres(artists, 20);
@@ -119,38 +143,70 @@ export default function PlaylistGeneratorPage() {
 				);
 			});
 
-			// 3. Apply genre filters if any are selected
+			// Apply genre filters if any are selected
 			if (selectedGenres.length > 0) {
-				// We need to get the full track details to access artist genres
-				const trackDetails = await Promise.all(
-					filteredTracks.map(async (track) => {
+				// Get unique artist IDs from filtered tracks
+				const artistIds = [
+					...new Set(
+						filteredTracks.flatMap((track) =>
+							track.track.artists.map((artist) => artist.id)
+						)
+					),
+				];
+
+				// Find artists not in cache
+				const uncachedArtistIds = artistIds.filter((id) => !artistCache[id]);
+
+				// Fetch uncached artists in batches of 50 (Spotify API limit)
+				if (uncachedArtistIds.length > 0) {
+					const batchSize = 50;
+					for (let i = 0; i < uncachedArtistIds.length; i += batchSize) {
+						const batch = uncachedArtistIds.slice(i, i + batchSize);
 						try {
-							const artistIds = track.track.artists.map((artist) => artist.id);
-							const artistsResponse = await spotifyApi.getArtists(artistIds);
-							return {
-								...track,
-								artists: artistsResponse.body.artists,
-							};
+							const artistsResponse = await spotifyApi.getArtists(batch);
+							const newArtists = artistsResponse.body.artists.map((artist) => ({
+								id: artist.id,
+								name: artist.name,
+								images: artist.images.map((img) => ({
+									url: img.url,
+									height: img.height || 0,
+									width: img.width || 0,
+								})),
+								genres: artist.genres,
+								popularity: artist.popularity,
+								external_urls: artist.external_urls,
+							}));
+
+							// Update cache with new artists
+							setArtistCache((prev) => ({
+								...prev,
+								...newArtists.reduce(
+									(acc, artist) => {
+										acc[artist.id] = artist;
+										return acc;
+									},
+									{} as Record<string, Artist>
+								),
+							}));
 						} catch (error) {
-							console.error('Error fetching artist details:', error);
-							return null;
+							console.error('Error fetching artist batch:', error);
 						}
-					})
-				);
+					}
+				}
 
-				// Filter tracks by genre
-				filteredTracks = filteredTracks.filter((_, index) => {
-					const trackWithArtists = trackDetails[index];
-					if (!trackWithArtists) return false;
-
-					const trackGenres = trackWithArtists.artists.flatMap(
-						(artist) => artist.genres || []
+				// Filter tracks by genre using cached artist data
+				filteredTracks = filteredTracks.filter((track) => {
+					const trackArtists = track.track.artists.map(
+						(artist) => artistCache[artist.id]
+					);
+					const trackGenres = trackArtists.flatMap(
+						(artist) => artist?.genres || []
 					);
 					return selectedGenres.some((genre) => trackGenres.includes(genre));
 				});
 			}
 
-			// 4. Apply artist filters if any are selected
+			// Apply artist filters if any are selected
 			if (selectedArtists.length > 0) {
 				filteredTracks = filteredTracks.filter((track) => {
 					return track.track.artists.some((artist) =>
@@ -236,12 +292,22 @@ export default function PlaylistGeneratorPage() {
 			isLoading={status === 'loading' || isLoadingTracks}
 			maxWidth="3xl"
 		>
-			<div className="bg-spotify-dark-gray rounded-lg p-4 md:p-6">
+			{/* Structured Data */}
+			<Script
+				id="structured-data"
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(generateStructuredData()),
+				}}
+			/>
+
+			<main className="bg-spotify-dark-gray rounded-lg p-4 md:p-6" role="main">
 				{!success ? (
 					<form
 						id="playlist-generator-form"
 						onSubmit={generatePlaylist}
 						className="space-y-4 md:space-y-6"
+						aria-label="Playlist generator form"
 					>
 						<FormField
 							id="playlistName"
@@ -249,8 +315,8 @@ export default function PlaylistGeneratorPage() {
 							type="text"
 							value={playlistName}
 							onChange={(e) => setPlaylistName(e.target.value)}
-							placeholder="My Awesome Playlist"
 							required
+							placeholder="Enter playlist name"
 						/>
 
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -262,6 +328,7 @@ export default function PlaylistGeneratorPage() {
 								onChange={(e) => setStartDate(e.target.value)}
 								required
 							/>
+
 							<FormField
 								id="endDate"
 								label="End Date"
@@ -272,88 +339,112 @@ export default function PlaylistGeneratorPage() {
 							/>
 						</div>
 
-						{/* Genre Filter */}
-						<FilterSelector
-							title="Filter by Genre (Optional)"
-							items={topGenres}
-							selectedItems={selectedGenres}
-							isLoading={loadingFilters}
-							getItemId={(genre) => genre.name}
-							getItemName={(genre) => genre.name}
-							onToggleItem={toggleGenre}
-							emptyMessage="No genres found"
-						/>
+						<section aria-label="Filter options" className="space-y-4">
+							<h2 className="text-lg font-semibold text-spotify-light-gray">
+								Filter Options
+							</h2>
 
-						{/* Artist Filter */}
-						<FilterSelector
-							title="Filter by Artist (Optional)"
-							items={topArtists}
-							selectedItems={selectedArtists}
-							isLoading={loadingFilters}
-							getItemId={(artist) => artist.id}
-							getItemName={(artist) => artist.name}
-							onToggleItem={toggleArtist}
-							emptyMessage="No artists found"
-							maxItems={20}
-						/>
-						<div className="flex justify-end">
-							<ActionButton
-								type="submit"
-								disabled={isLoading || isLoadingTracks}
-								variant="primary"
+							<div className="bg-spotify-black/50 p-4 rounded-md text-sm text-spotify-light-gray">
+								<p className="mb-2">
+									<strong>How filtering works:</strong>
+								</p>
+								<ul className="list-disc list-inside space-y-1">
+									<li>
+										When you select multiple filter types (genres AND artists
+										AND dates), tracks must match at least one criterion from
+										each selected filter type
+									</li>
+									<li>
+										Due to Spotify API limitations, genre filtering is based on
+										artist genres rather than individual track genres
+									</li>
+									<li>
+										A track will be included if any of its artists match any of
+										the selected genres
+									</li>
+									<li>
+										Some tracks may be included even if they don't perfectly
+										match your genre preferences
+									</li>
+									<li>
+										Some tracks may be excluded if their artists' genres don't
+										match exactly
+									</li>
+								</ul>
+							</div>
+
+							<FilterSelector
+								title="Genres"
+								items={topGenres}
+								selectedItems={selectedGenres}
+								getItemId={(genre) => genre.name}
+								getItemName={(genre) => genre.name}
+								onToggleItem={toggleGenre}
+								isLoading={loadingFilters}
+								emptyMessage="No genres found"
+							/>
+
+							<FilterSelector
+								title="Artists"
+								items={topArtists}
+								selectedItems={selectedArtists}
+								getItemId={(artist) => artist.id}
+								getItemName={(artist) => artist.name}
+								onToggleItem={toggleArtist}
+								isLoading={loadingFilters}
+								emptyMessage="No artists found"
+								maxItems={20}
+							/>
+						</section>
+
+						{error && (
+							<div
+								className="text-red-500 text-sm"
+								role="alert"
+								aria-live="polite"
 							>
-								{isLoading
-									? 'Generating...'
-									: isLoadingTracks
-										? 'Loading Tracks...'
-										: 'Generate Playlist'}
-							</ActionButton>
-						</div>
+								{error}
+							</div>
+						)}
+
+						<ActionButton type="submit" disabled={isLoading} className="w-full">
+							{isLoading ? 'Generating...' : 'Generate Playlist'}
+						</ActionButton>
 					</form>
 				) : (
-					<div className="text-center space-y-6 py-4">
-						<div className="bg-spotify-green/20 border border-spotify-green text-spotify-green p-4 rounded-md">
-							<h3 className="font-bold text-xl mb-2">
-								Playlist Created Successfully!
-							</h3>
-							<p>Added {trackCount} tracks from your saved songs.</p>
-						</div>
-
-						<div className="flex flex-col md:flex-row items-center justify-center gap-4">
-							<ActionButton
-								onClick={() => window.open(playlistUrl, '_blank')}
-								variant="primary"
-							>
-								Open Playlist in Spotify
-							</ActionButton>
+					<article
+						className="text-center space-y-4"
+						aria-label="Success message"
+					>
+						<h2 className="text-2xl font-bold text-spotify-green">
+							Playlist Created Successfully!
+						</h2>
+						<p className="text-spotify-light-gray">
+							Your playlist "{playlistName}" has been created with {trackCount}{' '}
+							tracks.
+						</p>
+						<div className="flex flex-col sm:flex-row gap-4 justify-center">
 							<SharePlaylistButton
 								playlistUrl={playlistUrl}
 								playlistName={playlistName}
 							/>
-						</div>
-
-						<div className="mt-6">
 							<ActionButton
 								onClick={() => {
 									setSuccess(false);
-									setPlaylistUrl('');
 									setPlaylistName('');
-									setTrackCount(0);
+									setStartDate('');
+									setEndDate('');
+									setSelectedGenres([]);
+									setSelectedArtists([]);
 								}}
 								variant="secondary"
 							>
-								Generate Another Playlist
+								Create Another Playlist
 							</ActionButton>
 						</div>
-					</div>
+					</article>
 				)}
-
-				{(error || tracksError) && (
-					<div className="bg-spotify-red text-spotify-white p-4 rounded-lg mt-4">
-						<p>{error || tracksError}</p>
-					</div>
-				)}
-			</div>
+			</main>
 		</PageContainer>
 	);
 }
