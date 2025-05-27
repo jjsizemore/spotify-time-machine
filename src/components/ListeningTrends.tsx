@@ -24,6 +24,9 @@ export default function ListeningTrends() {
 	const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
 	const [maxCount, setMaxCount] = useState(0);
 	const [processingData, setProcessingData] = useState(false);
+	const [granularity, setGranularity] = useState<'monthly' | 'quarterly'>(
+		'monthly'
+	);
 
 	const isMountedRef = useRef(true);
 	const processingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,7 +61,7 @@ export default function ListeningTrends() {
 
 			// Use compact tracks for trends
 			const compactTracks: CompactTrack[] = getCompactTracks(currentTimeRange);
-			let currentTracksByMonth: Record<string, number> = {};
+			let currentTracksByPeriod: Record<string, number> = {};
 			let currentMaxVal = 0;
 
 			const processChunk = (startIndex: number) => {
@@ -71,18 +74,25 @@ export default function ListeningTrends() {
 				for (let i = startIndex; i < endIndex; i++) {
 					const item = compactTracks[i];
 					const date = new Date(item.added_at);
-					const month = (date.getMonth() + 1).toString().padStart(2, '0');
-					const monthYear = `${date.getFullYear()}-${month}`;
+					let periodKey: string;
 
-					if (!currentTracksByMonth[monthYear]) {
-						currentTracksByMonth[monthYear] = 0;
+					if (granularity === 'monthly') {
+						const month = (date.getMonth() + 1).toString().padStart(2, '0');
+						periodKey = `${date.getFullYear()}-${month}`;
+					} else {
+						const quarter = Math.floor(date.getMonth() / 3) + 1;
+						periodKey = `${date.getFullYear()}-Q${quarter}`;
 					}
-					currentTracksByMonth[monthYear]++;
+
+					if (!currentTracksByPeriod[periodKey]) {
+						currentTracksByPeriod[periodKey] = 0;
+					}
+					currentTracksByPeriod[periodKey]++;
 				}
 
 				// Convert to array and sort chronologically for current state
 				const monthlyDataArray: MonthlyData[] = Object.entries(
-					currentTracksByMonth
+					currentTracksByPeriod
 				)
 					.map(([month, count]) => ({
 						month,
@@ -115,17 +125,49 @@ export default function ListeningTrends() {
 			// Start processing immediately
 			processChunk(0);
 		}
-	}, [tracks, isLoading, currentTimeRange, getCompactTracks]);
+	}, [tracks, isLoading, currentTimeRange, getCompactTracks, granularity]);
 
 	// Determine UI states
 	const isOverallLoading = isLoading && tracks.length === 0;
 	const isIncrementallyProcessing = processingData && !isOverallLoading;
 	const hasData = monthlyData.length > 0;
 
-	const formatMonthLabel = (monthStr: string) => {
-		const [year, month] = monthStr.split('-');
+	const formatPeriodLabel = (periodStr: string) => {
+		if (periodStr.includes('Q')) {
+			const [year, quarter] = periodStr.split('-Q');
+			return `Q${quarter} ${year}`;
+		}
+		const [year, month] = periodStr.split('-');
 		return `${new Date(parseInt(year), parseInt(month) - 1).toLocaleString('default', { month: 'short' })} ${year}`;
 	};
+
+	const granularityControls = (
+		<div className="flex items-center space-x-2 text-sm self-end sm:self-center">
+			<span className="text-spotify-light-gray text-xs">Granularity:</span>
+			<button
+				onClick={() => setGranularity('monthly')}
+				disabled={isLoading || processingData}
+				className={`px-2 py-0.5 rounded-full text-xs ${
+					granularity === 'monthly'
+						? 'bg-spotify-green text-black'
+						: 'bg-spotify-light-black text-spotify-light-gray'
+				}${isLoading || processingData ? ' opacity-50 cursor-not-allowed' : ''}`}
+			>
+				Monthly
+			</button>
+			<button
+				onClick={() => setGranularity('quarterly')}
+				disabled={isLoading || processingData}
+				className={`px-2 py-0.5 rounded-full text-xs ${
+					granularity === 'quarterly'
+						? 'bg-spotify-green text-black'
+						: 'bg-spotify-light-black text-spotify-light-gray'
+				}${isLoading || processingData ? ' opacity-50 cursor-not-allowed' : ''}`}
+			>
+				Quarterly
+			</button>
+		</div>
+	);
 
 	return (
 		<DataFetcherAndControlsWrapper
@@ -140,21 +182,24 @@ export default function ListeningTrends() {
 			currentTimeRange={currentTimeRange}
 			setTimeRange={setTimeRange}
 			isLoadingRange={isLoadingRange}
+			granularityControls={granularityControls}
 		>
 			{hasData && (
 				<>
 					{/* Chart Content */}
-					<div className="flex h-64">
+					<div className="flex h-96">
 						<div className="flex items-center justify-center w-10 text-xs text-spotify-light-gray shrink-0 mr-2">
 							<span className="transform -rotate-90 whitespace-nowrap">
-								Tracks / Month
+								Tracks / {granularity === 'monthly' ? 'Month' : 'Quarter'}
 							</span>
 						</div>
-						<div className="flex-grow h-full flex items-end space-x-2 overflow-x-auto pb-4">
-							{monthlyData.map((data) => (
+						<div className="flex-grow flex items-end space-x-2 overflow-x-auto pb-8 pt-4">
+							{monthlyData.map((data, idx) => (
 								<div
 									key={data.month}
-									className="flex flex-col items-center min-w-[50px] h-full"
+									className={`flex flex-col items-center min-w-[50px] h-full ${
+										idx === 0 ? 'pl-8' : ''
+									}`}
 								>
 									<div className="flex flex-col justify-end h-full w-full items-center">
 										<div
@@ -165,8 +210,8 @@ export default function ListeningTrends() {
 											}}
 										/>
 									</div>
-									<div className="text-xs text-spotify-light-gray mt-1 transform -rotate-45 origin-top-left whitespace-nowrap">
-										{formatMonthLabel(data.month)}
+									<div className="text-xs text-spotify-light-gray mt-2 pb-6 transform -rotate-45 origin-top-right -translate-x-1/2 whitespace-nowrap">
+										{formatPeriodLabel(data.month)}
 									</div>
 								</div>
 							))}

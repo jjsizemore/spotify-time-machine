@@ -217,21 +217,23 @@ export default function GenreTrendsVisualization() {
 			<span className="text-spotify-light-gray text-xs">Granularity:</span>
 			<button
 				onClick={() => setGranularity('quarterly')}
+				disabled={isLoading || isLoadingArtists || processingData}
 				className={`px-2 py-0.5 rounded-full text-xs ${
 					granularity === 'quarterly'
 						? 'bg-spotify-green text-black'
 						: 'bg-spotify-light-black text-spotify-light-gray'
-				}`}
+				}${isLoading || isLoadingArtists || processingData ? ' opacity-50 cursor-not-allowed' : ''}`}
 			>
 				Quarterly
 			</button>
 			<button
 				onClick={() => setGranularity('yearly')}
+				disabled={isLoading || isLoadingArtists || processingData}
 				className={`px-2 py-0.5 rounded-full text-xs ${
 					granularity === 'yearly'
 						? 'bg-spotify-green text-black'
 						: 'bg-spotify-light-black text-spotify-light-gray'
-				}`}
+				}${isLoading || isLoadingArtists || processingData ? ' opacity-50 cursor-not-allowed' : ''}`}
 			>
 				Yearly
 			</button>
