@@ -37,8 +37,8 @@ export default function FilterSelector<T>({
 					<LoadingSpinner size="sm" />
 				</div>
 			) : (
-				<div className="w-full bg-spotify-black rounded-md p-2">
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 max-h-50 py-1 overflow-y-auto content-start">
+				<div className="w-full bg-spotify-black rounded-xl">
+					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 min-h-[100px] max-h-[50vh] overflow-y-auto content-start p-4">
 						{displayItems.map((item) => {
 							const id = getItemId(item);
 							const name = getItemName(item);
