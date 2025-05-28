@@ -80,16 +80,16 @@ export default function Home() {
 
 				<header className="flex flex-col items-center justify-center mb-12">
 					<span className="text-4xl md:text-5xl font-extrabold text-spotify-green mb-4 text-center">
-						<div className="flex items-center justify-center order-1 md:order-2">
-							<h1 className="mr-4">Jermaine's</h1>
+						<div className="flex flex-col md:flex-row items-center justify-center">
+							<h1 className="mb-4 md:mb-0 md:mr-4">Jermaine's</h1>
 							<Image
 								src="/spotify-icon.png"
 								alt="Spotify Logo"
 								width={128}
 								height={128}
-								className="drop-shadow-lg mx-4"
+								className="drop-shadow-lg my-4 md:my-0 md:mx-4"
 							/>
-							<h1 className="ml-4">Time Machine</h1>
+							<h1 className="mt-4 md:mt-0 md:ml-4">Time Machine</h1>
 						</div>
 					</span>
 					<p className="text-lg md:text-xl text-center mb-8 text-spotify-light-gray">

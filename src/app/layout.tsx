@@ -4,6 +4,8 @@ import React from 'react';
 import { NextAuthProvider } from '../components/providers/NextAuthProvider';
 import './spotify.css';
 import { Analytics } from '@vercel/analytics/react';
+import { ThemeModeScript } from 'flowbite-react';
+
 // Root layout metadata (must be in server component)
 export const metadata = {
 	title: "Jermaine's Spotify Time Machine",
@@ -55,6 +57,7 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<head>
+				<ThemeModeScript />
 				<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 			</head>
 			<body className="bg-spotify-black text-spotify-light-gray font-sans min-h-screen flex flex-col">

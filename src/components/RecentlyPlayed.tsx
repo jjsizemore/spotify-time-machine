@@ -1,8 +1,8 @@
 import { PlayHistory } from '@/hooks/useUserStats';
-import Image from 'next/image';
 import React from 'react';
 import ErrorDisplay from './ErrorDisplay';
 import LoadingSpinner from './LoadingSpinner';
+import TrackItem from './TrackItem';
 
 interface RecentlyPlayedProps {
 	tracks: PlayHistory[];
@@ -58,30 +58,17 @@ export default function RecentlyPlayed({
 	return (
 		<div className="space-y-3">
 			{tracks.map((item, index) => (
-				<div
+				<TrackItem
 					key={`${item.track.id}-${index}`}
-					className="flex items-center p-2 rounded-md hover:bg-spotify-medium-gray/20 transition cursor-pointer"
-				>
-					<div className="w-12 h-12 shrink-0 relative mr-3 rounded overflow-hidden">
-						<Image
-							src={item.track.album.images[0]?.url || '/default-album.png'}
-							alt={item.track.album.name}
-							fill
-							className="object-cover"
-						/>
-					</div>
-					<div className="flex-grow min-w-0">
-						<h3 className="font-medium text-white truncate">
-							{item.track.name}
-						</h3>
-						<p className="text-xs text-spotify-light-gray truncate">
-							{item.track.artists.map((artist) => artist.name).join(', ')}
-						</p>
-					</div>
-					<div className="text-xs text-spotify-light-gray shrink-0 ml-2">
-						{formatPlayTime(item.played_at)}
-					</div>
-				</div>
+					track={item.track}
+					rightContent={formatPlayTime(item.played_at)}
+					onClick={() =>
+						window.open(
+							`https://open.spotify.com/track/${item.track.id}`,
+							'_blank'
+						)
+					}
+				/>
 			))}
 		</div>
 	);

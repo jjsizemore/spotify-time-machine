@@ -4,6 +4,7 @@ import { CompactTrack, useLikedTracks } from '@/hooks/useLikedTracks';
 import { timeRangeDisplays } from '@/lib/timeRanges';
 import React, { useState, useEffect, useRef } from 'react';
 import DataFetcherAndControlsWrapper from './DataFetcherAndControlsWrapper';
+import GranularitySelector, { GranularityOption } from './GranularitySelector';
 
 interface MonthlyData {
 	month: string;
@@ -27,6 +28,9 @@ export default function ListeningTrends() {
 	const [processingData, setProcessingData] = useState(false);
 	const [granularity, setGranularity] = useState<'monthly' | 'quarterly'>(
 		'monthly'
+	);
+	const [hoveredGranularity, setHoveredGranularity] = useState<string | null>(
+		null
 	);
 
 	const isMountedRef = useRef(true);
@@ -142,32 +146,20 @@ export default function ListeningTrends() {
 		return `${new Date(parseInt(year), parseInt(month) - 1).toLocaleString('default', { month: 'short' })} ${year}`;
 	};
 
+	const granularityOptions: GranularityOption[] = [
+		{ value: 'monthly', label: 'Monthly' },
+		{ value: 'quarterly', label: 'Quarterly' },
+	];
+
 	const granularityControls = (
-		<div className="flex items-center space-x-2 text-sm self-end sm:self-center">
-			<span className="text-spotify-light-gray text-xs">Granularity:</span>
-			<button
-				onClick={() => setGranularity('monthly')}
-				disabled={isLoading || processingData}
-				className={`px-2 py-0.5 rounded-full text-xs ${
-					granularity === 'monthly'
-						? 'bg-spotify-green text-black'
-						: 'bg-spotify-light-black text-spotify-light-gray'
-				}${isLoading || processingData ? ' opacity-50 cursor-not-allowed' : ''}`}
-			>
-				Monthly
-			</button>
-			<button
-				onClick={() => setGranularity('quarterly')}
-				disabled={isLoading || processingData}
-				className={`px-2 py-0.5 rounded-full text-xs ${
-					granularity === 'quarterly'
-						? 'bg-spotify-green text-black'
-						: 'bg-spotify-light-black text-spotify-light-gray'
-				}${isLoading || processingData ? ' opacity-50 cursor-not-allowed' : ''}`}
-			>
-				Quarterly
-			</button>
-		</div>
+		<GranularitySelector
+			options={granularityOptions}
+			selectedValue={granularity}
+			hoveredValue={hoveredGranularity}
+			isDisabled={isLoading || processingData}
+			onSelect={(value) => setGranularity(value as 'monthly' | 'quarterly')}
+			onHover={setHoveredGranularity}
+		/>
 	);
 
 	return (
@@ -202,6 +194,7 @@ export default function ListeningTrends() {
 									className={`flex flex-col items-center min-w-[50px] h-full ${
 										idx === 0 ? 'pl-8' : ''
 									}`}
+									title={`${formatPeriodLabel(data.month)}: ${data.count} tracks`}
 								>
 									<div className="flex flex-col justify-end h-full w-full items-center">
 										<div

@@ -1,4 +1,6 @@
-import React from 'react';
+import { getTextStyle } from '@/lib/styleUtils';
+import React, { useState } from 'react';
+import TrackItem from './TrackItem';
 
 interface Track {
 	id: string;
@@ -38,19 +40,27 @@ export default function MonthlyTrackList({
 	onCreatePlaylist,
 	renderTrackItem,
 }: MonthlyTrackListProps) {
+	const [hovered, setHovered] = useState<string | null>(null);
+
 	return (
 		<div className="bg-spotify-dark-gray rounded-lg overflow-hidden">
 			{/* Month Header */}
 			<div
 				className="bg-spotify-medium-gray py-4 px-6 flex justify-between items-center cursor-pointer"
+				style={getTextStyle(hovered === month)}
+				onMouseOver={() => setHovered(month)}
+				onMouseOut={() => setHovered(null)}
 				onClick={() => onToggle(month)}
 			>
-				<h2 className="text-xl font-bold text-spotify-white">
+				<h2
+					className="text-xl font-bold text-spotify-white"
+					style={getTextStyle(hovered === month)}
+				>
 					{month} • {tracks.length} tracks
 				</h2>
 				<div className="flex gap-4 items-center">
 					<button
-						className="bg-spotify-green text-spotify-black font-medium px-4 py-2 rounded-full hover:bg-spotify-green/90 transition text-sm"
+						className="bg-spotify-green text-spotify-black font-medium px-4 py-2 rounded-full hover:bg-spotify-green/90 transition text-sm cursor-pointer"
 						onClick={(e) => {
 							e.stopPropagation();
 							onCreatePlaylist(month, tracks);
@@ -58,7 +68,12 @@ export default function MonthlyTrackList({
 					>
 						Create Playlist
 					</button>
-					<span className="text-white text-2xl">{expanded ? '−' : '+'}</span>
+					<span
+						className="text-white text-2xl"
+						style={getTextStyle(hovered === month)}
+					>
+						{expanded ? '−' : '+'}
+					</span>
 				</div>
 			</div>
 
@@ -66,7 +81,7 @@ export default function MonthlyTrackList({
 			{expanded && (
 				<div className="px-6 py-4">
 					<div className="space-y-3">
-						{tracks.map((track) => renderTrackItem(track))}
+						{tracks.map((savedTrack) => renderTrackItem(savedTrack))}
 					</div>
 				</div>
 			)}

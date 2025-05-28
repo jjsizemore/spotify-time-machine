@@ -1,5 +1,6 @@
 'use client';
 
+import { getTextStyle, getTimeRangeButtonTextStyle } from '@/lib/styleUtils';
 import {
 	InternalTimeRange,
 	SpotifyTimeRange,
@@ -77,6 +78,8 @@ export default function DataFetcherAndControlsWrapper({
 			? mapToSpotifyTimeRange(currentTimeRange as InternalTimeRange)
 			: (currentTimeRange as SpotifyTimeRange);
 
+	const [hovered, setHovered] = useState<string | null>(null);
+
 	return (
 		<VisualizationContainer
 			title={title}
@@ -109,11 +112,17 @@ export default function DataFetcherAndControlsWrapper({
 					{displayConfig.map(({ value, label }) => (
 						<button
 							key={value}
+							style={getTimeRangeButtonTextStyle(
+								hovered === value,
+								currentSpotifyRange === value
+							)}
+							onMouseOver={() => setHovered(value)}
+							onMouseOut={() => setHovered(null)}
 							onClick={() => handleTimeRangeClick(value)}
 							className={`px-3 py-1 rounded-full transition font-medium ${
 								currentSpotifyRange === value
-									? 'bg-spotify-green text-black'
-									: 'bg-spotify-light-black text-spotify-light-gray hover:bg-spotify-medium-gray/50'
+									? 'bg-spotify-green'
+									: 'bg-spotify-light-black hover:bg-spotify-medium-gray/50'
 							}${
 								isLoadingRange[mapToInternalTimeRange(value)]
 									? ' opacity-60 grayscale cursor-not-allowed'

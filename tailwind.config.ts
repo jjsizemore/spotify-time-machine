@@ -29,11 +29,5 @@ module.exports = {
 			},
 		},
 	},
-	plugins: {
-		flowbite: {
-			theme: {
-				flowbite: {},
-			},
-		},
-	},
+	plugins: [require('flowbite/plugin')],
 };

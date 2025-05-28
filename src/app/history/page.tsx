@@ -105,6 +105,12 @@ export default function HistoryPage() {
 				track={track.track}
 				addedAt={track.added_at}
 				showAddedDate={true}
+				onClick={() =>
+					window.open(
+						`https://open.spotify.com/track/${track.track.id}`,
+						'_blank'
+					)
+				}
 			/>
 		);
 	};

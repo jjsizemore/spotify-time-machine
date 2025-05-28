@@ -1,6 +1,9 @@
 'use client';
 
 import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
+import GranularitySelector, {
+	GranularityOption,
+} from '@/components/GranularitySelector';
 import { useLikedArtists } from '@/hooks/useLikedArtists';
 import { timeRangeDisplays } from '@/lib/timeRanges';
 import React, { useState, useEffect, useRef } from 'react';
@@ -31,6 +34,9 @@ export default function GenreTrendsVisualization() {
 	const [processingData, setProcessingData] = useState(false);
 	const [granularity, setGranularity] = useState<'quarterly' | 'yearly'>(
 		'quarterly'
+	);
+	const [hoveredGranularity, setHoveredGranularity] = useState<string | null>(
+		null
 	);
 	const isMountedRef = useRef(true);
 	const processingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -213,32 +219,20 @@ export default function GenreTrendsVisualization() {
 	const hasPartialData =
 		!isOverallLoading && genreData.length > 0 && topGenres.length > 0;
 
+	const granularityOptions: GranularityOption[] = [
+		{ value: 'quarterly', label: 'Quarterly' },
+		{ value: 'yearly', label: 'Yearly' },
+	];
+
 	const granularityControls = currentTimeRange === 'ALL_TIME' && (
-		<div className="flex items-center space-x-2 text-sm self-end sm:self-center">
-			<span className="text-spotify-light-gray text-xs">Granularity:</span>
-			<button
-				onClick={() => setGranularity('quarterly')}
-				disabled={isLoading || isLoadingArtists || processingData}
-				className={`px-2 py-0.5 rounded-full text-xs ${
-					granularity === 'quarterly'
-						? 'bg-spotify-green text-black'
-						: 'bg-spotify-light-black text-spotify-light-gray'
-				}${isLoading || isLoadingArtists || processingData ? ' opacity-50 cursor-not-allowed' : ''}`}
-			>
-				Quarterly
-			</button>
-			<button
-				onClick={() => setGranularity('yearly')}
-				disabled={isLoading || isLoadingArtists || processingData}
-				className={`px-2 py-0.5 rounded-full text-xs ${
-					granularity === 'yearly'
-						? 'bg-spotify-green text-black'
-						: 'bg-spotify-light-black text-spotify-light-gray'
-				}${isLoading || isLoadingArtists || processingData ? ' opacity-50 cursor-not-allowed' : ''}`}
-			>
-				Yearly
-			</button>
-		</div>
+		<GranularitySelector
+			options={granularityOptions}
+			selectedValue={granularity}
+			hoveredValue={hoveredGranularity}
+			isDisabled={isLoading || isLoadingArtists || processingData}
+			onSelect={(value) => setGranularity(value as 'quarterly' | 'yearly')}
+			onHover={setHoveredGranularity}
+		/>
 	);
 
 	return (
@@ -304,7 +298,7 @@ export default function GenreTrendsVisualization() {
 															key={genre}
 															className={`h-full ${colorPalette[index % colorPalette.length]}`}
 															style={{ width: `${percentage}%` }}
-															title={`${genre}: ${Math.round(percentage)}%`}
+															title={`${genre.toUpperCase()}: ${Math.round(percentage)}%`}
 														></div>
 													) : null;
 												})}

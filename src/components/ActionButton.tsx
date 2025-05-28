@@ -18,7 +18,7 @@ export default function ActionButton({
 	variant = 'primary',
 }: ActionButtonProps) {
 	const baseStyles =
-		'px-6 py-3 rounded-full font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed';
+		'px-6 py-3 rounded-full font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
 
 	const variantStyles =
 		variant === 'primary'

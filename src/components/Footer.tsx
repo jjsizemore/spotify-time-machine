@@ -1,18 +1,11 @@
 'use client';
 
+import { baseIconStyle, getIconStyle } from '@/lib/styleUtils';
+import React, { useState } from 'react';
 import { IconType } from 'react-icons';
 import { FiGithub, FiHome, FiLinkedin, FiMail } from 'react-icons/fi';
 
 export default function Footer() {
-	const iconStyle = {
-		color: '#b3b3b3', // spotify-light-gray
-		transition: 'color 0.3s',
-	};
-
-	const iconHoverStyle = {
-		color: '#1db954', // spotify-green
-	};
-
 	const socialIcons: { icon: IconType; href: string; label: string }[] = [
 		{
 			icon: FiHome,
@@ -36,6 +29,8 @@ export default function Footer() {
 		},
 	];
 
+	const [hovered, setHovered] = useState<string | null>(null);
+
 	return (
 		<footer className="bg-spotify-dark-gray py-8 mt-auto border-t border-spotify-medium-gray">
 			<div className="container mx-auto px-4">
@@ -51,13 +46,9 @@ export default function Footer() {
 								}
 								className="transition-colors"
 								aria-label={label}
-								style={iconStyle}
-								onMouseOver={(e) =>
-									Object.assign(e.currentTarget.style, iconHoverStyle)
-								}
-								onMouseOut={(e) =>
-									Object.assign(e.currentTarget.style, iconStyle)
-								}
+								style={getIconStyle(hovered === label)}
+								onMouseOver={() => setHovered(label)}
+								onMouseOut={() => setHovered(null)}
 							>
 								<Icon size={24} />
 							</a>

@@ -1,8 +1,8 @@
 import { Track } from '@/hooks/useUserStats';
-import Image from 'next/image';
 import React from 'react';
 import ErrorDisplay from './ErrorDisplay';
 import LoadingSpinner from './LoadingSpinner';
+import TrackItem from './TrackItem';
 
 interface TopTracksProps {
 	tracks: Track[];
@@ -47,31 +47,14 @@ export default function TopTracks({
 	return (
 		<div className="space-y-3">
 			{tracks.map((track) => (
-				<a
+				<TrackItem
 					key={track.id}
-					href={`https://open.spotify.com/track/${track.id}`}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="flex items-center p-2 rounded-md hover:bg-spotify-medium-gray/20 transition cursor-pointer"
-				>
-					<div className="w-12 h-12 shrink-0 relative mr-3 rounded overflow-hidden">
-						<Image
-							src={track.album.images[0]?.url || '/default-album.png'}
-							alt={track.album.name}
-							fill
-							className="object-cover"
-						/>
-					</div>
-					<div className="flex-grow min-w-0">
-						<h3 className="font-medium text-white truncate">{track.name}</h3>
-						<p className="text-xs text-spotify-light-gray truncate">
-							{track.artists.map((artist) => artist.name).join(', ')}
-						</p>
-					</div>
-					<div className="text-xs text-spotify-light-gray shrink-0 ml-2">
-						{formatDuration(track.duration_ms)}
-					</div>
-				</a>
+					track={track}
+					rightContent={formatDuration(track.duration_ms)}
+					onClick={() =>
+						window.open(`https://open.spotify.com/track/${track.id}`, '_blank')
+					}
+				/>
 			))}
 		</div>
 	);
