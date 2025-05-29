@@ -1,4 +1,3 @@
-import { createHash, randomBytes } from 'crypto';
 import { refreshAccessToken, scopes } from '@/lib/spotify';
 import NextAuth from 'next-auth';
 import SpotifyProvider from 'next-auth/providers/spotify';

@@ -16,7 +16,16 @@ function SignInContent() {
 
 	useEffect(() => {
 		if (error) {
-			console.error('Sign-in error:', error);
+			const signInProcessState = sessionStorage.getItem(
+				SIGN_IN_PROCESS_STARTED_KEY
+			);
+			console.error('Sign-in error details:', {
+				error,
+				callbackUrl,
+				signInProcessState,
+				timestamp: new Date().toISOString(),
+				url: window.location.href,
+			});
 			sessionStorage.removeItem(SIGN_IN_PROCESS_STARTED_KEY);
 			const timer = setTimeout(() => {
 				router.replace('/');

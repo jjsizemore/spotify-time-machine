@@ -24,7 +24,7 @@ export const metadata = {
 				url: '/previews/dashboard-preview.jpeg',
 				width: 1200,
 				height: 630,
-				alt: 'Spotify Time Machine Dashboard Preview',
+				alt: "Jermaine's Spotify Time Machine Dashboard Preview",
 			},
 		],
 	},
