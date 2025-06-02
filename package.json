@@ -19,7 +19,7 @@
 	"dependencies": {
 		"@auth/prisma-adapter": "^2.9.1",
 		"@prisma/client": "^6.8.2",
-		"@tailwindcss/cli": "^4.1.7",
+		"@tailwindcss/cli": "^4.1.8",
 		"@tailwindcss/postcss": "^4.1.7",
 		"@tanstack/react-query": "^5.77.2",
 		"@vercel/analytics": "^1.5.0",
@@ -27,7 +27,7 @@
 		"date-fns": "^4.1.0",
 		"flowbite": "^3.1.2",
 		"flowbite-react": "^0.11.7",
-		"next": "15.3.2",
+		"next": "15.3.3",
 		"next-auth": "^4.24.11",
 		"react": "19.1.0",
 		"react-dom": "19.1.0",
