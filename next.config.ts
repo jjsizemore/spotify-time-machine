@@ -1,7 +1,7 @@
-const withFlowbiteReact = require('flowbite-react/plugin/nextjs');
+import withFlowbiteReact from 'flowbite-react/plugin/nextjs';
+import type { NextConfig } from 'next';
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
 	allowedDevOrigins: ['127.0.0.1'],
 	reactStrictMode: true,
 	images: {
@@ -28,4 +28,4 @@ const nextConfig = {
 	},
 };
 
-module.exports = withFlowbiteReact(nextConfig);
+export default withFlowbiteReact(nextConfig);
