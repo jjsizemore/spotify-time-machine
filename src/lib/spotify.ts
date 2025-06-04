@@ -18,16 +18,51 @@ export const scopes = [
 
 export const refreshAccessToken = async (refreshToken: string) => {
 	try {
-		spotifyApi.setRefreshToken(refreshToken);
-		const { body } = await spotifyApi.refreshAccessToken();
+		console.log('🔄 Attempting to refresh Spotify access token...');
+
+		// Use direct fetch instead of spotify-web-api-node for better control
+		const url = 'https://accounts.spotify.com/api/token';
+
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				Authorization: `Basic ${Buffer.from(
+					`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
+				).toString('base64')}`,
+			},
+			body: new URLSearchParams({
+				grant_type: 'refresh_token',
+				refresh_token: refreshToken,
+			}),
+			// Critical: Add no-cache to prevent stale responses
+			cache: 'no-cache',
+		});
+
+		if (!response.ok) {
+			const errorData = await response.text();
+			console.error('❌ Spotify token refresh failed:', {
+				status: response.status,
+				statusText: response.statusText,
+				error: errorData,
+			});
+			throw new Error(
+				`Token refresh failed: ${response.status} ${response.statusText} - ${errorData}`
+			);
+		}
+
+		const body = await response.json();
+
+		console.log('✅ Successfully refreshed Spotify access token');
 
 		return {
 			accessToken: body.access_token,
-			refreshToken: refreshToken, // If the Spotify API doesn't return a new refresh token, use the old one
+			// Important: Use new refresh token if provided, otherwise fall back to old one
+			refreshToken: body.refresh_token ?? refreshToken,
 			expiresAt: Math.floor(Date.now() / 1000) + body.expires_in,
 		};
 	} catch (error) {
-		console.error('Error refreshing access token:', error);
+		console.error('❌ Error refreshing access token:', error);
 		throw error;
 	}
 };

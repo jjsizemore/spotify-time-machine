@@ -35,7 +35,7 @@ export interface PlayHistory {
 }
 
 export const useUserStats = (timeRange: TimeRange = 'medium_term') => {
-	const { spotifyApi, isReady } = useSpotify();
+	const { spotifyApi, isReady, error: spotifyError, retry } = useSpotify();
 	const [topArtists, setTopArtists] = useState<Artist[]>([]);
 	const [topTracks, setTopTracks] = useState<Track[]>([]);
 	const [recentlyPlayed, setRecentlyPlayed] = useState<PlayHistory[]>([]);
@@ -45,6 +45,13 @@ export const useUserStats = (timeRange: TimeRange = 'medium_term') => {
 	const fetchData = useCallback(async () => {
 		// Don't try to fetch if the API isn't ready yet
 		if (!isReady) {
+			return;
+		}
+
+		// Check for Spotify API errors first
+		if (spotifyError) {
+			setError(spotifyError);
+			setIsLoading(false);
 			return;
 		}
 
@@ -133,7 +140,7 @@ export const useUserStats = (timeRange: TimeRange = 'medium_term') => {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [spotifyApi, timeRange, isReady]);
+	}, [spotifyApi, timeRange, isReady, spotifyError]);
 
 	useEffect(() => {
 		if (isReady) {
@@ -141,12 +148,20 @@ export const useUserStats = (timeRange: TimeRange = 'medium_term') => {
 		}
 	}, [fetchData, isReady]);
 
+	const handleRefresh = () => {
+		if (spotifyError) {
+			retry();
+		} else {
+			fetchData();
+		}
+	};
+
 	return {
 		topArtists,
 		topTracks,
 		recentlyPlayed,
 		isLoading: isLoading || !isReady, // Consider loading if the API isn't ready
-		error,
-		refresh: fetchData,
+		error: error || spotifyError,
+		refresh: handleRefresh,
 	};
 };
