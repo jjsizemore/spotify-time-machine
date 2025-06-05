@@ -1,5 +1,6 @@
 import '@/lib/init';
 import { LayoutContent } from '@/components/LayoutContent';
+import TokenStatus from '@/components/TokenStatus';
 import React from 'react';
 import { NextAuthProvider } from '../components/providers/NextAuthProvider';
 import './spotify.css';
@@ -63,6 +64,7 @@ export default function RootLayout({
 			<body className="bg-spotify-black text-spotify-light-gray font-sans min-h-screen flex flex-col">
 				<NextAuthProvider>
 					<LayoutContent>{children}</LayoutContent>
+					<TokenStatus />
 				</NextAuthProvider>
 				<Analytics />
 			</body>

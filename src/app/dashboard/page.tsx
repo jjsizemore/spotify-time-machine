@@ -31,12 +31,7 @@ export default function Dashboard() {
 	const { topArtists, topTracks, recentlyPlayed, isLoading, error, refresh } =
 		useUserStats(timeRange);
 
-	// Force a refresh when the component mounts
-	useEffect(() => {
-		if (status === 'authenticated') {
-			refresh();
-		}
-	}, [status, refresh]);
+	// No need to force refresh - useUserStats automatically fetches when ready
 
 	return (
 		<PageContainer

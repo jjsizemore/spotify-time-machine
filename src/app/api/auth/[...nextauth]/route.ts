@@ -19,35 +19,67 @@ const handler = NextAuth({
 		async jwt({ token, account }) {
 			// Initial sign in
 			if (account) {
+				console.log('🔑 Initial sign-in, storing tokens');
 				token.accessToken = account.access_token;
 				token.refreshToken = account.refresh_token;
 				token.expiresAt = account.expires_at;
 				return token;
 			}
 
-			// Return the token if it's still valid
-			if (Date.now() < (token.expiresAt as number) * 1000) {
+			// Add buffer time: refresh token 5 minutes before expiration instead of waiting for expiry
+			const bufferTime = 5 * 60; // 5 minutes in seconds
+			const expirationTime = (token.expiresAt as number) - bufferTime;
+
+			// Return the token if it's still valid (with buffer)
+			if (Date.now() < expirationTime * 1000) {
 				return token;
 			}
 
-			// Token has expired, refresh it
+			// Token will expire soon or has expired, refresh it
+			console.log('⏰ Token expires soon or has expired, refreshing...');
 			try {
 				const refreshedToken = await refreshAccessToken(
 					token.refreshToken as string
 				);
-				token.accessToken = refreshedToken.accessToken;
-				token.expiresAt = refreshedToken.expiresAt;
-				return token;
+
+				console.log('✅ Token refresh successful');
+
+				// Update token with refreshed values
+				return {
+					...token,
+					accessToken: refreshedToken.accessToken,
+					refreshToken: refreshedToken.refreshToken, // Important: update refresh token if new one provided
+					expiresAt: refreshedToken.expiresAt,
+					error: undefined, // Clear any previous errors
+				};
 			} catch (error) {
-				console.error('Error refreshing access token', error);
-				return { ...token, error: 'RefreshAccessTokenError' };
+				console.error('❌ Error refreshing access token:', error);
+
+				// Return token with error flag - this will trigger re-authentication
+				return {
+					...token,
+					error: 'RefreshAccessTokenError',
+					// Don't clear the tokens yet - let the client handle re-auth
+				};
 			}
 		},
 		async session({ session, token }) {
+			// Pass token information to the session
 			session.accessToken = token.accessToken as string | undefined;
 			session.refreshToken = token.refreshToken as string | undefined;
 			session.expiresAt = token.expiresAt as number | undefined;
 			session.error = token.error as string | undefined;
+
+			// Add debugging info in development
+			if (process.env.NODE_ENV === 'development') {
+				const timeToExpiry = token.expiresAt
+					? Math.floor(
+							((token.expiresAt as number) * 1000 - Date.now()) / 1000 / 60
+						)
+					: 0;
+				console.log(`🕐 Token expires in ${timeToExpiry} minutes`);
+			}
+
 			return session;
 		},
 	},
@@ -57,6 +89,8 @@ const handler = NextAuth({
 	secret: process.env.NEXTAUTH_SECRET,
 	session: {
 		strategy: 'jwt',
+		// Reduce session max age to ensure token refresh happens regularly
+		maxAge: 60 * 60, // 1 hour (same as Spotify token expiry)
 	},
 	cookies: {
 		sessionToken: {
@@ -87,6 +121,8 @@ const handler = NextAuth({
 			},
 		},
 	},
+	// Enhanced debugging for development
+	debug: process.env.NODE_ENV === 'development',
 });
 
 export { handler as GET, handler as POST };

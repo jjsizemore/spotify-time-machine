@@ -10,6 +10,7 @@ import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
 import { Artist } from '@/hooks/useUserStats';
 import { GenreCount, extractTopGenres } from '@/lib/genreUtils';
+import { SpotifyApiError } from '@/lib/spotify';
 import { createPlaylist } from '@/lib/spotifyTrackUtils';
 import { format, isAfter, isBefore, parseISO } from 'date-fns';
 import { useSession } from 'next-auth/react';
@@ -44,59 +45,60 @@ export default function PlaylistGeneratorPage() {
 	const [loadingFilters, setLoadingFilters] = useState(false);
 	const [artistCache, setArtistCache] = useState<Record<string, Artist>>({});
 
-	// Fetch user's top artists and extract genres when the component mounts
+	// Fetch top artists and genres for filters when component mounts
 	useEffect(() => {
-		const fetchTopArtistsAndGenres = async () => {
+		const fetchFilters = async () => {
 			if (!isReady) return;
 
+			setLoadingFilters(true);
 			try {
-				setLoadingFilters(true);
-
-				// Fetch user's top artists
+				// Fetch top artists
 				const response = await spotifyApi.getMyTopArtists({ limit: 50 });
-				const artists = response.body.items.map((artist) => ({
+				const artists: Artist[] = response.body.items.map((artist: any) => ({
 					id: artist.id,
 					name: artist.name,
-					images: artist.images.map((img) => ({
-						url: img.url,
-						height: img.height || 0,
-						width: img.width || 0,
-					})),
+					images: artist.images,
 					genres: artist.genres,
 					popularity: artist.popularity,
 					external_urls: artist.external_urls,
 				}));
 				setTopArtists(artists);
 
-				// Cache artist data
-				const artistCacheMap = artists.reduce(
-					(acc, artist) => {
-						acc[artist.id] = artist;
-						return acc;
-					},
-					{} as Record<string, Artist>
-				);
-				setArtistCache(artistCacheMap);
-
 				// Extract genres from top artists
-				const genres = extractTopGenres(artists, 20);
-				setTopGenres(genres);
+				const genresFromArtists = extractTopGenres(artists, 50);
+				setTopGenres(genresFromArtists);
+
+				// Create artist cache for batch fetching
+				const cache: Record<string, Artist> = {};
+				artists.forEach((artist) => {
+					cache[artist.id] = artist;
+				});
+				setArtistCache(cache);
 			} catch (err) {
-				console.error('Error fetching artist/genre data:', err);
+				console.error('Error fetching filters:', err);
+				if (err instanceof SpotifyApiError) {
+					if (err.status === 401) {
+						setError('Authentication expired. Please sign in again.');
+					} else {
+						setError(`Spotify API error: ${err.message}`);
+					}
+				} else {
+					setError('Failed to load filter options.');
+				}
 			} finally {
 				setLoadingFilters(false);
 			}
 		};
 
-		if (isReady) {
-			fetchTopArtistsAndGenres();
-		}
-	}, [isReady]);
+		fetchFilters();
+	}, [isReady, spotifyApi]);
 
 	// Handle genre selection
-	const toggleGenre = (genre: string) => {
+	const toggleGenre = (genreName: string) => {
 		setSelectedGenres((prev) =>
-			prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]
+			prev.includes(genreName)
+				? prev.filter((genre) => genre !== genreName)
+				: [...prev, genreName]
 		);
 	};
 
@@ -164,12 +166,12 @@ export default function PlaylistGeneratorPage() {
 					const batchSize = 50;
 					for (let i = 0; i < uncachedArtistIds.length; i += batchSize) {
 						const batch = uncachedArtistIds.slice(i, i + batchSize);
-						try {
-							const artistsResponse = await spotifyApi.getArtists(batch);
-							const newArtists = artistsResponse.body.artists.map((artist) => ({
+						const artistsResponse = await spotifyApi.getArtists(batch);
+						const newArtists = artistsResponse.body.artists.map(
+							(artist: any) => ({
 								id: artist.id,
 								name: artist.name,
-								images: artist.images.map((img) => ({
+								images: artist.images.map((img: any) => ({
 									url: img.url,
 									height: img.height || 0,
 									width: img.width || 0,
@@ -177,22 +179,20 @@ export default function PlaylistGeneratorPage() {
 								genres: artist.genres,
 								popularity: artist.popularity,
 								external_urls: artist.external_urls,
-							}));
+							})
+						);
 
-							// Update cache with new artists
-							setArtistCache((prev) => ({
-								...prev,
-								...newArtists.reduce(
-									(acc, artist) => {
-										acc[artist.id] = artist;
-										return acc;
-									},
-									{} as Record<string, Artist>
-								),
-							}));
-						} catch (error) {
-							console.error('Error fetching artist batch:', error);
-						}
+						// Update cache with new artists
+						setArtistCache((prev) => ({
+							...prev,
+							...newArtists.reduce(
+								(acc: Record<string, Artist>, artist: Artist) => {
+									acc[artist.id] = artist;
+									return acc;
+								},
+								{} as Record<string, Artist>
+							),
+						}));
 					}
 				}
 

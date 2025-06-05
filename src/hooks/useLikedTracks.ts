@@ -1,4 +1,5 @@
 import { getCachedData, setCachedData } from '@/lib/cacheUtils';
+import { SpotifyApiError } from '@/lib/spotify';
 import {
 	InternalTimeRange,
 	SpotifyTimeRange,

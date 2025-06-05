@@ -18,10 +18,10 @@
 	},
 	"dependencies": {
 		"@auth/prisma-adapter": "^2.9.1",
-		"@prisma/client": "^6.8.2",
+		"@prisma/client": "^6.9.0",
 		"@tailwindcss/cli": "^4.1.8",
 		"@tailwindcss/postcss": "^4.1.8",
-		"@tanstack/react-query": "^5.80.2",
+		"@tanstack/react-query": "^5.80.5",
 		"@vercel/analytics": "^1.5.0",
 		"@vercel/functions": "^2.1.0",
 		"date-fns": "^4.1.0",
@@ -32,18 +32,15 @@
 		"react": "19.1.0",
 		"react-dom": "19.1.0",
 		"react-icons": "^5.5.0",
-		"spotify-web-api-node": "^5.0.2",
-		"superagent": "^10.2.1",
-		"zod": "^3.25.49"
+		"zod": "^3.25.51"
 	},
 	"devDependencies": {
 		"@types/node": "^22.15.29",
 		"@types/react": "19.1.6",
 		"@types/react-dom": "19.1.6",
-		"@types/spotify-web-api-node": "^5.0.11",
 		"autoprefixer": "^10.4.21",
 		"postcss": "^8.5.4",
-		"prisma": "^6.8.2",
+		"prisma": "^6.9.0",
 		"puppeteer": "^24.10.0",
 		"tailwindcss": "^4.1.8",
 		"ts-node": "^10.9.2",

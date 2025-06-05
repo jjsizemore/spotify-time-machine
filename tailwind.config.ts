@@ -1,6 +1,7 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-	mode: 'jit',
+import flowbite from 'flowbite/plugin';
+import type { Config } from 'tailwindcss';
+
+export default {
 	content: [
 		'./src/**/*.{js,ts,jsx,tsx}',
 		'./src/app/**/*.{js,ts,jsx,tsx}',
@@ -29,5 +30,5 @@ module.exports = {
 			},
 		},
 	},
-	plugins: [require('flowbite/plugin')],
-};
+	plugins: [flowbite],
+} satisfies Config;
