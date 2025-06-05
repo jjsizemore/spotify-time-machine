@@ -1,11 +1,57 @@
 import { spotifyApi } from '@/lib/spotify';
 import { signIn, useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export const useSpotify = () => {
-	const { data: session, status } = useSession();
+	const { data: session, status, update } = useSession();
 	const [isReady, setIsReady] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
+	// Token refresh callback for the Spotify API client
+	const tokenRefreshCallback = useCallback(async () => {
+		if (!session?.refreshToken) {
+			throw new Error('No refresh token available');
+		}
+
+		try {
+			// Call the NextAuth token refresh endpoint
+			const response = await fetch('/api/auth/refresh-token', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					refreshToken: session.refreshToken,
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error('Token refresh failed');
+			}
+
+			const tokenData = await response.json();
+
+			// Update the session with new token data
+			await update({
+				...session,
+				accessToken: tokenData.accessToken,
+				refreshToken: tokenData.refreshToken,
+				expiresAt: tokenData.expiresAt,
+				error: undefined,
+			});
+
+			return {
+				accessToken: tokenData.accessToken,
+				refreshToken: tokenData.refreshToken,
+				expiresAt: tokenData.expiresAt,
+			};
+		} catch (error) {
+			console.error('Token refresh failed:', error);
+			// Force re-authentication
+			await signIn('spotify');
+			throw error;
+		}
+	}, [session, update]);
 
 	useEffect(() => {
 		// Clear error when session changes
@@ -23,7 +69,7 @@ export const useSpotify = () => {
 				setError('Authentication expired. Please sign in again.');
 				setIsReady(false);
 
-				// Clear potentially stale token from spotify-web-api-node
+				// Clear potentially stale token from the Spotify API client
 				spotifyApi.resetAccessToken();
 
 				// Force re-authentication
@@ -36,8 +82,9 @@ export const useSpotify = () => {
 				console.log('🔑 Setting access token for Spotify API');
 
 				try {
-					// Set the access token on the spotifyApi instance
+					// Set the access token and refresh callback on the spotifyApi instance
 					spotifyApi.setAccessToken(session.accessToken);
+					spotifyApi.setTokenRefreshCallback(tokenRefreshCallback);
 					setIsReady(true);
 					setError(null);
 				} catch (err) {
@@ -57,7 +104,7 @@ export const useSpotify = () => {
 			setError(null);
 			spotifyApi.resetAccessToken();
 		}
-	}, [session, status]);
+	}, [session, status, tokenRefreshCallback]);
 
 	// Add a method to manually retry
 	const retry = () => {
@@ -68,11 +115,17 @@ export const useSpotify = () => {
 		}
 	};
 
+	// Get queue status for debugging
+	const getQueueStatus = () => {
+		return spotifyApi.getQueueStatus();
+	};
+
 	return {
 		spotifyApi,
 		isReady,
 		error,
 		retry,
 		session,
+		getQueueStatus,
 	};
 };

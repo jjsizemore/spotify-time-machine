@@ -1,4 +1,5 @@
 import { getCachedData, setCachedData } from '@/lib/cacheUtils';
+import { SpotifyApiError } from '@/lib/spotify';
 import { useCallback, useEffect, useState } from 'react';
 import { SavedTrack, TimeRange, useLikedTracks } from './useLikedTracks';
 import { useSpotify } from './useSpotify';
@@ -162,6 +163,7 @@ export function useLikedArtists() {
 
 				for (let i = 0; i < artistIdArray.length; i += batchSize) {
 					const batch = artistIdArray.slice(i, i + batchSize);
+
 					const response = await spotifyApi.getArtists(batch);
 
 					// Add to both caches and mark as processed
