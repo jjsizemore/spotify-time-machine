@@ -49,8 +49,8 @@
 	"packageManager": "pnpm@10.11.0",
 	"pnpm": {
 		"overrides": {
-			"@types/react": "19.1.5",
-			"@types/react-dom": "19.1.5",
+			"@types/react": "19.1.6",
+			"@types/react-dom": "19.1.6",
 			"cookie@<0.7.0": ">=0.7.0"
 		},
 		"onlyBuiltDependencies": [
