@@ -142,9 +142,6 @@
 
 ## Code Quality & Developer Experience (DevEx)
 
-- [ ] **Linting & Formatting:**
-  - [ ] Ensure ESLint and Prettier are configured and consistently used (add `lint` and `format` scripts to `package.json` if not present).
-  - [ ] Enforce stricter ESLint rules for code quality and best practices.
 - [ ] **Code Documentation:**
   - [ ] Add JSDoc comments for complex functions, hooks, and components, especially those in `src/lib/` and `src/hooks/`.
   - [ ] Review and improve existing comments for clarity.
