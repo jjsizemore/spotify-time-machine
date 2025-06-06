@@ -58,6 +58,9 @@ importers:
       react-icons:
         specifier: ^5.5.0
         version: 5.5.0(react@19.1.0)
+      web-vitals:
+        specifier: ^5.0.2
+        version: 5.0.2
       zod:
         specifier: ^3.25.51
         version: 3.25.51
@@ -1613,6 +1616,9 @@ packages:
   v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
 
+  web-vitals@5.0.2:
+    resolution: {integrity: sha512-nhl+fujoz9Io6MdDSyGSiiUSR1DLMvD3Mde1sNaRKrNwsEFYQICripmEIyUvE2DPKDkW1BbHa4saEDo1U/2D/Q==}
+
   wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
     engines: {node: '>=10'}
@@ -3048,6 +3054,8 @@ snapshots:
   uuid@8.3.2: {}
 
   v8-compile-cache-lib@3.0.1: {}
+
+  web-vitals@5.0.2: {}
 
   wrap-ansi@7.0.0:
     dependencies:

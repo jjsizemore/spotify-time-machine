@@ -9,11 +9,14 @@ import TopArtists from '@/components/TopArtists';
 import TopGenres from '@/components/TopGenres';
 import TopTracks from '@/components/TopTracks';
 import { TimeRange, useUserStats } from '@/hooks/useUserStats';
+import {
+	generateBreadcrumbSchema,
+	generateWebApplicationSchema,
+} from '@/lib/seo';
 import { SpotifyTimeRange, timeRangeDisplays } from '@/lib/timeRanges';
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { generateStructuredData } from './metadata';
 
 // Lazy load the visualization components
 const ListeningTrends = lazy(() => import('@/components/ListeningTrends'));
@@ -31,7 +34,30 @@ export default function Dashboard() {
 	const { topArtists, topTracks, recentlyPlayed, isLoading, error, refresh } =
 		useUserStats(timeRange);
 
-	// No need to force refresh - useUserStats automatically fetches when ready
+	// Generate enhanced structured data for dashboard
+	const dashboardSchema = generateWebApplicationSchema({
+		'@type': 'WebPage',
+		name: 'Dashboard - Spotify Time Machine',
+		description:
+			'View your personalized Spotify listening statistics, including top artists, tracks, and genres. Analyze your music trends and discover insights about your listening habits.',
+		breadcrumb: generateBreadcrumbSchema([
+			{ name: 'Home', url: '/' },
+			{ name: 'Dashboard', url: '/dashboard' },
+		]),
+		mainEntity: {
+			'@type': 'DataVisualization',
+			name: 'Spotify Listening Statistics',
+			description:
+				'Interactive dashboard showing personal music listening analytics',
+			about: [
+				'Top Artists Analysis',
+				'Top Tracks Statistics',
+				'Genre Distribution',
+				'Recently Played Music',
+				'Listening Trends Over Time',
+			],
+		},
+	});
 
 	return (
 		<PageContainer
@@ -39,14 +65,48 @@ export default function Dashboard() {
 			maxWidth="7xl"
 			className="min-h-screen pb-20"
 		>
-			{/* Structured Data */}
+			{/* Enhanced Structured Data for 2025 SEO */}
 			<Script
-				id="structured-data"
+				id="dashboard-structured-data"
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{
-					__html: JSON.stringify(generateStructuredData()),
+					__html: JSON.stringify(dashboardSchema),
 				}}
 			/>
+
+			{/* Breadcrumb Schema */}
+			<Script
+				id="breadcrumb-schema"
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(
+						generateBreadcrumbSchema([
+							{ name: 'Home', url: '/' },
+							{ name: 'Dashboard', url: '/dashboard' },
+						])
+					),
+				}}
+			/>
+
+			{/* SEO-optimized heading structure */}
+			<header className="mb-8">
+				<h1 className="sr-only">
+					Spotify Music Dashboard - Your Personal Listening Analytics
+				</h1>
+				<nav aria-label="Breadcrumb" className="mb-4">
+					<ol className="flex items-center space-x-2 text-sm text-spotify-light-gray">
+						<li>
+							<a href="/" className="hover:text-spotify-green">
+								Home
+							</a>
+						</li>
+						<li className="text-spotify-gray">/</li>
+						<li className="text-spotify-green" aria-current="page">
+							Dashboard
+						</li>
+					</ol>
+				</nav>
+			</header>
 
 			{/* Feature Cards */}
 			<nav
@@ -71,9 +131,23 @@ export default function Dashboard() {
 			</nav>
 
 			{/* Visualizations */}
-			<section aria-label="Visualizations" className="space-y-8 mb-10">
-				<ListeningTrends />
-				<GenreTrendsVisualization />
+			<section
+				aria-label="Music Analytics Visualizations"
+				className="space-y-8 mb-10"
+			>
+				<h2 className="text-2xl font-bold text-spotify-white mb-4">
+					Your Music Journey
+				</h2>
+				<Suspense
+					fallback={<div className="loading-skeleton h-64 rounded-lg" />}
+				>
+					<ListeningTrends />
+				</Suspense>
+				<Suspense
+					fallback={<div className="loading-skeleton h-64 rounded-lg" />}
+				>
+					<GenreTrendsVisualization />
+				</Suspense>
 			</section>
 
 			{/* Stats Section */}
@@ -106,7 +180,10 @@ export default function Dashboard() {
 
 					<div className="flex-1 space-y-6 mt-6">
 						{activeTab === 'artists' && (
-							<article aria-label="Top artists">
+							<article aria-label="Top artists analysis">
+								<h3 className="text-xl font-semibold text-spotify-white mb-4">
+									Your Top Artists
+								</h3>
 								<TopArtists
 									artists={topArtists}
 									isLoading={false}
@@ -117,7 +194,10 @@ export default function Dashboard() {
 						)}
 
 						{activeTab === 'tracks' && (
-							<article aria-label="Top tracks">
+							<article aria-label="Top tracks analysis">
+								<h3 className="text-xl font-semibold text-spotify-white mb-4">
+									Your Top Tracks
+								</h3>
 								<TopTracks
 									tracks={topTracks}
 									isLoading={false}
@@ -128,7 +208,10 @@ export default function Dashboard() {
 						)}
 
 						{activeTab === 'genres' && (
-							<article aria-label="Top genres">
+							<article aria-label="Top genres analysis">
+								<h3 className="text-xl font-semibold text-spotify-white mb-4">
+									Your Top Genres
+								</h3>
 								<TopGenres
 									artists={topArtists}
 									isLoading={false}
@@ -139,7 +222,10 @@ export default function Dashboard() {
 						)}
 
 						{activeTab === 'recent' && (
-							<article aria-label="Recently played">
+							<article aria-label="Recently played music">
+								<h3 className="text-xl font-semibold text-spotify-white mb-4">
+									Recently Played
+								</h3>
 								<RecentlyPlayed
 									tracks={recentlyPlayed}
 									isLoading={false}

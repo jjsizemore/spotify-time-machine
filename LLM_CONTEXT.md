@@ -34,6 +34,17 @@
    - ✅ React Query 5.80.5 for optimized data fetching
    - ✅ Trunk configuration optimized for development workflow
 
+5. **🆕 2025 SEO & Performance Standards** ✅
+   - ✅ PWA manifest with mobile-first design
+   - ✅ Service Worker with advanced caching strategies
+   - ✅ Core Web Vitals monitoring with web-vitals 5.0.2
+   - ✅ Enhanced structured data (Schema.org) for all pages
+   - ✅ Advanced robots.txt with bot-specific rules
+   - ✅ Comprehensive sitemap with image sitemap support
+   - ✅ Security headers and performance optimizations
+   - ✅ Mobile-first responsive design enhancements
+   - ✅ Critical CSS optimization for CLS reduction
+
 ### Remaining High Priority Features
 1. **PKCE Implementation for Spotify OAuth**
    - Enhancing security of the authentication flow
@@ -53,6 +64,7 @@
 ## Optimization Preferences
 
 - **Enterprise-Grade Reliability**: The codebase now features production-ready infrastructure with sophisticated error handling, request queuing, and automatic token management
+- **2025 SEO Standards**: Comprehensive SEO implementation following latest industry standards for search engine optimization, Core Web Vitals, and mobile-first indexing
 - Use established, well-documented libraries and frameworks (e.g., Next.js, Tailwind CSS, NextAuth.js, react-icons)
 - Focus on core functionality first, then add additional features
 - Leverage the enhanced Spotify API client for all API interactions
@@ -64,6 +76,43 @@
 - Adhere to the color palette and theming defined in `src/app/globals.css` via CSS variables
 
 ## Key Architectural Patterns & Components
+
+### 🆕 2025 SEO & Performance Architecture
+
+- **Enhanced SEO Utilities** (`src/lib/seo.ts`):
+  ```typescript
+  // Comprehensive metadata generation
+  generateEnhancedMetadata({
+    title, description, path, image, tags
+  })
+
+  // Structured data generators
+  generateWebApplicationSchema()
+  generateBreadcrumbSchema()
+  generateOrganizationSchema()
+  generateFAQSchema()
+
+  // Core Web Vitals monitoring
+  initCoreWebVitals()
+  ```
+
+- **PWA Implementation**:
+  - `src/app/manifest.ts`: PWA manifest with 2025 standards
+  - `public/sw.js`: Service Worker with advanced caching strategies
+  - `public/browserconfig.xml`: Windows tile configuration
+  - Mobile-first design with offline capabilities
+
+- **Performance Monitoring** (`src/components/WebVitalsMonitor.tsx`):
+  - Real-time Core Web Vitals tracking
+  - Performance Observer for long tasks and layout shifts
+  - Integration with Google Analytics 4 and Vercel Analytics
+  - Development debugging with detailed metrics
+
+- **Enhanced Next.js Configuration** (`next.config.ts`):
+  - Advanced image optimization with AVIF/WebP support
+  - Security headers and performance optimizations
+  - Bundle splitting and compression
+  - SEO-friendly redirects and caching strategies
 
 ### Enhanced Authentication & API Layer
 - **Advanced Token Management** (`src/app/api/auth/[...nextauth]/route.ts`):
@@ -100,6 +149,7 @@
   - `PageContainer.tsx`: Standard wrapper for page content, providing consistent layout and loading states.
   - `LayoutContent.tsx`: Manages the overall page structure within `RootLayout.tsx`, often including `Header.tsx` and `Footer.tsx`.
   - `TokenStatus.tsx`: **NEW** Real-time token monitoring widget (development only)
+  - `WebVitalsMonitor.tsx`: **NEW** Core Web Vitals monitoring component
   - `ActionButton.tsx`: Versatile button component for primary and secondary actions with updated hover effects.
   - `SpotifySignInButton.tsx`: Standardized Spotify sign-in button.
   - `FormField.tsx`: Consistent styling for form inputs.
@@ -218,6 +268,31 @@ if (error) {
 
 ## Performance Optimization
 
+### 🆕 2025 SEO & Performance Standards
+1. **Core Web Vitals Monitoring:**
+   - Real-time LCP, CLS, INP, FCP, TTFB tracking
+   - Performance Observer for long tasks and layout shifts
+   - Integration with analytics platforms
+   - Development debugging with detailed metrics
+
+2. **PWA Implementation:**
+   - Service Worker with cache-first, network-first, and stale-while-revalidate strategies
+   - Offline functionality for static assets
+   - Background sync capabilities
+   - Push notification support (ready for future implementation)
+
+3. **Advanced Image Optimization:**
+   - AVIF and WebP format support
+   - Responsive image sizes and device-specific optimization
+   - Long-term caching with immutable headers
+   - SVG optimization and security
+
+4. **Enhanced Structured Data:**
+   - WebApplication schema for main app
+   - Organization schema for brand recognition
+   - Breadcrumb navigation for better crawling
+   - FAQ schema ready for help pages
+
 ### Enhanced API Reliability
 1. **Request Queuing System:**
    - Priority-based request processing
@@ -248,64 +323,61 @@ if (error) {
    - Improves UI responsiveness
    - Used for visualization calculations
 
-3. **Progressive Rendering:**
-   - Implements data chunking
-   - User-controlled granularity
-   - Optimized for large datasets
+## 🆕 SEO Implementation Details
 
-### Caching Strategy
-1. **API Response Caching:**
-   - TTL-based cache invalidation
-   - Size-limited cache storage
-   - Progressive loading patterns
+### Metadata Strategy
+- **Page-specific metadata** using enhanced `generateEnhancedMetadata()` function
+- **Dynamic Open Graph images** for social media sharing
+- **Twitter Card optimization** with large image support
+- **Canonical URLs** for duplicate content prevention
+- **Mobile-first meta tags** for app-like experience
 
-2. **Client-Side State:**
-   - Optimized re-renders
-   - Memoized computations
-   - Efficient data structures
+### Structured Data Implementation
+- **WebApplication schema** for main application
+- **Organization schema** for brand recognition
+- **Breadcrumb navigation** for improved crawling
+- **FAQ schema** ready for help/documentation pages
+- **Rating and review schema** for user feedback
 
-## Modern Tooling & Code Quality
+### Technical SEO
+- **Advanced robots.txt** with bot-specific crawl delays
+- **Comprehensive sitemap** with image sitemap support
+- **Security headers** for improved trust signals
+- **Performance optimizations** for Core Web Vitals
+- **Mobile-first responsive design** for mobile indexing
 
-### Updated Package Ecosystem
-```json
-{
-  "dependencies": {
-    "@prisma/client": "^6.9.0",          // Database reliability (major upgrade)
-    "@tanstack/react-query": "^5.80.5",  // Data fetching (major upgrade)
-    "zod": "^3.25.51"                     // Schema validation (updated)
-  },
-}
-```
+### Performance Monitoring
+- **Core Web Vitals tracking** with real-time monitoring
+- **Performance Observer** for advanced metrics
+- **Analytics integration** for data-driven optimization
+- **Development debugging** for performance issues
 
-### Enhanced Configuration
+## Dependencies & Versions
 
-**Trunk Configuration** (`.trunk/trunk.yaml`):
-```yaml
-lint:
-  disabled:
-    - eslint    # Disabled in favor of Biome
-    - prettier  # Disabled in favor of Biome
-  enabled:
-    - biome@1.9.4          # Primary code formatter and linter (v2.0 beta available)
-    - checkov@3.2.435      # Infrastructure security scanning
-    - osv-scanner@2.0.2    # Vulnerability scanning
-    - trufflehog@3.88.34   # Secret detection
-```
+### Core Framework
+- **Next.js 15.3.3**: Latest App Router with enhanced performance
+- **React 19.1.0**: Latest stable with concurrent features
+- **TypeScript 5.8.3**: Enhanced type safety and developer experience
 
-**NextAuth Enhanced Configuration:**
-```typescript
-session: {
-  strategy: 'jwt',
-  maxAge: 30 * 60, // Reduced to 30 minutes for more frequent refresh
-},
-debug: process.env.NODE_ENV === 'development',
-```
+### SEO & Performance
+- **web-vitals 5.0.2**: Core Web Vitals monitoring
+- **@vercel/analytics 1.5.0**: Performance and user analytics
 
-### Development Workflow
-- **Modern Linting & Formatting**: Biome 1.9.4 instead of Prettier & ESLint
-- **Security Scanning**: Automated secret detection and vulnerability scanning
-- **Development Debugging**: Real-time token monitoring and queue status
-- **Type Safety**: Enhanced with latest TypeScript patterns
+### Authentication & API
+- **NextAuth.js 4.24.11**: Secure OAuth implementation
+- **@tanstack/react-query 5.80.5**: Advanced data fetching and caching
+
+### UI & Styling
+- **Tailwind CSS 4.1.8**: Latest utility-first CSS framework
+- **Flowbite React 0.11.7**: Component library integration
+
+### Database & ORM
+- **Prisma 6.9.0**: Enhanced database reliability and performance
+- **@prisma/client 6.9.0**: Type-safe database client
+
+### Development Tools
+- **Biome 1.9.4**: Fast linting and formatting
+- **Trunk**: Code quality and security scanning
 
 ## Testing Strategy
 

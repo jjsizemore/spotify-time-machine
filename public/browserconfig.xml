@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<browserconfig>
+    <msapplication>
+        <tile>
+            <square150x150logo src="/spotify-icon.png"/>
+            <TileColor>#1DB954</TileColor>
+        </tile>
+    </msapplication>
+</browserconfig>
