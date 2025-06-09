@@ -2,7 +2,7 @@
 # To learn more about the format of this file, see https://docs.trunk.io/reference/trunk-yaml
 version: 0.1
 cli:
-  version: 1.22.15
+  version: 1.24.0
 # Trunk provides extensibility via plugins. (https://docs.trunk.io/plugins)
 plugins:
   sources:
@@ -20,7 +20,7 @@ lint:
     - eslint
     - prettier
   enabled:
-    - checkov@3.2.435
+    - checkov@3.2.439
     - osv-scanner@2.0.2
     - oxipng@9.1.5
     - svgo@3.3.2
@@ -28,7 +28,7 @@ lint:
     - biome@1.9.4
     - git-diff-check
     - markdownlint@0.45.0
-    - trufflehog@3.88.34
+    - trufflehog@3.89.0
 actions:
   enabled:
     - trunk-announce
