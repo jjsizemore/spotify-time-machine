@@ -45,7 +45,7 @@ export default function ThankYouPage() {
 							Jermaine's
 						</h1>
 						<Image
-							src="/spotify-icon.png"
+							src="/images/optimized/root/spotify-icon.webp"
 							alt="Spotify Logo"
 							width={64}
 							height={64}

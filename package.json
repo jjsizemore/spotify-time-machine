@@ -14,6 +14,8 @@
 		"css:build": "npx @tailwindcss/cli -i ./src/app/globals.css -o ./src/app/spotify.css",
 		"css:watch": "npx @tailwindcss/cli -i ./src/app/globals.css -o ./src/app/spotify.css --watch",
 		"postinstall": "prisma generate && flowbite-react patch",
+		"optimize-images": "tsx scripts/optimize-images.ts",
+		"update-image-refs": "tsx scripts/update-image-references.ts",
 		"screenshots": "NODE_OPTIONS='--loader ts-node/esm' ts-node --project scripts/tsconfig.json scripts/generate-screenshots.ts"
 	},
 	"dependencies": {
@@ -43,8 +45,10 @@
 		"postcss": "^8.5.4",
 		"prisma": "^6.9.0",
 		"puppeteer": "^24.10.0",
+		"sharp": "^0.34.2",
 		"tailwindcss": "^4.1.8",
 		"ts-node": "^10.9.2",
+		"tsx": "^4.19.4",
 		"typescript": "^5.8.3"
 	},
 	"packageManager": "pnpm@10.11.0",

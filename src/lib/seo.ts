@@ -45,7 +45,7 @@ export function generateEnhancedMetadata({
 	tags?: string[];
 }): Metadata {
 	const url = `${SEO_CONFIG.baseUrl}${path}`;
-	const imageUrl = image || '/previews/dashboard-preview.jpeg';
+	const imageUrl = image || '/images/optimized/previews/dashboard-preview.webp';
 	const fullImageUrl = imageUrl.startsWith('http')
 		? imageUrl
 		: `${SEO_CONFIG.baseUrl}${imageUrl}`;
@@ -131,7 +131,7 @@ export function generateWebApplicationSchema(
 			'@type': 'Person',
 			name: SEO_CONFIG.author,
 		},
-		screenshot: `${SEO_CONFIG.baseUrl}/previews/dashboard-preview.jpeg`,
+		screenshot: `${SEO_CONFIG.baseUrl}/images/optimized/previews/dashboard-preview.webp`,
 		featureList: [
 			'Personal Spotify analytics and insights',
 			'Music listening history visualization',

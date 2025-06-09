@@ -83,7 +83,7 @@ export default function Home() {
 						<div className="flex flex-col md:flex-row items-center justify-center">
 							<h1 className="mb-4 md:mb-0 md:mr-4">Jermaine's</h1>
 							<Image
-								src="/spotify-icon.png"
+								src="/images/optimized/root/spotify-icon.webp"
 								alt="Spotify Logo"
 								width={128}
 								height={128}
@@ -112,9 +112,9 @@ export default function Home() {
 					<FeatureShowcaseItem
 						title="Interactive Dashboard"
 						description="Get insights into your listening habits with an interactive dashboard. Track your top artists, genres, and tracks over time."
-						imageUrl="/previews/dashboard-preview.jpeg"
+						imageUrl="/images/optimized/previews/dashboard-preview.webp"
 						imageAlt="Dashboard Preview"
-						previewUrl="/previews/dashboard-preview.jpeg"
+						previewUrl="/images/optimized/previews/dashboard-preview.webp"
 						imageWidth={400}
 						imageHeight={450}
 					/>
@@ -122,9 +122,9 @@ export default function Home() {
 					<FeatureShowcaseItem
 						title="Monthly History"
 						description="Travel back in time and explore your liked tracks month by month. Create playlists instantly from any time period with a single click."
-						imageUrl="/previews/history-preview.jpeg"
+						imageUrl="/images/optimized/previews/history-preview.webp"
 						imageAlt="History Preview"
-						previewUrl="/previews/history-preview.jpeg"
+						previewUrl="/images/optimized/previews/history-preview.webp"
 						imageWidth={400}
 						imageHeight={450}
 					/>
@@ -132,9 +132,9 @@ export default function Home() {
 					<FeatureShowcaseItem
 						title="Custom Playlist Generator"
 						description="Create personalized playlists by selecting custom date ranges and filtering by your favorite genres and artists. Share your playlists with friends instantly."
-						imageUrl="/previews/playlist-generator-preview.jpeg"
+						imageUrl="/images/optimized/previews/playlist-generator-preview.webp"
 						imageAlt="Playlist Generator Preview"
-						previewUrl="/previews/playlist-generator-preview.jpeg"
+						previewUrl="/images/optimized/previews/playlist-generator-preview.webp"
 						imageWidth={400}
 						imageHeight={450}
 					/>

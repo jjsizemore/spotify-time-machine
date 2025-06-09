@@ -12,7 +12,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 			type: 'website',
 			images: [
 				{
-					url: '/previews/playlist-generator-preview.jpeg',
+					url: '/images/optimized/previews/playlist-generator-preview.webp',
 					width: 1200,
 					height: 630,
 					alt: "Jermaine's Spotify Time Machine Playlist Generator Preview",
@@ -23,7 +23,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 			card: 'summary_large_image',
 			title: "Playlist Generator | Jermaine's Spotify Time Machine",
 			description: 'Create custom playlists from your liked songs',
-			images: ['/previews/playlist-generator-preview.jpeg'],
+			images: ['/images/optimized/previews/playlist-generator-preview.webp'],
 		},
 	};
 };
@@ -49,7 +49,7 @@ export const generateStructuredData = () => {
 			'Instant playlist sharing',
 			'Keyboard shortcuts support',
 		],
-		screenshot: '/previews/playlist-generator-preview.jpeg',
+		screenshot: '/images/optimized/previews/playlist-generator-preview.webp',
 		browserRequirements: 'Requires JavaScript. Requires HTML5.',
 		operatingSystem: 'Any',
 	};

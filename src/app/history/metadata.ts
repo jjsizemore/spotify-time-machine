@@ -12,7 +12,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 			type: 'website',
 			images: [
 				{
-					url: '/previews/history-preview.jpeg',
+					url: '/images/optimized/previews/history-preview.webp',
 					width: 1200,
 					height: 630,
 					alt: "Jermaine's Spotify Time Machine History Preview",
@@ -23,7 +23,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 			card: 'summary_large_image',
 			title: "Monthly History | Jermaine's Spotify Time Machine",
 			description: 'Explore your Spotify listening history month by month',
-			images: ['/previews/history-preview.jpeg'],
+			images: ['/images/optimized/previews/history-preview.webp'],
 		},
 	};
 };
@@ -48,7 +48,7 @@ export const generateStructuredData = () => {
 			'Expandable monthly sections',
 			'Time range selection',
 		],
-		screenshot: '/previews/history-preview.jpeg',
+		screenshot: '/images/optimized/previews/history-preview.webp',
 		browserRequirements: 'Requires JavaScript. Requires HTML5.',
 		operatingSystem: 'Any',
 	};

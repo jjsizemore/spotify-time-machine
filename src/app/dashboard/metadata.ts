@@ -12,7 +12,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 			type: 'website',
 			images: [
 				{
-					url: '/previews/dashboard-preview.jpeg',
+					url: '/images/optimized/previews/dashboard-preview.webp',
 					width: 1200,
 					height: 630,
 					alt: "Jermaine's Spotify Time Machine Dashboard Preview",
@@ -24,7 +24,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 			title: "Dashboard | Jermaine's Spotify Time Machine",
 			description:
 				'View your personalized Spotify listening statistics and music trends',
-			images: ['/previews/dashboard-preview.jpeg'],
+			images: ['/images/optimized/previews/dashboard-preview.webp'],
 		},
 	};
 };
@@ -49,7 +49,7 @@ export const generateStructuredData = () => {
 			'Recently played tracks',
 			'Time range selection for stats',
 		],
-		screenshot: '/previews/dashboard-preview.jpeg',
+		screenshot: '/images/optimized/previews/dashboard-preview.webp',
 		browserRequirements: 'Requires JavaScript. Requires HTML5.',
 		operatingSystem: 'Any',
 	};

@@ -86,19 +86,19 @@ export async function generateImageSitemap(): Promise<MetadataRoute.Sitemap> {
 
 	return [
 		{
-			url: `${baseUrl}/previews/dashboard-preview.jpeg`,
+			url: `${baseUrl}/previews/dashboard-preview.png`,
 			lastModified: new Date('2024-01-01'),
 			changeFrequency: 'yearly',
 			priority: 0.8,
 		},
 		{
-			url: `${baseUrl}/previews/history-preview.jpeg`,
+			url: `${baseUrl}/previews/history-preview.png`,
 			lastModified: new Date('2024-01-01'),
 			changeFrequency: 'yearly',
 			priority: 0.7,
 		},
 		{
-			url: `${baseUrl}/previews/playlist-generator-preview.jpeg`,
+			url: `${baseUrl}/previews/playlist-generator-preview.png`,
 			lastModified: new Date('2024-01-01'),
 			changeFrequency: 'yearly',
 			priority: 0.7,

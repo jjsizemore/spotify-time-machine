@@ -6,7 +6,7 @@ export const metadata: Metadata = generateEnhancedMetadata({
 	description:
 		'Explore your Spotify listening history month by month. Discover your musical journey through time, see what you were listening to in any given month, and create playlists from your past favorites.',
 	path: '/history',
-	image: '/previews/history-preview.jpeg',
+	image: '/images/optimized/previews/history-preview.webp',
 	tags: [
 		'music history',
 		'Spotify timeline',
