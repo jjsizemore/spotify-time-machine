@@ -8,7 +8,22 @@
 
 ## Recent Updates ✨
 
-### ✅ Component Architecture Simplification (Latest)
+### ✅ Complete Tailwind CSS v4 Upgrade (Latest)
+- **🔧 Full v4 Migration**: Complete upgrade following [Tailwind CSS v4 upgrade guide](https://tailwindcss.com/docs/upgrade-guide) and [Flowbite v4 documentation](https://flowbite.com/docs/customize/configuration/)
+  - ✅ Removed deprecated `@tailwind` directives and replaced with `@import "tailwindcss"`
+  - ✅ Updated `@plugin "flowbite/plugin"` syntax (was using incorrect flowbite-react path)
+  - ✅ Fixed `@source` directives to properly scan `node_modules/flowbite` and `node_modules/flowbite-react`
+  - ✅ Added proper `@theme` configuration with Spotify color palette integration
+  - ✅ Removed deprecated `tailwind.config.ts` file (v4 uses CSS-based config)
+  - ✅ Added `@custom-variant dark` for proper dark mode support
+  - ✅ Replaced deprecated `@layer utilities` with proper v4 patterns
+  - ✅ Updated deprecated utilities: `flex-shrink-*` → `shrink-*`
+  - ✅ Fixed deprecated opacity modifiers: `hover:bg-opacity-90` → `hover:bg-green-500/90`
+- **✅ Build Verification**: Confirmed working CSS compilation and successful production build
+- **🎨 Enhanced Theming**: Integrated Spotify colors into Tailwind's theme system for consistent utility class generation
+- **📋 Compliance**: Now fully compliant with Tailwind CSS v4 standards and modern browser support (Safari 16.4+, Chrome 111+, Firefox 128+)
+
+### ✅ Component Architecture Simplification
 - **Consolidated Client Components**: Moved client-side logic from separate `*Client.tsx` files directly into `page.tsx` files
   - `SignInClient.tsx` → `src/app/auth/signin/page.tsx`
   - `ThankYouClient.tsx` → `src/app/thank-you/page.tsx`
@@ -101,7 +116,7 @@
 - Use the Next.js App Router pattern (src/app directory, server/client components, layouts, etc.)
 - Use Tailwind CSS for all styling and utility classes
 - Follow the enhanced error handling patterns with `SpotifyApiError`
-- Adhere to the color palette and theming defined in `src/app/globals.css` via CSS variables
+- Adhere to the color palette and theming defined in `src/app/input.css` via CSS variables
 
 ## Key Architectural Patterns & Components
 

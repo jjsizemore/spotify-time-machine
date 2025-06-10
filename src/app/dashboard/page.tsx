@@ -115,7 +115,7 @@ export default function Dashboard() {
 						</div>
 						<button
 							onClick={() => setShowApiNotice(false)}
-							className="text-yellow-400 hover:text-yellow-300 p-1 flex-shrink-0"
+							className="text-yellow-400 hover:text-yellow-300 p-1 shrink-0"
 							aria-label="Dismiss notice"
 						>
 							<svg

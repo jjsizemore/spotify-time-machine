@@ -1,10 +1,39 @@
 @import "tailwindcss";
-@plugin "flowbite-react/plugin/tailwindcss";
-@source "../../.flowbite-react/class-list.json";
-@import "flowbite";
-@import "flowbite/src/themes/default";
 
-@tailwind utilities;
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite";
+@source "../node_modules/flowbite-react";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	/* Spotify color palette */
+	--color-spotify-green: #1db954;
+	--color-spotify-black: #191414;
+	--color-spotify-dark-gray: #121212;
+	--color-spotify-medium-gray: #535353;
+	--color-spotify-light-gray: #b3b3b3;
+
+	/* Theme system colors */
+	--color-primary-50: #eff6ff;
+	--color-primary-100: #dbeafe;
+	--color-primary-200: #bfdbfe;
+	--color-primary-300: #93c5fd;
+	--color-primary-400: #60a5fa;
+	--color-primary-500: #3b82f6;
+	--color-primary-600: #2563eb;
+	--color-primary-700: #1d4ed8;
+	--color-primary-800: #1e40af;
+	--color-primary-900: #1e3a8a;
+
+	/* Font families */
+	--font-sans: "system-ui", "Segoe UI", "Roboto", "Helvetica Neue", "Arial",
+		"sans-serif";
+	--font-body: "system-ui", "Segoe UI", "Roboto", "Helvetica Neue", "Arial",
+		"sans-serif";
+	--font-mono: "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas",
+		"Liberation Mono", "Courier New", "monospace";
+}
 
 /* Base theme variables */
 :root {
@@ -83,9 +112,7 @@ html.theme-light {
 	background-color: var(--bg-tertiary-hover);
 }
 
-@layer utilities {
-	/* Add any additional utility classes here */
-}
+/* Additional utility classes can be added here if needed */
 
 @theme inline {
 	--color-background: var(--background);
@@ -133,7 +160,7 @@ body {
 	.spotify-button {
 		background-color: var(--accent-color);
 		color: var(--text-on-accent);
-		@reference font-bold px-6 py-3 rounded-full shadow-lg hover:bg-opacity-90 transition text-lg flex items-center gap-2;
+		@reference font-bold px-6 py-3 rounded-full shadow-lg hover:bg-green-500/90 transition text-lg flex items-center gap-2;
 	}
 
 	.spotify-button:hover {
@@ -142,7 +169,7 @@ body {
 
 	.card {
 		background-color: var(--bg-secondary);
-		@reference p-6 rounded-lg hover:bg-opacity-80 transition;
+		@reference p-6 rounded-lg hover:bg-gray-800/80 transition;
 	}
 	.card:hover {
 		background-color: rgba(var(--bg-secondary-rgb), 0.8);
@@ -151,12 +178,6 @@ body {
 
 /* Helper for card hover if bg-secondary is hex. This assumes --bg-secondary is #181818 */
 /* You might need to adjust if your bundler/CSS setup supports color manipulation or define another variable */
-
-@layer utilities {
-	.hover\:bg-bg-secondary-80:hover {
-		background-color: rgba(24, 24, 24, 0.8);
-	}
-}
 
 /* Critical CSS for Core Web Vitals optimization */
 .layout-content {

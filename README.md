@@ -187,7 +187,7 @@ lint:
 
 The project uses Tailwind CSS for utility-first styling, combined with a custom Spotify-themed styling system:
 
-- **Global Styles & Theming:** Base styles and CSS custom properties defined in `src/app/globals.css`
+- **Global Styles & Theming:** Base styles and CSS custom properties defined in `src/app/input.css`
 - **Tailwind CSS:** Utility-first styling approach with modern configuration
 - **Reusable Component Classes:** Pre-defined classes for common elements
 - **Responsive Design:** Mobile-first approach

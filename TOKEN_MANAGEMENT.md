@@ -515,7 +515,7 @@ export default config;
 ### **Color System Updates**
 
 ```css
-/* src/app/globals.css */
+/* src/app/input.css */
 :root {
   --spotify-green: #1db954;    /* Lowercase hex for consistency */
   --spotify-black: #191414;

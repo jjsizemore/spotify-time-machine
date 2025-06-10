@@ -281,7 +281,7 @@ export default function GenreTrendsVisualization() {
 
 									return (
 										<div key={period} className="flex items-center">
-											<div className="w-16 flex-shrink-0 text-xs text-spotify-light-gray">
+											<div className="w-16 shrink-0 text-xs text-spotify-light-gray">
 												{period}
 											</div>
 											<div className="flex-grow h-8 flex rounded-full overflow-hidden">

@@ -4,7 +4,7 @@ import TokenStatus from '@/components/TokenStatus';
 import WebVitalsMonitor from '@/components/WebVitalsMonitor';
 import React from 'react';
 import { NextAuthProvider } from '../components/providers/NextAuthProvider';
-import './spotify.css';
+import './output.css';
 import {
 	ADVANCED_META_TAGS,
 	generateEnhancedMetadata,
@@ -14,6 +14,7 @@ import {
 import { Analytics } from '@vercel/analytics/react';
 import { ThemeModeScript } from 'flowbite-react';
 import Script from 'next/script';
+import { PostHogProvider } from './providers';
 
 // Enhanced metadata for 2025 SEO standards
 export const metadata = generateEnhancedMetadata({
@@ -139,9 +140,11 @@ export default function RootLayout({
 				/>
 
 				<NextAuthProvider>
-					<LayoutContent>{children}</LayoutContent>
-					<TokenStatus />
-					<WebVitalsMonitor />
+					<PostHogProvider>
+						<LayoutContent>{children}</LayoutContent>
+						<TokenStatus />
+						<WebVitalsMonitor />
+					</PostHogProvider>
 				</NextAuthProvider>
 
 				{/* Vercel Analytics */}
