@@ -1,5 +1,6 @@
 'use client';
 
+import Breadcrumb from '@/components/Breadcrumb';
 import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
 import FeatureCard from '@/components/FeatureCard';
 import PageContainer from '@/components/PageContainer';
@@ -9,10 +10,7 @@ import TopArtists from '@/components/TopArtists';
 import TopGenres from '@/components/TopGenres';
 import TopTracks from '@/components/TopTracks';
 import { TimeRange, useUserStats } from '@/hooks/useUserStats';
-import {
-	generateBreadcrumbSchema,
-	generateWebApplicationSchema,
-} from '@/lib/seo';
+import { generateWebApplicationSchema } from '@/lib/seo';
 import { SpotifyTimeRange, timeRangeDisplays } from '@/lib/timeRanges';
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';
@@ -41,10 +39,6 @@ export default function Dashboard() {
 		name: 'Dashboard - Spotify Time Machine',
 		description:
 			'View your personalized Spotify listening statistics, including top artists, tracks, and genres. Analyze your music trends and discover insights about your listening habits.',
-		breadcrumb: generateBreadcrumbSchema([
-			{ name: 'Home', url: '/' },
-			{ name: 'Dashboard', url: '/dashboard' },
-		]),
 		mainEntity: {
 			'@type': 'DataVisualization',
 			name: 'Spotify Listening Statistics',
@@ -75,38 +69,12 @@ export default function Dashboard() {
 				}}
 			/>
 
-			{/* Breadcrumb Schema */}
-			<Script
-				id="breadcrumb-schema"
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{
-					__html: JSON.stringify(
-						generateBreadcrumbSchema([
-							{ name: 'Home', url: '/' },
-							{ name: 'Dashboard', url: '/dashboard' },
-						])
-					),
-				}}
-			/>
-
 			{/* SEO-optimized heading structure */}
 			<header className="mb-8">
 				<h1 className="sr-only">
 					Spotify Music Dashboard - Your Personal Listening Analytics
 				</h1>
-				<nav aria-label="Breadcrumb" className="mb-4">
-					<ol className="flex items-center space-x-2 text-sm text-spotify-light-gray">
-						<li>
-							<a href="/" className="hover:text-spotify-green">
-								Home
-							</a>
-						</li>
-						<li className="text-spotify-gray">/</li>
-						<li className="text-spotify-green" aria-current="page">
-							Dashboard
-						</li>
-					</ol>
-				</nav>
+				<Breadcrumb items={[{ name: 'Home', url: '/dashboard' }]} />
 			</header>
 
 			{/* API Restriction Notice for Dashboard */}

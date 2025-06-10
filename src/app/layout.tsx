@@ -95,23 +95,7 @@ export default function RootLayout({
 				/>
 			</head>
 			<body className="bg-spotify-black text-spotify-light-gray font-sans min-h-screen flex flex-col layout-content">
-				{/* Core Web Vitals and Performance Monitoring */}
-				<Script
-					id="web-vitals"
-					strategy="afterInteractive"
-					dangerouslySetInnerHTML={{
-						__html: `
-							// Initialize Core Web Vitals monitoring
-							if ('web-vitals' in window) {
-								window['web-vitals'].getCLS(console.log);
-								window['web-vitals'].getFID(console.log);
-								window['web-vitals'].getFCP(console.log);
-								window['web-vitals'].getLCP(console.log);
-								window['web-vitals'].getTTFB(console.log);
-							}
-						`,
-					}}
-				/>
+				{/* Core Web Vitals monitoring is handled by WebVitalsMonitor component */}
 
 				{/* Enhanced Structured Data */}
 				<Script

@@ -135,32 +135,26 @@ const nextConfig: NextConfig = {
 		];
 	},
 
-	// Bundle analysis and optimization
-	webpack: (config, { dev, isServer }) => {
-		// Bundle analyzer in development
-		if (dev && !isServer) {
-			config.optimization.splitChunks = {
-				...config.optimization.splitChunks,
-				cacheGroups: {
-					...config.optimization.splitChunks?.cacheGroups,
-					spotify: {
-						name: 'spotify',
-						test: /[\\/]lib[\\/]spotify/,
-						chunks: 'all',
-						priority: 10,
-					},
-					vendor: {
-						name: 'vendor',
-						test: /[\\/]node_modules[\\/]/,
-						chunks: 'all',
-						priority: 5,
-					},
-				},
-			};
-		}
-
-		return config;
+	// PostHog rewrites
+	async rewrites() {
+		return [
+			{
+				source: '/ingest/static/:path*',
+				destination: 'https://us-assets.i.posthog.com/static/:path*',
+			},
+			{
+				source: '/ingest/:path*',
+				destination: 'https://us.i.posthog.com/:path*',
+			},
+			{
+				source: '/ingest/decide',
+				destination: 'https://us.i.posthog.com/decide',
+			},
+		];
 	},
+
+	// Required to support PostHog trailing slash API requests
+	skipTrailingSlashRedirect: true,
 
 	// Output configuration for deployment
 	output: 'standalone',

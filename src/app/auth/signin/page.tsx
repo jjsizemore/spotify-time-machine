@@ -71,14 +71,6 @@ function SignInContent() {
 	);
 }
 
-export default function SignIn() {
-	return (
-		<Suspense fallback={<SignInFallback />}>
-			<SignInContent />
-		</Suspense>
-	);
-}
-
 // Fallback UI component
 function SignInFallback() {
 	return (
@@ -88,5 +80,13 @@ function SignInFallback() {
 				<p className="text-spotify-light-gray mt-4">Loading sign-in page...</p>
 			</div>
 		</div>
+	);
+}
+
+export default function SignInPage() {
+	return (
+		<Suspense fallback={<SignInFallback />}>
+			<SignInContent />
+		</Suspense>
 	);
 }

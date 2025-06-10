@@ -1,4 +1,3 @@
-import { useSession } from 'next-auth/react';
 import React from 'react';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -34,18 +33,7 @@ export default function PageContainer({
 	maxWidth = '6xl',
 	isAuthLayout = false,
 }: PageContainerProps) {
-	const { status } = useSession();
-
-	// Global loading state based on session status
-	if (status === 'loading' && showLoadingOverlay) {
-		return (
-			<div className="min-h-screen bg-spotify-black flex items-center justify-center">
-				<LoadingSpinner size="lg" />
-			</div>
-		);
-	}
-
-	// Component-specific loading state
+	// Component-specific loading state only
 	if (isLoading && showLoadingOverlay) {
 		return (
 			<div className="min-h-screen bg-spotify-black flex items-center justify-center">

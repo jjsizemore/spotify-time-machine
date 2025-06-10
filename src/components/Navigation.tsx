@@ -59,12 +59,8 @@ export default function Navigation({ user }: NavigationProps) {
 						<Link
 							key={label}
 							href={href}
-							className={`text-sm font-medium ${
-								pathname === href
-									? 'text-spotify-green'
-									: 'text-spotify-light-gray hover:text-spotify-white'
-							}`}
-							style={getTextStyle(hovered === label)}
+							className={`text-sm font-medium transition-colors`}
+							style={getTextStyle(hovered === label, pathname === href)}
 							onMouseOver={() => setHovered(label)}
 							onMouseOut={() => setHovered(null)}
 						>

@@ -48,12 +48,15 @@ export default function WebVitalsMonitor() {
 						}
 					};
 
-					// Initialize all Core Web Vitals with web-vitals v5 API
-					if (webVitals.onCLS) webVitals.onCLS(sendToAnalytics);
-					if (webVitals.onINP) webVitals.onINP(sendToAnalytics); // INP replaces FID in v5
-					if (webVitals.onFCP) webVitals.onFCP(sendToAnalytics);
-					if (webVitals.onLCP) webVitals.onLCP(sendToAnalytics);
-					if (webVitals.onTTFB) webVitals.onTTFB(sendToAnalytics);
+					// Initialize Core Web Vitals (web-vitals v5.0.2)
+					// Core Web Vitals: CLS, INP, LCP
+					webVitals.onCLS(sendToAnalytics);
+					webVitals.onINP(sendToAnalytics); // INP replaced FID in v5
+					webVitals.onLCP(sendToAnalytics);
+
+					// Other Web Vitals: FCP, TTFB
+					webVitals.onFCP(sendToAnalytics);
+					webVitals.onTTFB(sendToAnalytics);
 				})
 				.catch((error) => {
 					console.error('Failed to load web-vitals:', error);

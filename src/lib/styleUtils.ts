@@ -43,13 +43,14 @@ export function getIconStyle(isHover: boolean) {
 }
 
 /**
- * Returns the text style object based on hover state.
+ * Returns the text style object based on hover and selection state.
  * @param isHover - Whether the text is hovered.
+ * @param isSelected - Whether the text is selected (optional).
  * @returns The style object for the text.
  */
-export function getTextStyle(isHover: boolean) {
+export function getTextStyle(isHover: boolean, isSelected?: boolean) {
 	return {
-		color: isHover ? '#1db954' : '#b3b3b3', // spotify-green : spotify-light-gray
+		color: isHover || isSelected ? '#1db954' : '#b3b3b3', // spotify-green : spotify-light-gray
 		transition: 'color 0.3s',
 	};
 }
