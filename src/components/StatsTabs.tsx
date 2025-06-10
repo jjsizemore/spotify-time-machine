@@ -26,10 +26,10 @@ export default function StatsTabs({ activeTab, onChange }: StatsTabsProps) {
 						<button
 							key={tab.id}
 							onClick={() => onChange(tab.id)}
-							style={getTextStyle(hoveredTab === tab.id)}
+							style={getTextStyle(hoveredTab === tab.id, activeTab === tab.id)}
 							onMouseOver={() => setHoveredTab(tab.id)}
 							onMouseOut={() => setHoveredTab(null)}
-							className={`px-3 md:px-4 py-2 md:py-3 text-sm font-medium transition-colors relative whitespace-nowrap`}
+							className={`px-3 md:px-4 py-2 md:py-3 cursor-pointer text-sm font-medium transition-colors relative whitespace-nowrap`}
 						>
 							{tab.label}
 							{activeTab === tab.id && (

@@ -1,6 +1,7 @@
 'use client';
 
 import ActionButton from '@/components/ActionButton';
+import Breadcrumb from '@/components/Breadcrumb';
 import FilterSelector from '@/components/FilterSelector';
 import FormField from '@/components/FormField';
 import PageContainer from '@/components/PageContainer';
@@ -10,13 +11,13 @@ import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
 import { Artist } from '@/hooks/useUserStats';
 import { GenreCount, extractTopGenres } from '@/lib/genreUtils';
+import { generateWebApplicationSchema } from '@/lib/seo';
 import { SpotifyApiError } from '@/lib/spotify';
 import { createPlaylist } from '@/lib/spotifyTrackUtils';
 import { format, isAfter, isBefore, parseISO } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';
 import React, { useState, useEffect } from 'react';
-import { generateStructuredData } from './metadata';
 
 export default function PlaylistGeneratorPage() {
 	const { status } = useSession();
@@ -291,17 +292,43 @@ export default function PlaylistGeneratorPage() {
 
 	return (
 		<PageContainer
-			title="Custom Playlist Generator"
-			description="Create a playlist from your liked songs within a specific date range."
 			isLoading={status === 'loading' || isLoadingTracks}
-			maxWidth="3xl"
+			maxWidth="7xl"
+			className="min-h-screen pb-20"
 		>
+			{/* SEO-optimized heading structure */}
+			<header className="mb-8">
+				<h1 className="sr-only">
+					Playlist Generator - Create Custom Spotify Playlists
+				</h1>
+				<Breadcrumb
+					items={[
+						{ name: 'Home', url: '/dashboard' },
+						{ name: 'Playlist Generator', url: '/playlist-generator' },
+					]}
+				/>
+			</header>
 			{/* Structured Data */}
 			<Script
 				id="structured-data"
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{
-					__html: JSON.stringify(generateStructuredData()),
+					__html: JSON.stringify(
+						generateWebApplicationSchema({
+							'@type': 'WebPage',
+							name: 'Playlist Generator - Spotify Time Machine',
+							description:
+								'Create personalized playlists by selecting custom date ranges and filtering by your favorite genres and artists.',
+							featureList: [
+								'Custom date range selection',
+								'Genre-based filtering',
+								'Artist-based filtering',
+								'One-click playlist creation',
+								'Instant playlist sharing',
+								'Keyboard shortcuts support',
+							],
+						})
+					),
 				}}
 			/>
 

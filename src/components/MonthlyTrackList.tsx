@@ -47,14 +47,14 @@ export default function MonthlyTrackList({
 			{/* Month Header */}
 			<div
 				className="bg-spotify-medium-gray py-4 px-6 flex justify-between items-center cursor-pointer"
-				style={getTextStyle(hovered === month)}
+				style={getTextStyle(hovered === month, expanded)}
 				onMouseOver={() => setHovered(month)}
 				onMouseOut={() => setHovered(null)}
 				onClick={() => onToggle(month)}
 			>
 				<h2
 					className="text-xl font-bold text-spotify-white"
-					style={getTextStyle(hovered === month)}
+					style={getTextStyle(hovered === month, expanded)}
 				>
 					{month} • {tracks.length} tracks
 				</h2>
@@ -70,7 +70,7 @@ export default function MonthlyTrackList({
 					</button>
 					<span
 						className="text-white text-2xl"
-						style={getTextStyle(hovered === month)}
+						style={getTextStyle(hovered === month, expanded)}
 					>
 						{expanded ? '−' : '+'}
 					</span>

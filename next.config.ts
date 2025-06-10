@@ -135,33 +135,6 @@ const nextConfig: NextConfig = {
 		];
 	},
 
-	// Bundle analysis and optimization
-	webpack: (config, { dev, isServer }) => {
-		// Bundle analyzer in development
-		if (dev && !isServer) {
-			config.optimization.splitChunks = {
-				...config.optimization.splitChunks,
-				cacheGroups: {
-					...config.optimization.splitChunks?.cacheGroups,
-					spotify: {
-						name: 'spotify',
-						test: /[\\/]lib[\\/]spotify/,
-						chunks: 'all',
-						priority: 10,
-					},
-					vendor: {
-						name: 'vendor',
-						test: /[\\/]node_modules[\\/]/,
-						chunks: 'all',
-						priority: 5,
-					},
-				},
-			};
-		}
-
-		return config;
-	},
-
 	// Output configuration for deployment
 	output: 'standalone',
 

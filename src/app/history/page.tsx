@@ -1,5 +1,6 @@
 'use client';
 
+import Breadcrumb from '@/components/Breadcrumb';
 import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import MonthlyTrackList from '@/components/MonthlyTrackList';
@@ -8,6 +9,7 @@ import Toast from '@/components/Toast';
 import TrackItem from '@/components/TrackItem';
 import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
+import { generateWebApplicationSchema } from '@/lib/seo';
 import {
 	MonthlyTracks,
 	SavedTrack,
@@ -24,7 +26,6 @@ import { format, parse } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';
 import React, { useState, useEffect } from 'react';
-import { generateStructuredData } from './metadata';
 
 export default function HistoryPage() {
 	const { status } = useSession();
@@ -152,71 +153,107 @@ export default function HistoryPage() {
 	}
 
 	return (
-		<DataFetcherAndControlsWrapper
-			title="Your Monthly Listening History"
-			isLoading={isOverallLoading}
-			isProcessing={isProcessingData}
-			error={
-				tracksError
-					? typeof tracksError === 'string'
-						? new Error(tracksError)
-						: tracksError
-					: null
-			}
-			isEmpty={isEmpty}
-			emptyDataMessage="No listening history found for the selected period."
-			currentTimeRange={currentTimeRange}
-			setTimeRange={setTimeRange}
-			isLoadingRange={isLoadingRange}
-			timeRangeDisplay={timeRangeDisplays.visualization}
+		<PageContainer
+			isLoading={status === 'loading'}
+			maxWidth="7xl"
+			className="min-h-screen pb-20"
 		>
-			{/* Structured Data */}
-			<Script
-				id="structured-data"
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{
-					__html: JSON.stringify(generateStructuredData()),
-				}}
-			/>
-
-			{showToast && (
-				<Toast
-					message={toastMessage}
-					onDismiss={() => setShowToast(false)}
-					type={
-						toastMessage.includes('Failed') || toastMessage.includes('Cannot')
-							? 'error'
-							: 'success'
-					}
+			{/* SEO-optimized heading structure */}
+			<header className="mb-8">
+				<h1 className="sr-only">
+					Music History - Your Monthly Listening Journey
+				</h1>
+				<Breadcrumb
+					items={[
+						{ name: 'Home', url: '/dashboard' },
+						{ name: 'History', url: '/history' },
+					]}
 				/>
-			)}
+			</header>
 
-			{/* Display content only if not in initial overall loading and not empty */}
-			{!isOverallLoading && !isEmpty && (
-				<main className="space-y-6" role="main">
-					{monthlyTracks.map((month) => (
-						<article
-							key={month.month}
-							aria-label={`Tracks from ${month.month}`}
-						>
-							<MonthlyTrackList
-								month={month.month}
-								tracks={month.tracks}
-								expanded={month.expanded}
-								onToggle={toggleMonth}
-								onCreatePlaylist={createMonthlyPlaylist}
-								renderTrackItem={renderTrackItem}
-							/>
-						</article>
-					))}
-				</main>
-			)}
-			{/* Show a loading text if tracks are still being fetched by the hook but not for the initial load handled by wrapper*/}
-			{isLoadingTracksFromHook && tracks.length > 0 && !isOverallLoading && (
-				<div className="mt-8 text-center text-spotify-light-gray" role="status">
-					Updating your listening history...
-				</div>
-			)}
-		</DataFetcherAndControlsWrapper>
+			<DataFetcherAndControlsWrapper
+				title="Your Monthly Listening History"
+				isLoading={isOverallLoading}
+				isProcessing={isProcessingData}
+				error={
+					tracksError
+						? typeof tracksError === 'string'
+							? new Error(tracksError)
+							: tracksError
+						: null
+				}
+				isEmpty={isEmpty}
+				emptyDataMessage="No listening history found for the selected period."
+				currentTimeRange={currentTimeRange}
+				setTimeRange={setTimeRange}
+				isLoadingRange={isLoadingRange}
+				timeRangeDisplay={timeRangeDisplays.visualization}
+			>
+				{/* Structured Data */}
+				<Script
+					id="structured-data"
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify(
+							generateWebApplicationSchema({
+								'@type': 'WebPage',
+								name: 'Music History - Spotify Time Machine',
+								description:
+									'Travel back in time and explore your liked tracks month by month. Create playlists instantly from any time period.',
+								featureList: [
+									'Monthly track history view',
+									'One-click playlist creation',
+									'Track added date information',
+									'Expandable monthly sections',
+									'Time range selection',
+								],
+							})
+						),
+					}}
+				/>
+
+				{showToast && (
+					<Toast
+						message={toastMessage}
+						onDismiss={() => setShowToast(false)}
+						type={
+							toastMessage.includes('Failed') || toastMessage.includes('Cannot')
+								? 'error'
+								: 'success'
+						}
+					/>
+				)}
+
+				{/* Display content only if not in initial overall loading and not empty */}
+				{!isOverallLoading && !isEmpty && (
+					<main className="space-y-6" role="main">
+						{monthlyTracks.map((month) => (
+							<article
+								key={month.month}
+								aria-label={`Tracks from ${month.month}`}
+							>
+								<MonthlyTrackList
+									month={month.month}
+									tracks={month.tracks}
+									expanded={month.expanded}
+									onToggle={toggleMonth}
+									onCreatePlaylist={createMonthlyPlaylist}
+									renderTrackItem={renderTrackItem}
+								/>
+							</article>
+						))}
+					</main>
+				)}
+				{/* Show a loading text if tracks are still being fetched by the hook but not for the initial load handled by wrapper*/}
+				{isLoadingTracksFromHook && tracks.length > 0 && !isOverallLoading && (
+					<div
+						className="mt-8 text-center text-spotify-light-gray"
+						role="status"
+					>
+						Updating your listening history...
+					</div>
+				)}
+			</DataFetcherAndControlsWrapper>
+		</PageContainer>
 	);
 }

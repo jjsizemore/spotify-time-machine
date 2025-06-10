@@ -21,18 +21,6 @@ export default function manifest(): MetadataRoute.Manifest {
 				type: 'image/svg+xml',
 				purpose: 'maskable',
 			},
-			{
-				src: '/images/optimized/root/spotify-icon.webp',
-				sizes: '192x192',
-				type: 'image/webp',
-				purpose: 'any',
-			},
-			{
-				src: '/images/optimized/root/spotify-icon.webp',
-				sizes: '512x512',
-				type: 'image/webp',
-				purpose: 'any',
-			},
 		],
 		screenshots: [
 			{
