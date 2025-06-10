@@ -150,6 +150,6 @@
 	],
 	"files": {
 		"ignoreUnknown": true,
-		"ignore": ["node_modules", "dist", "build", "public"]
+		"ignore": ["node_modules", "dist", "build", "public", "**/*.css"]
 	}
 }

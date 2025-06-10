@@ -109,11 +109,5 @@ export async function generateImageSitemap(): Promise<MetadataRoute.Sitemap> {
 			changeFrequency: 'yearly',
 			priority: 0.9,
 		},
-		{
-			url: `${baseUrl}/spotify-icon.png`,
-			lastModified: new Date('2024-01-01'),
-			changeFrequency: 'yearly',
-			priority: 0.9,
-		},
 	];
 }

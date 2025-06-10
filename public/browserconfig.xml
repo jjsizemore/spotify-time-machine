@@ -2,7 +2,7 @@
 <browserconfig>
     <msapplication>
         <tile>
-            <square150x150logo src="/spotify-icon.png"/>
+            <square150x150logo src="/favicon.svg"/>
             <TileColor>#1DB954</TileColor>
         </tile>
     </msapplication>

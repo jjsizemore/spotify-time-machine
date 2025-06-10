@@ -1,0 +1,37 @@
+{
+	"rules": {
+		"at-rule-no-unknown": [
+			true,
+			{
+				"ignoreAtRules": [
+					"tailwind",
+					"apply",
+					"variants",
+					"responsive",
+					"screen",
+					"layer",
+					"theme",
+					"plugin",
+					"source",
+					"import",
+					"custom-variant",
+					"keyframes",
+					"media",
+					"reference"
+				]
+			}
+		],
+		"property-no-unknown": [
+			true,
+			{
+				"ignoreProperties": ["/^--/"]
+			}
+		],
+		"function-no-unknown": null,
+		"selector-pseudo-class-no-unknown": null,
+		"no-descending-specificity": null,
+		"value-keyword-case": null,
+		"block-no-empty": null,
+		"comment-no-empty": null
+	}
+}

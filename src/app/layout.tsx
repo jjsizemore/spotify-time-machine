@@ -80,9 +80,9 @@ export default function RootLayout({
 				<meta name="referrer" content={ADVANCED_META_TAGS['referrer']} />
 
 				{/* PWA and Performance */}
-				<link rel="manifest" href="/manifest.json" />
+				<link rel="manifest" href="/manifest.webmanifest" />
 				<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-				<link rel="apple-touch-icon" href="/spotify-icon.png" />
+				<link rel="apple-touch-icon" href="/favicon.svg" />
 
 				{/* DNS Prefetch for Performance */}
 				<link rel="dns-prefetch" href="//i.scdn.co" />

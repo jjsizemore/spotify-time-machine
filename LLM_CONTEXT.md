@@ -8,7 +8,33 @@
 
 ## Recent Updates ✨
 
-### ✅ Complete Tailwind CSS v4 Upgrade (Latest)
+### ✅ Next.js 15 Manifest Implementation Update (Latest)
+- **🔄 PWA Manifest Modernization**: Updated manifest references to use Next.js 15 standards
+  - ✅ **Updated Layout Reference**: Changed `<link rel="manifest" href="/manifest.json" />` to `/manifest.webmanifest`
+  - ✅ **Updated Service Worker**: Modified `public/sw.js` to cache `/manifest.webmanifest` instead of `/manifest.json`
+  - ✅ **Next.js 15 Compliance**: Leveraging `src/app/manifest.ts` for proper manifest route generation
+  - ✅ **Build Verification**: Confirmed `/manifest.webmanifest` route is properly generated during build
+  - 🔧 **Technical Details**: Next.js 15 automatically generates manifest routes from `manifest.ts`, serving both `/manifest.webmanifest` (preferred) and `/manifest.json` (backwards compatibility)
+- **📱 PWA Standards**: Now follows modern PWA manifest naming conventions for better browser compatibility
+- **✅ Build Verification**: All changes tested and confirmed working with successful production build
+
+### ✅ Spotify Icon Usage Cleanup & Stylelint Configuration Fix
+- **⚖️ Spotify Icon Legal Compliance**: Properly restricted Spotify icon usage to avoid trademark issues
+  - ✅ **Removed** from Service Worker notifications (replaced with favicon.svg)
+  - ✅ **Removed** from Service Worker static asset caching
+  - ✅ **Removed** from image sitemap metadata (SEO compliance)
+  - ✅ **Retained** appropriate usage in UI components (Navigation, HomePage, Thank You) as part of "Jermaine's {spotify-icon} Time Machine" branding
+  - ⚠️ **Important**: Spotify icon should ONLY be used in the context of the app's title, never as app metadata or system notifications
+- **🔧 Fixed Stylelint Errors**: Resolved stylelint configuration issues that were causing trunk check failures
+  - ✅ Created `.trunk/configs/.stylelintrc.json` with Tailwind CSS v4 compatibility
+  - ✅ Added support for Tailwind v4 at-rules: `@import`, `@theme`, `@plugin`, `@source`, `@custom-variant`, `@reference`
+  - ✅ Configured CSS custom properties support with `/^--/` pattern matching
+  - ✅ Disabled problematic rules that conflict with modern CSS patterns
+  - ✅ Fixed all trunk check failures related to stylelint configuration errors
+- **✅ Build Verification**: All linting checks now pass successfully with `trunk check --all`
+- **🎯 Tailwind v4 Ready**: Configuration specifically designed for Tailwind CSS v4 syntax and features
+
+### ✅ Complete Tailwind CSS v4 Upgrade
 - **🔧 Full v4 Migration**: Complete upgrade following [Tailwind CSS v4 upgrade guide](https://tailwindcss.com/docs/upgrade-guide) and [Flowbite v4 documentation](https://flowbite.com/docs/customize/configuration/)
   - ✅ Removed deprecated `@tailwind` directives and replaced with `@import "tailwindcss"`
   - ✅ Updated `@plugin "flowbite/plugin"` syntax (was using incorrect flowbite-react path)

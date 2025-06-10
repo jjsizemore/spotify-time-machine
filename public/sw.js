@@ -12,8 +12,8 @@ const STATIC_ASSETS = [
 	'/history',
 	'/playlist-generator',
 	'/favicon.svg',
-	'/spotify-icon.png',
-	'/manifest.json',
+
+	'/manifest.webmanifest',
 	'/_next/static/css/app/layout.css',
 	'/_next/static/chunks/webpack.js',
 ];
@@ -168,7 +168,7 @@ self.addEventListener('push', (event) => {
 		const data = event.data.json();
 		const options = {
 			body: data.body,
-			icon: '/spotify-icon.png',
+			icon: '/favicon.svg',
 			badge: '/favicon.svg',
 			vibrate: [100, 50, 100],
 			data: {
@@ -179,7 +179,7 @@ self.addEventListener('push', (event) => {
 				{
 					action: 'explore',
 					title: 'View Dashboard',
-					icon: '/spotify-icon.png',
+					icon: '/favicon.svg',
 				},
 				{
 					action: 'close',
