@@ -45,6 +45,15 @@
    - ✅ Mobile-first responsive design enhancements
    - ✅ Critical CSS optimization for CLS reduction
 
+### Recently Completed ✅
+6. **🆕 Spotify API Restriction Notifications**
+   - ✅ Prominent notification banners on home page and dashboard
+   - ✅ Explains development mode limitations and allowlist restrictions
+   - ✅ Provides clear call-to-action buttons for user advocacy
+   - ✅ Links to developer community discussion and Spotify support
+   - ✅ Accurate information based on Spotify quota modes documentation
+   - ✅ Dismissible UI with responsive design
+
 ### Remaining High Priority Features
 1. **PKCE Implementation for Spotify OAuth**
    - Enhancing security of the authentication flow

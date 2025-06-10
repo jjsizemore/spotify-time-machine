@@ -6,11 +6,13 @@ import SpotifySignInButton from '@/components/SpotifySignInButton';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
 	const { status } = useSession();
 	const router = useRouter();
+	const [showApiRestrictionNotice, setShowApiRestrictionNotice] =
+		useState(true);
 
 	// Redirect to dashboard if already authenticated
 	useEffect(() => {
@@ -34,6 +36,128 @@ export default function Home() {
 			role="main"
 		>
 			<div className="flex flex-col items-center w-full max-w-4xl xl:max-w-6xl py-12">
+				{/* Spotify API Restriction Notice */}
+				{showApiRestrictionNotice && (
+					<section
+						aria-labelledby="api-restriction-heading"
+						className="w-full max-w-4xl mx-auto mb-8 bg-red-900/20 border border-red-500/50 rounded-lg p-6 shadow-lg"
+					>
+						<div className="flex items-start justify-between">
+							<div className="flex-1">
+								<div className="flex items-center mb-4">
+									<div className="text-2xl mr-3">⚠️</div>
+									<h2
+										id="api-restriction-heading"
+										className="text-xl font-bold text-red-400"
+									>
+										Important Notice: App in Development Mode
+									</h2>
+								</div>
+
+								<div className="space-y-4 text-sm text-spotify-light-gray">
+									<div className="bg-red-900/30 p-4 rounded-md">
+										<p className="text-red-300 font-semibold mb-2">
+											🚨 This app is currently stuck in development mode due to
+											Spotify's new API restrictions.
+										</p>
+										<ul className="list-disc list-inside space-y-1 text-red-200">
+											<li>
+												Only users manually added to an allowlist can use this
+												app (max 25 users)
+											</li>
+											<li>
+												Severely restricted rate limits compared to extended
+												quota mode
+											</li>
+											<li>
+												Spotify now requires 250k MAUs (Monthly Active Users) to
+												enable extended access
+											</li>
+											<li>
+												Only organizations (not individuals) can apply for
+												extended access as of May 15, 2025
+											</li>
+											<li>
+												This makes it impossible for independent developers to
+												launch new public apps
+											</li>
+										</ul>
+									</div>
+
+									<div>
+										<p className="font-semibold text-spotify-white mb-2">
+											📢 Help us fight these restrictions:
+										</p>
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+											<a
+												href="https://community.spotify.com/t5/Spotify-for-Developers/Updating-the-Criteria-for-Web-API-Extended-Access/m-p/6920661/highlight/true#M17569"
+												target="_blank"
+												rel="noopener noreferrer"
+												className="inline-flex items-center px-4 py-2 bg-spotify-green hover:bg-spotify-green/80 text-spotify-black font-medium rounded-lg transition-colors"
+											>
+												<span className="mr-2">💬</span>
+												Join Developer Discussion
+											</a>
+											<a
+												href="https://support.spotify.com/us/contact-spotify-support/"
+												target="_blank"
+												rel="noopener noreferrer"
+												className="inline-flex items-center px-4 py-2 bg-spotify-dark-gray hover:bg-spotify-medium-gray text-spotify-white font-medium rounded-lg transition-colors border border-spotify-light-gray/30"
+											>
+												<span className="mr-2">📧</span>
+												Contact Spotify Support
+											</a>
+										</div>
+									</div>
+
+									<div className="text-xs opacity-80">
+										<p>
+											<strong>More info:</strong>{' '}
+											<a
+												href="https://developer.spotify.com/blog/2025-04-15-updating-the-criteria-for-web-api-extended-access"
+												target="_blank"
+												rel="noopener noreferrer"
+												className="text-spotify-green hover:text-spotify-green/80 underline"
+											>
+												Spotify's API Change Announcement
+											</a>
+											{' | '}
+											<a
+												href="https://developer.spotify.com/terms"
+												target="_blank"
+												rel="noopener noreferrer"
+												className="text-spotify-green hover:text-spotify-green/80 underline"
+											>
+												Updated Developer Terms
+											</a>
+										</p>
+									</div>
+								</div>
+							</div>
+
+							<button
+								onClick={() => setShowApiRestrictionNotice(false)}
+								className="ml-4 text-red-400 hover:text-red-300 p-1"
+								aria-label="Dismiss notice"
+							>
+								<svg
+									className="w-5 h-5"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										strokeWidth={2}
+										d="M6 18L18 6M6 6l12 12"
+									/>
+								</svg>
+							</button>
+						</div>
+					</section>
+				)}
+
 				{/* Data Usage & Privacy Card */}
 				<section
 					aria-labelledby="privacy-heading"

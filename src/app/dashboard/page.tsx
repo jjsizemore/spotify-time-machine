@@ -30,6 +30,7 @@ export default function Dashboard() {
 	const { status } = useSession();
 	const [timeRange, setTimeRange] = useState<TimeRange>('medium_term');
 	const [activeTab, setActiveTab] = useState<Tab>('artists');
+	const [showApiNotice, setShowApiNotice] = useState(true);
 
 	const { topArtists, topTracks, recentlyPlayed, isLoading, error, refresh } =
 		useUserStats(timeRange);
@@ -107,6 +108,65 @@ export default function Dashboard() {
 					</ol>
 				</nav>
 			</header>
+
+			{/* API Restriction Notice for Dashboard */}
+			{showApiNotice && (
+				<section className="mb-8 bg-yellow-900/20 border border-yellow-500/50 rounded-lg p-4">
+					<div className="flex items-start justify-between">
+						<div className="flex items-start">
+							<div className="text-lg mr-3 mt-0.5">⚠️</div>
+							<div>
+								<h2 className="text-sm font-semibold text-yellow-400 mb-2">
+									Limited functionality: App in development mode
+								</h2>
+								<p className="text-xs text-yellow-200 mb-3">
+									Due to Spotify's new API restrictions requiring 250k MAUs
+									(Monthly Active Users) and only accepting organizations (not
+									individuals), this app has severe rate limits and you may
+									experience slower performance.
+								</p>
+								<div className="flex flex-wrap gap-2">
+									<a
+										href="https://community.spotify.com/t5/Spotify-for-Developers/Updating-the-Criteria-for-Web-API-Extended-Access/m-p/6920661/highlight/true#M17569"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="inline-flex items-center px-3 py-1 bg-yellow-600 hover:bg-yellow-500 text-yellow-100 text-xs font-medium rounded transition-colors"
+									>
+										💬 Join discussion
+									</a>
+									<a
+										href="https://support.spotify.com/us/contact-spotify-support/"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="inline-flex items-center px-3 py-1 bg-transparent border border-yellow-500/50 hover:bg-yellow-500/10 text-yellow-300 text-xs font-medium rounded transition-colors"
+									>
+										📧 Contact Spotify
+									</a>
+								</div>
+							</div>
+						</div>
+						<button
+							onClick={() => setShowApiNotice(false)}
+							className="text-yellow-400 hover:text-yellow-300 p-1 flex-shrink-0"
+							aria-label="Dismiss notice"
+						>
+							<svg
+								className="w-4 h-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						</button>
+					</div>
+				</section>
+			)}
 
 			{/* Feature Cards */}
 			<nav
