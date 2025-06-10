@@ -132,6 +132,12 @@ const nextConfig: NextConfig = {
 				destination: '/dashboard',
 				permanent: true,
 			},
+			// Legacy manifest.json redirect for backwards compatibility
+			{
+				source: '/manifest.json',
+				destination: '/manifest.webmanifest',
+				permanent: true,
+			},
 		];
 	},
 

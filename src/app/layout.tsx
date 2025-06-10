@@ -4,7 +4,7 @@ import TokenStatus from '@/components/TokenStatus';
 import WebVitalsMonitor from '@/components/WebVitalsMonitor';
 import React from 'react';
 import { NextAuthProvider } from '../components/providers/NextAuthProvider';
-import './output.css';
+import './globals.css';
 import {
 	ADVANCED_META_TAGS,
 	generateEnhancedMetadata,

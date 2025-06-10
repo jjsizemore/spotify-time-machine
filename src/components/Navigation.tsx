@@ -74,7 +74,7 @@ export default function Navigation({ user }: NavigationProps) {
 					<Link href="/dashboard" className="flex items-center gap-3">
 						<h1 className="text-xl font-bold text-spotify-green">Jermaine's</h1>
 						<Image
-							src="/images/optimized/root/spotify-icon.webp"
+							src="/spotify-icon.png"
 							alt="Spotify Logo"
 							width={64}
 							height={64}

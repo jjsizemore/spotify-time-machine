@@ -207,7 +207,7 @@ export default function HomePageClient() {
 					<span className="text-spotify-green">Jermaine&apos;s</span>
 					<br />
 					<Image
-						src="/images/optimized/root/spotify-icon.webp"
+						src="/spotify-icon.png"
 						alt="Spotify Logo"
 						width={120}
 						height={120}
@@ -235,7 +235,7 @@ export default function HomePageClient() {
 					<FeatureShowcaseItem
 						title="Personal Analytics"
 						description="View your top artists, tracks, and genres with beautiful visualizations and detailed insights into your listening habits."
-						imageUrl="/images/optimized/previews/dashboard-preview.webp"
+						imageUrl="/previews/dashboard-preview.jpeg"
 						imageAlt="Dashboard Preview"
 						previewUrl="/dashboard"
 						imageWidth={400}
@@ -244,7 +244,7 @@ export default function HomePageClient() {
 					<FeatureShowcaseItem
 						title="Time Travel"
 						description="Explore your liked tracks month by month and see exactly what you were listening to at any point in time."
-						imageUrl="/images/optimized/previews/history-preview.webp"
+						imageUrl="/previews/history-preview.jpeg"
 						imageAlt="History Preview"
 						previewUrl="/history"
 						imageWidth={400}
@@ -254,7 +254,7 @@ export default function HomePageClient() {
 					<FeatureShowcaseItem
 						title="Playlist Generator"
 						description="Create custom playlists from specific time periods, genres, or artists with a single click."
-						imageUrl="/images/optimized/previews/playlist-generator-preview.webp"
+						imageUrl="/previews/playlist-generator-preview.jpeg"
 						imageAlt="Playlist Generator Preview"
 						previewUrl="/playlist-generator"
 						imageWidth={400}

@@ -8,7 +8,7 @@ export const metadata: Metadata = generateEnhancedMetadata({
 	description:
 		'Your personal Spotify listening history and playlist generator. Relive your music journey, create custom playlists, and explore your listening habits over time with advanced analytics and visualizations.',
 	path: '/',
-	image: '/images/optimized/previews/home-preview.webp',
+	image: '/previews/landing-page-preview.jpeg',
 	tags: [
 		'Spotify time machine',
 		'music discovery',

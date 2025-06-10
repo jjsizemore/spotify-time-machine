@@ -11,12 +11,7 @@
 		"start": "next start",
 		"lint": "trunk check",
 		"fmt": "trunk fmt",
-		"css:build": "npx @tailwindcss/cli -i ./src/app/input.css -o ./src/app/output.css",
-		"css:watch": "npx @tailwindcss/cli -i ./src/app/input.css -o ./src/app/output.css --watch",
-		"postinstall": "prisma generate && flowbite-react patch",
-		"optimize-images": "tsx scripts/optimize-images.ts",
-		"update-image-refs": "tsx scripts/update-image-references.ts",
-		"screenshots": "NODE_OPTIONS='--loader ts-node/esm' ts-node --project scripts/tsconfig.json scripts/generate-screenshots.ts"
+		"postinstall": "prisma generate && flowbite-react patch"
 	},
 	"dependencies": {
 		"@auth/prisma-adapter": "^2.9.1",

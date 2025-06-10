@@ -6,7 +6,7 @@ export const metadata: Metadata = generateEnhancedMetadata({
 	description:
 		'Create custom Spotify playlists from your listening history. Generate playlists based on specific time periods, filter by your favorite genres and artists, and rediscover your musical past.',
 	path: '/playlist-generator',
-	image: '/images/optimized/previews/playlist-generator-preview.webp',
+	image: '/previews/playlist-generator-preview.jpeg',
 	tags: [
 		'playlist generator',
 		'Spotify playlists',
