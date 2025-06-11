@@ -7,7 +7,7 @@
 		"clean": "rm -rf .next",
 		"debug": "pnpm run clean && pnpm install && pnpm run build && pnpm run dev",
 		"dev": "next dev --turbopack --hostname 127.0.0.1",
-		"build": "pnpm run css:build && next build",
+		"build": "next build",
 		"start": "next start",
 		"lint": "trunk check",
 		"fmt": "trunk fmt",
