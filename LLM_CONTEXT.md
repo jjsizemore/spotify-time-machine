@@ -8,6 +8,35 @@
 
 ## Recent Updates ✨
 
+### ✅ OAuth Authentication PKCE Cookie Fix (Latest)
+- **🔐 Fixed Spotify OAuth PKCE Authentication Issues**: Resolved critical authentication errors preventing users from signing in
+  - ✅ **Added Missing PKCE Cookies**: Added `pkceCodeVerifier`, `state`, and `nonce` cookie configurations to NextAuth
+  - ✅ **Removed Domain Restrictions**: Removed development domain restrictions that were causing cookie issues with 127.0.0.1
+  - ✅ **Fixed Middleware Interference**: Reduced middleware logging and processing during OAuth callback flow
+  - ✅ **Proper Cookie Timeouts**: Set appropriate 15-minute expiration for OAuth flow cookies
+  - 🔧 **Technical Issues Resolved**:
+    - `PKCE code_verifier cookie was missing` - Fixed by adding proper cookie configuration
+    - `access_denied` errors - Fixed by ensuring proper cookie handling during OAuth flow
+    - Middleware interference during OAuth callback - Fixed by allowing auth routes to pass through
+  - ✅ **Build Verification**: All changes tested and confirmed working with successful production build
+- **🎯 User Experience**: Users can now successfully authenticate with Spotify without encountering cookie-related errors
+- **⚠️ Important**: Ensure `NEXTAUTH_URL=http://127.0.0.1:3000` in your `.env.local` file to match the dev server hostname
+
+### ✅ Date Picker Validation & User Experience Enhancement (Latest)
+- **📅 Enhanced Playlist Generator Date Validation**: Improved user experience with comprehensive date picker validation
+  - ✅ **Default Values**: Both start and end date pickers now default to current date for better UX
+  - ✅ **Future Date Prevention**: Added `max` attribute to prevent users from selecting future dates in the UI
+  - ✅ **Server-Side Validation**: Added comprehensive validation in form submission to prevent future dates
+  - ✅ **Date Range Validation**: Added validation to ensure start date is not after end date
+  - ✅ **FormField Component Enhancement**: Extended `FormField` component with optional `max` prop for date validation
+  - ✅ **Clear Error Messages**: Improved error messaging for date validation failures
+  - 🔧 **Technical Implementation**:
+    - Added `getCurrentDate()` helper function for consistent date formatting
+    - Enhanced form validation with `isAfter()` date comparisons
+    - Updated component state management to use current date as default
+- **✅ Build Verification**: All changes tested and confirmed working with successful production build
+- **🎯 User Experience**: Users can no longer accidentally select invalid dates, improving overall form usability
+
 ### ✅ Next.js 15 Manifest Implementation Update (Latest)
 - **🔄 PWA Manifest Modernization**: Updated manifest references to use Next.js 15 standards
   - ✅ **Updated Layout Reference**: Changed `<link rel="manifest" href="/manifest.json" />` to `/manifest.webmanifest`

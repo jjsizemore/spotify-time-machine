@@ -9,6 +9,7 @@ interface FormFieldProps {
 	placeholder?: string;
 	required?: boolean;
 	className?: string;
+	max?: string;
 }
 
 export default function FormField({
@@ -20,6 +21,7 @@ export default function FormField({
 	placeholder,
 	required = false,
 	className,
+	max,
 }: FormFieldProps) {
 	return (
 		<div className={className}>
@@ -34,6 +36,7 @@ export default function FormField({
 				placeholder={placeholder}
 				className="w-full bg-spotify-black border border-spotify-medium-gray rounded-md p-3 text-spotify-white focus:outline-none focus:ring-2 focus:ring-spotify-green"
 				required={required}
+				max={max}
 			/>
 		</div>
 	);

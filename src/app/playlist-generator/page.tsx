@@ -28,8 +28,14 @@ export default function PlaylistGeneratorPage() {
 		error: tracksError,
 	} = useLikedTracks();
 
-	const [startDate, setStartDate] = useState('');
-	const [endDate, setEndDate] = useState('');
+	// Get current date in YYYY-MM-DD format for defaults and validation
+	const getCurrentDate = () => {
+		const today = new Date();
+		return today.toISOString().split('T')[0];
+	};
+
+	const [startDate, setStartDate] = useState(getCurrentDate());
+	const [endDate, setEndDate] = useState(getCurrentDate());
 	const [playlistName, setPlaylistName] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [success, setSuccess] = useState(false);
@@ -121,6 +127,27 @@ export default function PlaylistGeneratorPage() {
 			return;
 		}
 
+		// Validate that dates are not in the future
+		const today = new Date();
+		const parsedStartDate = parseISO(startDate);
+		const parsedEndDate = parseISO(endDate);
+
+		if (isAfter(parsedStartDate, today)) {
+			setError('Start date cannot be in the future');
+			return;
+		}
+
+		if (isAfter(parsedEndDate, today)) {
+			setError('End date cannot be in the future');
+			return;
+		}
+
+		// Validate that start date is not after end date
+		if (isAfter(parsedStartDate, parsedEndDate)) {
+			setError('Start date must be before or equal to end date');
+			return;
+		}
+
 		if (!isReady) {
 			setError('Spotify API is not ready. Please try again.');
 			return;
@@ -137,9 +164,6 @@ export default function PlaylistGeneratorPage() {
 			setSuccess(false);
 
 			// Filter tracks by date range
-			const parsedStartDate = parseISO(startDate);
-			const parsedEndDate = parseISO(endDate);
-
 			let filteredTracks = tracks.filter((track) => {
 				const trackDate = new Date(track.added_at);
 				return (
@@ -279,8 +303,8 @@ export default function PlaylistGeneratorPage() {
 				e.preventDefault();
 				setSuccess(false);
 				setPlaylistName('');
-				setStartDate('');
-				setEndDate('');
+				setStartDate(getCurrentDate());
+				setEndDate(getCurrentDate());
 				setSelectedGenres([]);
 				setSelectedArtists([]);
 			}
@@ -364,6 +388,7 @@ export default function PlaylistGeneratorPage() {
 								type="date"
 								value={startDate}
 								onChange={(e) => setStartDate(e.target.value)}
+								max={getCurrentDate()}
 								required
 							/>
 
@@ -373,6 +398,7 @@ export default function PlaylistGeneratorPage() {
 								type="date"
 								value={endDate}
 								onChange={(e) => setEndDate(e.target.value)}
+								max={getCurrentDate()}
 								required
 							/>
 						</div>
@@ -466,8 +492,8 @@ export default function PlaylistGeneratorPage() {
 								onClick={() => {
 									setSuccess(false);
 									setPlaylistName('');
-									setStartDate('');
-									setEndDate('');
+									setStartDate(getCurrentDate());
+									setEndDate(getCurrentDate());
 									setSelectedGenres([]);
 									setSelectedArtists([]);
 								}}

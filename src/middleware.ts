@@ -57,14 +57,44 @@ export function middleware(request: NextRequest) {
 	const authSession =
 		request.cookies.get('next-auth.session-token') ||
 		request.cookies.get('__Secure-next-auth.session-token');
-	const stateCookie =
-		request.cookies.get('next-auth.state') ||
-		request.cookies.get('__Secure-next-auth.state');
 
-	console.log('[MIDDLEWARE] Path:', request.nextUrl.pathname);
-	console.log('[MIDDLEWARE] All Cookies:', request.cookies.getAll());
-	console.log('[MIDDLEWARE] authSession cookie:', authSession);
-	console.log('[MIDDLEWARE] stateCookie:', stateCookie);
+	// Reduced logging - only log essential information
+	if (process.env.NODE_ENV === 'development') {
+		console.log('[MIDDLEWARE] Path:', request.nextUrl.pathname);
+		if (request.nextUrl.pathname.startsWith('/api/auth')) {
+			console.log(
+				'[MIDDLEWARE] OAuth flow - auth session present:',
+				!!authSession
+			);
+		}
+	}
+
+	// For auth callback routes, allow all requests through with minimal processing
+	if (request.nextUrl.pathname.startsWith('/api/auth/callback')) {
+		// Don't interfere with OAuth callback flow - let NextAuth handle everything
+		return NextResponse.next();
+	}
+
+	// For other auth routes, also allow through
+	if (request.nextUrl.pathname.startsWith('/api/auth')) {
+		// Only apply rate limiting to API routes
+		if (isRateLimited(ip)) {
+			return new NextResponse(
+				JSON.stringify({
+					error: 'Too many requests',
+					message: 'Please try again later',
+				}),
+				{
+					status: 429,
+					headers: {
+						'Content-Type': 'application/json',
+						'Retry-After': '60',
+					},
+				}
+			);
+		}
+		return NextResponse.next();
+	}
 
 	// For protected routes, check if auth is missing and redirect to home
 	const isProtectedRoute =
@@ -77,8 +107,11 @@ export function middleware(request: NextRequest) {
 		return NextResponse.redirect(new URL('/', request.url));
 	}
 
-	// Only apply rate limiting to API routes
-	if (request.nextUrl.pathname.startsWith('/api')) {
+	// Only apply rate limiting to non-auth API routes
+	if (
+		request.nextUrl.pathname.startsWith('/api') &&
+		!request.nextUrl.pathname.startsWith('/api/auth')
+	) {
 		// Check rate limit
 		if (isRateLimited(ip)) {
 			return new NextResponse(
@@ -97,7 +130,7 @@ export function middleware(request: NextRequest) {
 		}
 
 		// For API routes that require auth, check if auth session exists
-		if (!request.nextUrl.pathname.startsWith('/api/auth') && !authSession) {
+		if (!authSession) {
 			return new NextResponse(
 				JSON.stringify({
 					error: 'Unauthorized',
@@ -113,29 +146,7 @@ export function middleware(request: NextRequest) {
 		}
 	}
 
-	// For auth callback route, ensure cookies can be set properly
-	// Also handle possible missing state cookie which could indicate OAuth state mismatch
-	if (request.nextUrl.pathname.startsWith('/api/auth/callback')) {
-		console.log(
-			'[MIDDLEWARE] /api/auth/callback hit. State cookie value:',
-			stateCookie?.value
-		);
-		// If the state cookie is missing during callback, redirect to sign in
-		if (!stateCookie && request.nextUrl.searchParams.has('state')) {
-			console.error(
-				'[MIDDLEWARE] State cookie MISSING on callback with state param. Redirecting to /.'
-			);
-			return NextResponse.redirect(new URL('/', request.url));
-		}
-		console.log(
-			'[MIDDLEWARE] State cookie present or no state param on callback. Proceeding.'
-		);
-
-		const response = NextResponse.next();
-		return response;
-	}
-
-	// Continue with the authentication check for protected routes
+	// Continue with the request
 	return NextResponse.next();
 }
 
