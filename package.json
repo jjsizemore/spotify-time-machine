@@ -35,23 +35,23 @@
 		"zod": "^3.25.51"
 	},
 	"devDependencies": {
-		"@types/node": "^22.15.29",
-		"@types/react": "19.1.6",
+		"@types/node": "^24.0.3",
+		"@types/react": "19.1.8",
 		"@types/react-dom": "19.1.6",
 		"autoprefixer": "^10.4.21",
-		"postcss": "^8.5.4",
+		"postcss": "^8.5.6",
 		"prisma": "^6.9.0",
-		"puppeteer": "^24.10.0",
+		"puppeteer": "^24.10.1",
 		"sharp": "^0.34.2",
-		"tailwindcss": "^4.1.8",
+		"tailwindcss": "^4.1.10",
 		"ts-node": "^10.9.2",
-		"tsx": "^4.19.4",
+		"tsx": "^4.20.3",
 		"typescript": "^5.8.3"
 	},
 	"packageManager": "pnpm@10.12.1",
 	"pnpm": {
 		"overrides": {
-			"@types/react": "19.1.6",
+			"@types/react": "19.1.8",
 			"@types/react-dom": "19.1.6",
 			"cookie@<0.7.0": ">=0.7.0"
 		},
