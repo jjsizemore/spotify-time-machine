@@ -62,20 +62,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
 				},
 			},
 		},
-		// Add dynamic routes for better SEO discovery
-		{
-			url: `${baseUrl}/auth/signin`,
-			lastModified: new Date('2024-01-01'),
-			changeFrequency: 'yearly',
-			priority: 0.3,
-		},
-		// Add API documentation routes if they exist
-		{
-			url: `${baseUrl}/api-docs`,
-			lastModified: new Date('2024-01-01'),
-			changeFrequency: 'monthly',
-			priority: 0.4,
-		},
 	];
 }
 
