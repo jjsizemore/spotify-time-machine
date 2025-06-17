@@ -332,6 +332,25 @@ if (error) {
     - Cache management with TTL and size limits
   - Both hooks leverage enhanced `useSpotify` for API access with automatic retry
 
+- **Enhanced Cache Error Handling** (`src/lib/cacheUtils.ts`):
+  ```typescript
+  // Robust error categorization and logging
+  interface CacheError {
+    type: 'QUOTA_EXCEEDED' | 'PARSE_ERROR' | 'STORAGE_ACCESS' | 'CORRUPTED_DATA' | 'UNKNOWN';
+    operation: 'SET' | 'GET' | 'CLEAR';
+    key?: string;
+    originalError?: Error;
+    context?: string;
+  }
+
+  // Features:
+  // - Detailed error logging with context and operation tracking
+  // - Smart cache cleanup with corruption detection
+  // - Item size monitoring for quota management
+  // - Structured error reporting with actionable information
+  // - Graceful degradation for non-browser environments
+  ```
+
 ### State Management
 - **Enhanced Custom Hooks:**
   - `useSpotify.ts`: **ENHANCED** Central hook for Spotify API interaction
