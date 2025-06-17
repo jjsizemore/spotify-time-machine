@@ -150,6 +150,13 @@
 	],
 	"files": {
 		"ignoreUnknown": true,
-		"ignore": ["node_modules", "dist", "build", "public", "**/*.css"]
+		"ignore": [
+			"node_modules",
+			"dist",
+			"build",
+			"public",
+			"**/*.css",
+			".trunk/configs/biome.json"
+		]
 	}
 }
