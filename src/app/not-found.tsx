@@ -19,7 +19,7 @@ export default function NotFound() {
 
 				<div className="space-y-4">
 					<Link href="/dashboard">
-						<ActionButton variant="primary">Go to Dashboard</ActionButton>
+						<ActionButton variant="primary">Go Home</ActionButton>
 					</Link>
 				</div>
 			</div>

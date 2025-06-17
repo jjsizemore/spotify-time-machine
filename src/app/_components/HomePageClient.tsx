@@ -226,7 +226,7 @@ export default function HomePageClient() {
 				</p>
 
 				{/* Spotify Sign In Button */}
-				<div className="flex justify-center">
+				<div className="flex justify-center mb-12">
 					<SpotifySignInButton />
 				</div>
 
@@ -237,7 +237,7 @@ export default function HomePageClient() {
 						description="View your top artists, tracks, and genres with beautiful visualizations and detailed insights into your listening habits."
 						imageUrl="/previews/dashboard-preview.jpeg"
 						imageAlt="Dashboard Preview"
-						previewUrl="/dashboard"
+						previewUrl="/previews/dashboard-preview.jpeg"
 						imageWidth={400}
 						imageHeight={300}
 					/>
@@ -246,7 +246,7 @@ export default function HomePageClient() {
 						description="Explore your liked tracks month by month and see exactly what you were listening to at any point in time."
 						imageUrl="/previews/history-preview.jpeg"
 						imageAlt="History Preview"
-						previewUrl="/history"
+						previewUrl="/previews/history-preview.jpeg"
 						imageWidth={400}
 						imageHeight={300}
 						reverseLayout={true}
@@ -256,7 +256,7 @@ export default function HomePageClient() {
 						description="Create custom playlists from specific time periods, genres, or artists with a single click."
 						imageUrl="/previews/playlist-generator-preview.jpeg"
 						imageAlt="Playlist Generator Preview"
-						previewUrl="/playlist-generator"
+						previewUrl="/previews/playlist-generator-preview.jpeg"
 						imageWidth={400}
 						imageHeight={300}
 					/>
