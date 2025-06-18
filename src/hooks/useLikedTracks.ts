@@ -1,4 +1,9 @@
-import { getCachedData, setCachedData } from '@/lib/cacheUtils';
+import {
+	getCachedData,
+	getCachedDataCompressed,
+	setCachedData,
+	setCachedDataCompressed,
+} from '@/lib/cacheUtils';
 import { SpotifyApiError } from '@/lib/spotify';
 import {
 	InternalTimeRange,
@@ -28,58 +33,138 @@ export interface SavedTrack {
 	};
 }
 
-// Compact track representation for trends
+// Compact track representation for trends (minimal data)
 export interface CompactTrack {
 	id: string;
 	added_at: string;
 	artist_ids: string[];
 }
 
+// Efficient normalized storage structures
+interface NormalizedTrack {
+	id: string;
+	added_at: string;
+	name: string;
+	album_id: string;
+	artist_ids: string[];
+	duration_ms: number;
+	preview_url: string | null;
+}
+
+interface AlbumData {
+	id: string;
+	name: string;
+	images: Array<{
+		url: string;
+		height?: number;
+		width?: number;
+	}>;
+}
+
+interface ArtistData {
+	id: string;
+	name: string;
+}
+
+interface NormalizedCache {
+	tracks: NormalizedTrack[];
+	albums: Record<string, AlbumData>;
+	artists: Record<string, ArtistData>;
+	lastUpdated: number;
+}
+
 // Time ranges supported
 export type TimeRange = InternalTimeRange | SpotifyTimeRange;
 
-// Multiple cache keys for progressive loading
+// More efficient cache keys - single normalized cache per time range
 const CACHE_KEYS = {
-	PAST_YEAR: 'likedTracks_pastYear',
-	PAST_TWO_YEARS: 'likedTracks_pastTwoYears',
-	ALL_TIME: 'likedTracks_allTime',
-	COMPACT_PAST_YEAR: 'compactTracks_pastYear',
-	COMPACT_PAST_TWO_YEARS: 'compactTracks_pastTwoYears',
-	COMPACT_ALL_TIME: 'compactTracks_allTime',
+	PAST_YEAR: 'normalizedTracks_pastYear',
+	PAST_TWO_YEARS: 'normalizedTracks_pastTwoYears',
+	ALL_TIME: 'normalizedTracks_allTime',
 };
 
 // Cache TTL (24 hours in milliseconds)
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 
-// Maximum cache size (in number of tracks)
-const MAX_CACHE_SIZE = 15000;
+// Maximum cache size (in number of tracks) - increased since data is more compact
+const MAX_CACHE_SIZE = 25000;
 
-// In-memory cache for each time range
-const tracksCache = {
-	PAST_YEAR: null as SavedTrack[] | null,
-	PAST_TWO_YEARS: null as SavedTrack[] | null,
-	ALL_TIME: null as SavedTrack[] | null,
-};
-
-// Compact cache for trends
-const compactCache = {
-	PAST_YEAR: null as CompactTrack[] | null,
-	PAST_TWO_YEARS: null as CompactTrack[] | null,
-	ALL_TIME: null as CompactTrack[] | null,
+// In-memory normalized cache for each time range
+const normalizedCache: Record<InternalTimeRange, NormalizedCache | null> = {
+	PAST_YEAR: null,
+	PAST_TWO_YEARS: null,
+	ALL_TIME: null,
 };
 
 // For deduplicating fetch requests
 const ongoingFetches = {
-	PAST_YEAR: null as Promise<SavedTrack[]> | null,
-	PAST_TWO_YEARS: null as Promise<SavedTrack[]> | null,
-	ALL_TIME: null as Promise<SavedTrack[]> | null,
+	PAST_YEAR: null as Promise<NormalizedCache> | null,
+	PAST_TWO_YEARS: null as Promise<NormalizedCache> | null,
+	ALL_TIME: null as Promise<NormalizedCache> | null,
 };
 
-// Helper to convert to compact format
-const toCompactTrack = (track: SavedTrack): CompactTrack => ({
-	id: track.track.id,
+// Helper to convert SavedTrack to normalized format
+const normalizeTrack = (track: SavedTrack): NormalizedTrack => {
+	// Generate album ID from album name (simple hash alternative)
+	const albumId = track.track.album.name.toLowerCase().replace(/\s+/g, '_');
+
+	return {
+		id: track.track.id,
+		added_at: track.added_at,
+		name: track.track.name,
+		album_id: albumId,
+		artist_ids: track.track.artists.map((a) => a.id),
+		duration_ms: track.track.duration_ms,
+		preview_url: track.track.preview_url,
+	};
+};
+
+// Helper to extract album data
+const extractAlbumData = (track: SavedTrack): AlbumData => {
+	const albumId = track.track.album.name.toLowerCase().replace(/\s+/g, '_');
+	return {
+		id: albumId,
+		name: track.track.album.name,
+		images: track.track.album.images,
+	};
+};
+
+// Helper to extract artist data
+const extractArtistData = (artist: {
+	id: string;
+	name: string;
+}): ArtistData => ({
+	id: artist.id,
+	name: artist.name,
+});
+
+// Helper to convert normalized data back to SavedTrack format
+const denormalizeTrack = (
+	track: NormalizedTrack,
+	albums: Record<string, AlbumData>,
+	artists: Record<string, ArtistData>
+): SavedTrack => ({
 	added_at: track.added_at,
-	artist_ids: track.track.artists.map((a) => a.id),
+	track: {
+		id: track.id,
+		name: track.name,
+		album: albums[track.album_id] || {
+			name: 'Unknown Album',
+			images: [],
+		},
+		artists: track.artist_ids.map(
+			(id) => artists[id] || { id, name: 'Unknown Artist' }
+		),
+		duration_ms: track.duration_ms,
+		preview_url: track.preview_url,
+	},
+});
+
+// Helper to convert to compact format
+const toCompactTrack = (track: NormalizedTrack): CompactTrack => ({
+	id: track.id,
+	added_at: track.added_at,
+	artist_ids: track.artist_ids,
 });
 
 // Helper to map any TimeRange to InternalTimeRange
@@ -94,17 +179,49 @@ const toInternalRange = (range: TimeRange): InternalTimeRange => {
 const checkAndCleanupCache = (range: TimeRange) => {
 	const internalRange = toInternalRange(range);
 	const cacheKey = CACHE_KEYS[internalRange];
-	const compactCacheKey = CACHE_KEYS[`COMPACT_${internalRange}`];
+	const cache = normalizedCache[internalRange];
 
-	const cachedData = getCachedData<SavedTrack[]>(cacheKey);
-	if (cachedData && cachedData.length > MAX_CACHE_SIZE) {
+	if (cache && cache.tracks.length > MAX_CACHE_SIZE) {
 		// Keep only the most recent tracks
-		const trimmedData = cachedData.slice(0, MAX_CACHE_SIZE);
-		setCachedData(cacheKey, trimmedData, CACHE_TTL);
+		const trimmedTracks = cache.tracks
+			.sort(
+				(a, b) =>
+					new Date(b.added_at).getTime() - new Date(a.added_at).getTime()
+			)
+			.slice(0, MAX_CACHE_SIZE);
 
-		// Update compact cache
-		const compactData = trimmedData.map(toCompactTrack);
-		setCachedData(compactCacheKey, compactData, CACHE_TTL);
+		// Remove unused albums and artists
+		const usedAlbumIds = new Set(trimmedTracks.map((t) => t.album_id));
+		const usedArtistIds = new Set(trimmedTracks.flatMap((t) => t.artist_ids));
+
+		const trimmedAlbums: Record<string, AlbumData> = {};
+		const trimmedArtists: Record<string, ArtistData> = {};
+
+		Object.entries(cache.albums).forEach(([id, album]) => {
+			if (usedAlbumIds.has(id)) {
+				trimmedAlbums[id] = album;
+			}
+		});
+
+		Object.entries(cache.artists).forEach(([id, artist]) => {
+			if (usedArtistIds.has(id)) {
+				trimmedArtists[id] = artist;
+			}
+		});
+
+		const trimmedCache: NormalizedCache = {
+			tracks: trimmedTracks,
+			albums: trimmedAlbums,
+			artists: trimmedArtists,
+			lastUpdated: cache.lastUpdated,
+		};
+
+		normalizedCache[internalRange] = trimmedCache;
+		setCachedDataCompressed(cacheKey, trimmedCache, CACHE_TTL);
+
+		console.log(
+			`Cache cleaned up for ${range}: ${trimmedTracks.length} tracks, ${Object.keys(trimmedAlbums).length} albums, ${Object.keys(trimmedArtists).length} artists`
+		);
 	}
 };
 
@@ -149,42 +266,40 @@ export function useLikedTracks() {
 			const internalRange = toInternalRange(range);
 
 			// Check in-memory cache first
-			if (tracksCache[internalRange]) {
-				console.log(`Using in-memory cache for ${range}`);
-				return tracksCache[internalRange]!;
+			if (normalizedCache[internalRange]) {
+				console.log(`Using in-memory normalized cache for ${range}`);
+				const cache = normalizedCache[internalRange]!;
+				return cache.tracks.map((track) =>
+					denormalizeTrack(track, cache.albums, cache.artists)
+				);
 			}
 
 			// Then check persistent cache
 			const cacheKey = CACHE_KEYS[internalRange];
-			const cachedData = getCachedData<SavedTrack[]>(cacheKey);
+			const cachedData = getCachedDataCompressed<NormalizedCache>(cacheKey);
 
 			if (cachedData) {
-				console.log(`Using persistent cache for ${range}`);
-				tracksCache[internalRange] = cachedData;
-
-				// Update compact cache
-				const compactData = cachedData.map(toCompactTrack);
-				compactCache[internalRange] = compactData;
-				setCachedData(
-					CACHE_KEYS[`COMPACT_${internalRange}`],
-					compactData,
-					CACHE_TTL
+				console.log(`Using persistent normalized cache for ${range}`);
+				normalizedCache[internalRange] = cachedData;
+				return cachedData.tracks.map((track) =>
+					denormalizeTrack(track, cachedData.albums, cachedData.artists)
 				);
-
-				return cachedData;
 			}
 
 			// Check if fetch is already in progress
 			if (ongoingFetches[internalRange]) {
 				console.log(`Waiting for ongoing fetch for ${range}`);
-				return ongoingFetches[internalRange]!;
+				const cache = await ongoingFetches[internalRange]!;
+				return cache.tracks.map((track) =>
+					denormalizeTrack(track, cache.albums, cache.artists)
+				);
 			}
 
 			// Prepare to fetch from API
 			const cutoffDate = getCutoffDate(range);
 			console.log(`Fetching ${range} tracks from API`);
 
-			const fetchPromise = (async (): Promise<SavedTrack[]> => {
+			const fetchPromise = (async (): Promise<NormalizedCache> => {
 				try {
 					const limit = 50;
 					let offset = 0;
@@ -223,15 +338,45 @@ export function useLikedTracks() {
 						offset += limit;
 					} while (offset < total && fetchedItemsCount > 0 && !reachedCutoff);
 
-					// Cache the results
-					tracksCache[internalRange] = allTracks;
-					setCachedData(cacheKey, allTracks, CACHE_TTL);
-					console.log(`Cached ${allTracks.length} tracks for ${range}`);
+					// Normalize the data
+					const normalizedTracks: NormalizedTrack[] = [];
+					const albums: Record<string, AlbumData> = {};
+					const artists: Record<string, ArtistData> = {};
+
+					allTracks.forEach((track) => {
+						// Add normalized track
+						normalizedTracks.push(normalizeTrack(track));
+
+						// Add album data
+						const albumData = extractAlbumData(track);
+						albums[albumData.id] = albumData;
+
+						// Add artist data
+						track.track.artists.forEach((artist) => {
+							const artistData = extractArtistData(artist);
+							artists[artistData.id] = artistData;
+						});
+					});
+
+					const normalizedCacheData: NormalizedCache = {
+						tracks: normalizedTracks,
+						albums,
+						artists,
+						lastUpdated: Date.now(),
+					};
+
+					// Cache the normalized results
+					normalizedCache[internalRange] = normalizedCacheData;
+					setCachedDataCompressed(cacheKey, normalizedCacheData, CACHE_TTL);
+
+					console.log(
+						`Cached ${normalizedTracks.length} normalized tracks for ${range} (${Object.keys(albums).length} albums, ${Object.keys(artists).length} artists)`
+					);
 
 					// After fetching, check and cleanup cache
 					checkAndCleanupCache(range);
 
-					return allTracks;
+					return normalizedCacheData;
 				} catch (err) {
 					console.error(`Error fetching tracks for ${range}:`, err);
 					throw err;
@@ -241,32 +386,30 @@ export function useLikedTracks() {
 			})();
 
 			ongoingFetches[internalRange] = fetchPromise;
-			return fetchPromise;
+			const cache = await fetchPromise;
+			return cache.tracks.map((track) =>
+				denormalizeTrack(track, cache.albums, cache.artists)
+			);
 		},
 		[isReady, spotifyApi, getCutoffDate]
 	);
 
-	// Get compact tracks for trends
+	// Get compact tracks for trends (now more efficient)
 	const getCompactTracks = useCallback((range: TimeRange): CompactTrack[] => {
 		const internalRange = toInternalRange(range);
-		if (compactCache[internalRange]) {
-			return compactCache[internalRange]!;
+		const cache = normalizedCache[internalRange];
+
+		if (cache) {
+			return cache.tracks.map(toCompactTrack);
 		}
 
-		const compactCacheKey = CACHE_KEYS[`COMPACT_${internalRange}`];
-		const cachedData = getCachedData<CompactTrack[]>(compactCacheKey);
+		// Try to get from persistent cache
+		const cacheKey = CACHE_KEYS[internalRange];
+		const cachedData = getCachedDataCompressed<NormalizedCache>(cacheKey);
 
 		if (cachedData) {
-			compactCache[internalRange] = cachedData;
-			return cachedData;
-		}
-
-		// If no compact cache, convert from full tracks
-		if (tracksCache[internalRange]) {
-			const compactData = tracksCache[internalRange]!.map(toCompactTrack);
-			compactCache[internalRange] = compactData;
-			setCachedData(compactCacheKey, compactData, CACHE_TTL);
-			return compactData;
+			normalizedCache[internalRange] = cachedData;
+			return cachedData.tracks.map(toCompactTrack);
 		}
 
 		return [];
@@ -363,8 +506,12 @@ export function useLikedTracks() {
 		const internalRange = toInternalRange(range);
 
 		// If we already have data for this range, update immediately
-		if (tracksCache[internalRange]) {
-			setTracks(tracksCache[internalRange]!);
+		if (normalizedCache[internalRange]) {
+			const cache = normalizedCache[internalRange]!;
+			const denormalizedTracks = cache.tracks.map((track) =>
+				denormalizeTrack(track, cache.albums, cache.artists)
+			);
+			setTracks(denormalizedTracks);
 			setIsLoading(false);
 		} else {
 			// Otherwise, show loading state
@@ -380,6 +527,21 @@ export function useLikedTracks() {
 		currentTimeRange,
 		setTimeRange,
 		getTracksForRange: fetchTracksForRange,
-		getCompactTracks, // Expose compact tracks for trends
+		getCompactTracks, // Now more efficient - no separate cache needed
 	};
+}
+
+// Export function to clear in-memory cache - useful for debugging or cache corruption
+export function clearTracksInMemoryCache(): void {
+	// Clear in-memory normalized cache
+	normalizedCache.PAST_YEAR = null;
+	normalizedCache.PAST_TWO_YEARS = null;
+	normalizedCache.ALL_TIME = null;
+
+	// Clear ongoing fetches
+	ongoingFetches.PAST_YEAR = null;
+	ongoingFetches.PAST_TWO_YEARS = null;
+	ongoingFetches.ALL_TIME = null;
+
+	console.log('In-memory tracks cache cleared');
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { getTextStyle, getTimeRangeButtonTextStyle } from '@/lib/styleUtils';
+import { getTimeRangeButtonTextStyle } from '@/lib/styleUtils';
 import {
 	InternalTimeRange,
 	SpotifyTimeRange,

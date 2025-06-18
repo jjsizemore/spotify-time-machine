@@ -1,3 +1,6 @@
+import { clearArtistsInMemoryCache } from '@/hooks/useLikedArtists';
+import { clearTracksInMemoryCache } from '@/hooks/useLikedTracks';
+import { clearAllCache } from '@/lib/cacheUtils';
 import { getTextStyle } from '@/lib/styleUtils';
 import { Dropdown } from 'flowbite-react';
 import { signOut } from 'next-auth/react';
@@ -5,8 +8,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import { HiOutlineLogout } from 'react-icons/hi';
+import { HiOutlineLogout, HiOutlineTrash } from 'react-icons/hi';
 import ActionButton from './ActionButton';
+import Toast from './Toast';
 
 interface NavigationProps {
 	user?:
@@ -21,6 +25,37 @@ interface NavigationProps {
 export default function Navigation({ user }: NavigationProps) {
 	const pathname = usePathname();
 	const router = useRouter();
+	const [toast, setToast] = useState<{
+		message: string;
+		type: 'success' | 'error' | 'warning' | 'info';
+	} | null>(null);
+
+	const handleClearCache = async () => {
+		try {
+			// Clear localStorage cache
+			const removedCount = clearAllCache();
+
+			// Clear in-memory caches
+			clearTracksInMemoryCache();
+			clearArtistsInMemoryCache();
+
+			console.log(
+				`Cache cleared: ${removedCount} localStorage items removed, in-memory caches cleared`
+			);
+
+			setToast({
+				message: `Cache cleared successfully! Removed ${removedCount} cached items and cleared in-memory data.`,
+				type: 'warning',
+			});
+		} catch (error) {
+			console.error('Error clearing cache:', error);
+			// Show error toast
+			setToast({
+				message: 'Failed to clear cache. Please try again.',
+				type: 'error',
+			});
+		}
+	};
 
 	const handleLogout = async () => {
 		try {
@@ -51,78 +86,107 @@ export default function Navigation({ user }: NavigationProps) {
 	];
 
 	return (
-		<nav className="bg-spotify-dark-gray px-6 py-4 border-b border-spotify-medium-gray">
-			<div className="container mx-auto grid grid-cols-1 md:grid-cols-3 items-center">
-				{/* Left navigation section */}
-				<div className="flex items-center justify-center md:justify-start gap-6 mb-4 md:mb-0 order-2 md:order-1">
-					{navLinks.map(({ label, href }) => (
-						<Link
-							key={label}
-							href={href}
-							className={`text-sm font-medium transition-colors`}
-							style={getTextStyle(hovered === label, pathname === href)}
-							onMouseOver={() => setHovered(label)}
-							onMouseOut={() => setHovered(null)}
-						>
-							{label}
+		<>
+			{/* Toast notification */}
+			{toast && (
+				<Toast
+					message={toast.message}
+					type={toast.type}
+					onDismiss={() => setToast(null)}
+				/>
+			)}
+
+			<nav className="bg-spotify-dark-gray px-6 py-4 border-b border-spotify-medium-gray">
+				<div className="container mx-auto grid grid-cols-1 md:grid-cols-3 items-center">
+					{/* Left navigation section */}
+					<div className="flex items-center justify-center md:justify-start gap-6 mb-4 md:mb-0 order-2 md:order-1">
+						{navLinks.map(({ label, href }) => (
+							<Link
+								key={label}
+								href={href}
+								className={`text-sm font-medium transition-colors`}
+								style={getTextStyle(hovered === label, pathname === href)}
+								onMouseOver={() => setHovered(label)}
+								onMouseOut={() => setHovered(null)}
+							>
+								{label}
+							</Link>
+						))}
+					</div>
+
+					{/* Center logo section */}
+					<div className="flex items-center justify-center order-1 md:order-2">
+						<Link href="/dashboard" className="flex items-center gap-3">
+							<h1 className="text-xl font-bold text-spotify-green">
+								Jermaine's
+							</h1>
+							<Image
+								src="/spotify-icon.png"
+								alt="Spotify Logo"
+								width={64}
+								height={64}
+								className="drop-shadow-lg"
+							/>
+							<h1 className="text-xl font-bold text-spotify-green">
+								Time Machine
+							</h1>
 						</Link>
-					))}
-				</div>
+					</div>
 
-				{/* Center logo section */}
-				<div className="flex items-center justify-center order-1 md:order-2">
-					<Link href="/dashboard" className="flex items-center gap-3">
-						<h1 className="text-xl font-bold text-spotify-green">Jermaine's</h1>
-						<Image
-							src="/spotify-icon.png"
-							alt="Spotify Logo"
-							width={64}
-							height={64}
-							className="drop-shadow-lg"
-						/>
-						<h1 className="text-xl font-bold text-spotify-green">
-							Time Machine
-						</h1>
-					</Link>
-				</div>
-
-				{/* Right user section */}
-				<div className="flex items-center justify-center md:justify-end gap-4 mb-4 md:mb-0 order-3">
-					<Dropdown
-						arrowIcon={false}
-						inline
-						label={
-							<div className="flex items-center gap-2 cursor-pointer">
-								{user?.image && (
-									<Image
-										src={user.image}
-										alt="Profile"
-										width={32}
-										height={32}
-										className="rounded-full"
-									/>
-								)}
-								<span
-									className="text-spotify-light-gray hidden md:inline"
-									style={getTextStyle(hovered === 'UserDropdown')}
-									onMouseOver={() => setHovered('UserDropdown')}
-									onMouseOut={() => setHovered(null)}
-								>
-									{user?.name}
-								</span>
+					{/* Right user section */}
+					<div className="flex items-center justify-center md:justify-end gap-4 mb-4 md:mb-0 order-3">
+						<Dropdown
+							arrowIcon={false}
+							inline
+							label={
+								<div className="flex items-center gap-2 cursor-pointer">
+									{user?.image && (
+										<Image
+											src={user.image}
+											alt="Profile"
+											width={32}
+											height={32}
+											className="rounded-full"
+										/>
+									)}
+									<span
+										className="text-spotify-light-gray hidden md:inline"
+										style={getTextStyle(hovered === 'UserDropdown')}
+										onMouseOver={() => setHovered('UserDropdown')}
+										onMouseOut={() => setHovered(null)}
+									>
+										{user?.name}
+									</span>
+								</div>
+							}
+							className="!bg-spotify-dark-gray !border !border-spotify-medium-gray/30 !shadow-lg !rounded-md !origin-top-right"
+						>
+							<div className="flex flex-col items-center align-middle">
+								<div className="flex m-2 align-middle">
+									<ActionButton
+										onClick={handleClearCache}
+										variant="secondary"
+										className="m-4"
+									>
+										<span className="flex items-center gap-2">
+											<HiOutlineTrash className="h-4 w-4" />
+											Clear Cache
+										</span>
+									</ActionButton>
+								</div>
+								<div className="flex m-2 align-middle">
+									<ActionButton onClick={handleLogout} variant="primary">
+										<span className="flex items-center gap-2">
+											<HiOutlineLogout className="h-4 w-4" />
+											Logout
+										</span>
+									</ActionButton>
+								</div>
 							</div>
-						}
-						className="!bg-spotify-dark-gray !border !border-spotify-medium-gray/30 !shadow-lg !rounded-md"
-					>
-						<ActionButton onClick={handleLogout} variant="primary">
-							<span className="flex items-center gap-2">
-								<HiOutlineLogout className="h-4 w-4" />
-								Logout
-							</span>
-						</ActionButton>
-					</Dropdown>
+						</Dropdown>
+					</div>
 				</div>
-			</div>
-		</nav>
+			</nav>
+		</>
 	);
 }

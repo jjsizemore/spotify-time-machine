@@ -8,6 +8,26 @@
 
 ## Recent Updates ✨
 
+### ✅ Clear Cache Feature for Data Management (Latest)
+- **🗑️ User-Controlled Cache Clearing**: Added comprehensive cache management functionality for users experiencing data issues
+  - ✅ **Clear Cache Button**: Added button in user dropdown menu (Navigation component) with trash icon
+  - ✅ **Comprehensive Cache Clearing**: Clears both localStorage cache and in-memory caches
+    - Removes all `spotifyTimeMachineCache_*` items from localStorage
+    - Clears normalized tracks cache from `useLikedTracks` hook
+    - Clears artists cache from `useLikedArtists` hook
+  - ✅ **Informative Tooltip**: Hover tooltip explains the feature: "Clear all cached listening data. This may improve visualizations if you're experiencing issues with stale or corrupt data."
+  - ✅ **User Feedback**: Alert confirmation showing number of items cleared
+  - ✅ **New Cache Utilities**: Added `clearAllCache()` function in `src/lib/cacheUtils.ts`
+  - ✅ **Hook Cache Clearing**: Added `clearTracksInMemoryCache()` and `clearArtistsInMemoryCache()` functions
+  - 🔧 **Technical Features**:
+    - Safely iterates through localStorage to find cache items with app prefix
+    - Clears both regular and compressed cache formats
+    - Resets in-memory cache maps and sets used by hooks
+    - Comprehensive error handling with detailed logging
+- **✅ Build Verification**: All changes tested and confirmed working with successful production build
+- **🎯 User Experience**: Users can now resolve visualization issues caused by stale or corrupt cached data
+- **🛠️ Developer Experience**: Useful debugging tool for cache-related issues during development
+
 ### ✅ Enhanced Authentication Error Handling & User Experience (Latest)
 - **🚨 Robust Sign-In Error Management**: Dramatically improved error handling for authentication failures with specific, actionable guidance
   - ✅ **Specific Error Types**: Added detailed error mapping for different OAuth error scenarios (OAuthCallback, Callback, AccessDenied, Configuration, Verification)

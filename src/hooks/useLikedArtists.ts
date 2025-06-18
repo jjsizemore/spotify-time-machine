@@ -287,3 +287,13 @@ export function useLikedArtists() {
 		getCompactArtists,
 	};
 }
+
+// Export function to clear in-memory cache - useful for debugging or cache corruption
+export function clearArtistsInMemoryCache(): void {
+	// Clear global artists cache
+	artistsCache.clear();
+	compactArtistsCache.clear();
+	processedArtistIds.clear();
+
+	console.log('In-memory artists cache cleared');
+}
