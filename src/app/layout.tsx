@@ -11,6 +11,11 @@ import {
 	generateOrganizationSchema,
 	generateWebApplicationSchema,
 } from '@/lib/seo';
+import {
+	ConsentManagerDialog,
+	ConsentManagerProvider,
+	CookieBanner,
+} from '@c15t/nextjs';
 import { Analytics } from '@vercel/analytics/react';
 import { ThemeModeScript } from 'flowbite-react';
 import Script from 'next/script';
@@ -96,35 +101,44 @@ export default function RootLayout({
 				/>
 			</head>
 			<body className="bg-spotify-black text-spotify-light-gray font-sans min-h-screen flex flex-col layout-content">
-				{/* Core Web Vitals monitoring is handled by WebVitalsMonitor component */}
-
-				{/* Enhanced Structured Data */}
-				<Script
-					id="web-application-schema"
-					type="application/ld+json"
-					dangerouslySetInnerHTML={{
-						__html: JSON.stringify(webAppSchema),
+				<ConsentManagerProvider
+					options={{
+						mode: 'c15t',
+						backendURL: '/api/c15t',
 					}}
-				/>
+				>
+					<CookieBanner />
+					<ConsentManagerDialog />
 
-				<Script
-					id="organization-schema"
-					type="application/ld+json"
-					dangerouslySetInnerHTML={{
-						__html: JSON.stringify(organizationSchema),
-					}}
-				/>
+					{/* Core Web Vitals monitoring is handled by WebVitalsMonitor component */}
 
-				{/* Google Analytics 4 for Core Web Vitals */}
-				<Script
-					src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"
-					strategy="afterInteractive"
-				/>
-				<Script
-					id="google-analytics"
-					strategy="afterInteractive"
-					dangerouslySetInnerHTML={{
-						__html: `
+					{/* Enhanced Structured Data */}
+					<Script
+						id="web-application-schema"
+						type="application/ld+json"
+						dangerouslySetInnerHTML={{
+							__html: JSON.stringify(webAppSchema),
+						}}
+					/>
+
+					<Script
+						id="organization-schema"
+						type="application/ld+json"
+						dangerouslySetInnerHTML={{
+							__html: JSON.stringify(organizationSchema),
+						}}
+					/>
+
+					{/* Google Analytics 4 for Core Web Vitals */}
+					<Script
+						src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"
+						strategy="afterInteractive"
+					/>
+					<Script
+						id="google-analytics"
+						strategy="afterInteractive"
+						dangerouslySetInnerHTML={{
+							__html: `
 							window.dataLayer = window.dataLayer || [];
 							function gtag(){dataLayer.push(arguments);}
 							gtag('js', new Date());
@@ -136,26 +150,26 @@ export default function RootLayout({
 								}
 							});
 						`,
-					}}
-				/>
+						}}
+					/>
 
-				<NextAuthProvider>
-					<PostHogProvider>
-						<LayoutContent>{children}</LayoutContent>
-						<TokenStatus />
-						<WebVitalsMonitor />
-					</PostHogProvider>
-				</NextAuthProvider>
+					<NextAuthProvider>
+						<PostHogProvider>
+							<LayoutContent>{children}</LayoutContent>
+							<TokenStatus />
+							<WebVitalsMonitor />
+						</PostHogProvider>
+					</NextAuthProvider>
 
-				{/* Vercel Analytics */}
-				<Analytics />
+					{/* Vercel Analytics */}
+					<Analytics />
 
-				{/* Service Worker Registration for PWA */}
-				<Script
-					id="service-worker"
-					strategy="afterInteractive"
-					dangerouslySetInnerHTML={{
-						__html: `
+					{/* Service Worker Registration for PWA */}
+					<Script
+						id="service-worker"
+						strategy="afterInteractive"
+						dangerouslySetInnerHTML={{
+							__html: `
 							if ('serviceWorker' in navigator) {
 								window.addEventListener('load', function() {
 									navigator.serviceWorker.register('/sw.js')
@@ -168,8 +182,9 @@ export default function RootLayout({
 								});
 							}
 						`,
-					}}
-				/>
+						}}
+					/>
+				</ConsentManagerProvider>
 			</body>
 		</html>
 	);
