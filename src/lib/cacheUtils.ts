@@ -747,3 +747,269 @@ export function clearAllCache(): number {
 		return removedCount;
 	}
 }
+
+// Add IndexedDB support for large datasets
+interface IndexedDBStorage {
+	open(): Promise<IDBDatabase>;
+	set<T>(key: string, data: T, ttlMinutes: number): Promise<void>;
+	get<T>(key: string): Promise<T | null>;
+	clear(): Promise<void>;
+}
+
+class IndexedDBCacheStorage implements IndexedDBStorage {
+	private dbName = 'SpotifyTimeMachineCache';
+	private version = 1;
+	private storeName = 'cache';
+
+	async open(): Promise<IDBDatabase> {
+		return new Promise((resolve, reject) => {
+			const request = indexedDB.open(this.dbName, this.version);
+
+			request.onerror = () => reject(request.error);
+			request.onsuccess = () => resolve(request.result);
+
+			request.onupgradeneeded = (event) => {
+				const db = (event.target as IDBOpenDBRequest).result;
+				if (!db.objectStoreNames.contains(this.storeName)) {
+					const store = db.createObjectStore(this.storeName, {
+						keyPath: 'key',
+					});
+					store.createIndex('timestamp', 'timestamp', { unique: false });
+				}
+			};
+		});
+	}
+
+	async set<T>(key: string, data: T, ttlMinutes: number): Promise<void> {
+		try {
+			const db = await this.open();
+			const timestamp = Date.now();
+			const item = {
+				key: CACHE_PREFIX + key,
+				data,
+				timestamp,
+				ttl: ttlMinutes * 60 * 1000,
+			};
+
+			const transaction = db.transaction([this.storeName], 'readwrite');
+			const store = transaction.objectStore(this.storeName);
+
+			await new Promise<void>((resolve, reject) => {
+				const request = store.put(item);
+				request.onsuccess = () => resolve();
+				request.onerror = () => reject(request.error);
+			});
+
+			console.debug(`IndexedDB cache set: ${key} (TTL: ${ttlMinutes}min)`);
+		} catch (error: any) {
+			console.error('IndexedDB cache set error:', error);
+			throw error;
+		}
+	}
+
+	async get<T>(key: string): Promise<T | null> {
+		try {
+			const db = await this.open();
+			const transaction = db.transaction([this.storeName], 'readonly');
+			const store = transaction.objectStore(this.storeName);
+
+			const item = await new Promise<any>((resolve, reject) => {
+				const request = store.get(CACHE_PREFIX + key);
+				request.onsuccess = () => resolve(request.result);
+				request.onerror = () => reject(request.error);
+			});
+
+			if (!item) {
+				console.debug(`IndexedDB cache miss: ${key} - no data found`);
+				return null;
+			}
+
+			const now = Date.now();
+			const age = now - item.timestamp;
+
+			if (age > item.ttl) {
+				console.debug(`IndexedDB cache expired: ${key}`);
+				// Remove expired item
+				const deleteTransaction = db.transaction([this.storeName], 'readwrite');
+				const deleteStore = deleteTransaction.objectStore(this.storeName);
+				deleteStore.delete(CACHE_PREFIX + key);
+				return null;
+			}
+
+			console.debug(`IndexedDB cache hit: ${key}`);
+			return item.data;
+		} catch (error: any) {
+			console.error('IndexedDB cache get error:', error);
+			return null;
+		}
+	}
+
+	async clear(): Promise<void> {
+		try {
+			const db = await this.open();
+			const transaction = db.transaction([this.storeName], 'readwrite');
+			const store = transaction.objectStore(this.storeName);
+
+			// Clear only items with our prefix
+			const range = IDBKeyRange.bound(CACHE_PREFIX, CACHE_PREFIX + '\uffff');
+			const request = store.openCursor(range);
+
+			let removedCount = 0;
+
+			await new Promise<void>((resolve, reject) => {
+				request.onsuccess = (event) => {
+					const cursor = (event.target as IDBRequest).result;
+					if (cursor) {
+						cursor.delete();
+						removedCount++;
+						cursor.continue();
+					} else {
+						resolve();
+					}
+				};
+				request.onerror = () => reject(request.error);
+			});
+
+			console.info(`IndexedDB cache cleared: Removed ${removedCount} items`);
+		} catch (error: any) {
+			console.error('IndexedDB cache clear error:', error);
+		}
+	}
+}
+
+// Check if IndexedDB is available
+function isIndexedDBAvailable(): boolean {
+	if (typeof window === 'undefined') return false;
+	return 'indexedDB' in window && window.indexedDB !== null;
+}
+
+// Smart cache that uses IndexedDB for large data, localStorage for small data
+const indexedDBStorage = new IndexedDBCacheStorage();
+
+export function setCachedDataSmart<T>(
+	key: string,
+	data: T,
+	ttlMinutes: number,
+	forceIndexedDB: boolean = false
+): void {
+	// Estimate data size
+	const dataSize = new Blob([JSON.stringify(data)]).size;
+	const sizeKB = Math.round(dataSize / 1024);
+
+	// Use IndexedDB for large data (>1MB) or when explicitly requested
+	const useIndexedDB = forceIndexedDB || sizeKB > 1024;
+
+	if (useIndexedDB && isIndexedDBAvailable()) {
+		indexedDBStorage.set(key, data, ttlMinutes).catch((error) => {
+			console.warn('IndexedDB failed, falling back to localStorage:', error);
+			setCachedDataCompressed(key, data, ttlMinutes, true);
+		});
+	} else {
+		// Use compressed localStorage for smaller data
+		setCachedDataCompressed(key, data, ttlMinutes, true);
+	}
+}
+
+export function getCachedDataSmart<T>(key: string): Promise<T | null> {
+	if (isIndexedDBAvailable()) {
+		return indexedDBStorage.get<T>(key).catch((error) => {
+			console.warn('IndexedDB failed, falling back to localStorage:', error);
+			return getCachedDataCompressed<T>(key);
+		});
+	} else {
+		return Promise.resolve(getCachedDataCompressed<T>(key));
+	}
+}
+
+export function clearAllCacheSmart(): Promise<number> {
+	return Promise.all([
+		isIndexedDBAvailable() ? indexedDBStorage.clear() : Promise.resolve(),
+		Promise.resolve(clearAllCache()),
+	]).then(() => {
+		console.info('All caches cleared (IndexedDB + localStorage)');
+		return 0; // Return count not easily available for IndexedDB
+	});
+}
+
+/**
+ * Check storage quota and usage
+ * Returns information about available storage space
+ */
+export async function getStorageInfo(): Promise<{
+	quota: number;
+	usage: number;
+	available: number;
+	percentUsed: number;
+	canStoreMoreData: boolean;
+}> {
+	if (typeof window === 'undefined' || !('storage' in navigator)) {
+		return {
+			quota: 0,
+			usage: 0,
+			available: 0,
+			percentUsed: 0,
+			canStoreMoreData: false,
+		};
+	}
+
+	try {
+		const estimate = await navigator.storage.estimate();
+		const quota = estimate.quota || 0;
+		const usage = estimate.usage || 0;
+		const available = quota - usage;
+		const percentUsed = quota > 0 ? (usage / quota) * 100 : 0;
+		const canStoreMoreData = available > 50 * 1024 * 1024; // At least 50MB available
+
+		return {
+			quota,
+			usage,
+			available,
+			percentUsed,
+			canStoreMoreData,
+		};
+	} catch (error) {
+		console.error('Failed to get storage estimate:', error);
+		return {
+			quota: 0,
+			usage: 0,
+			available: 0,
+			percentUsed: 0,
+			canStoreMoreData: false,
+		};
+	}
+}
+
+/**
+ * Request persistent storage to prevent data eviction
+ */
+export async function requestPersistentStorage(): Promise<boolean> {
+	if (typeof window === 'undefined' || !('storage' in navigator)) {
+		return false;
+	}
+
+	try {
+		if ('persist' in navigator.storage) {
+			const isPersistent = await navigator.storage.persist();
+			console.info(`Persistent storage ${isPersistent ? 'granted' : 'denied'}`);
+			return isPersistent;
+		}
+		return false;
+	} catch (error) {
+		console.error('Failed to request persistent storage:', error);
+		return false;
+	}
+}
+
+/**
+ * Log storage information for debugging
+ */
+export async function logStorageInfo(): Promise<void> {
+	const info = await getStorageInfo();
+	console.group('📊 Storage Information');
+	console.log(`Quota: ${(info.quota / (1024 * 1024 * 1024)).toFixed(2)} GB`);
+	console.log(`Used: ${(info.usage / (1024 * 1024)).toFixed(2)} MB`);
+	console.log(`Available: ${(info.available / (1024 * 1024)).toFixed(2)} MB`);
+	console.log(`Percent Used: ${info.percentUsed.toFixed(1)}%`);
+	console.log(`Can Store More: ${info.canStoreMoreData ? '✅' : '❌'}`);
+	console.groupEnd();
+}

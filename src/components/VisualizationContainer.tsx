@@ -36,7 +36,7 @@ export default function VisualizationContainer({
 	isProcessing = false,
 	error = null,
 	isEmpty = false,
-	emptyDataMessage = 'No data available to display. If you think this is an error, please clear your cache (Spotify Account Portrait > Clear Cache) and try again.',
+	emptyDataMessage = 'No data available to display. If you think this is an error, please clear your cache (Spotify Account Portrait > Clear Cache) and refresh the page.',
 }: VisualizationContainerProps) {
 	const [showLoading, setShowLoading] = useState(true);
 	const [showProcessing, setShowProcessing] = useState(false);

@@ -1,8 +1,10 @@
 import {
 	getCachedData,
 	getCachedDataCompressed,
+	getCachedDataSmart,
 	setCachedData,
 	setCachedDataCompressed,
+	setCachedDataSmart,
 } from '@/lib/cacheUtils';
 import { SpotifyApiError } from '@/lib/spotify';
 import {
@@ -365,9 +367,14 @@ export function useLikedTracks() {
 						lastUpdated: Date.now(),
 					};
 
-					// Cache the normalized results
+					// Cache the normalized results using smart caching
 					normalizedCache[internalRange] = normalizedCacheData;
-					setCachedDataCompressed(cacheKey, normalizedCacheData, CACHE_TTL);
+					setCachedDataSmart(
+						cacheKey,
+						normalizedCacheData,
+						CACHE_TTL / (60 * 1000),
+						true
+					); // Force IndexedDB for large datasets
 
 					console.log(
 						`Cached ${normalizedTracks.length} normalized tracks for ${range} (${Object.keys(albums).length} albums, ${Object.keys(artists).length} artists)`
@@ -403,7 +410,7 @@ export function useLikedTracks() {
 			return cache.tracks.map(toCompactTrack);
 		}
 
-		// Try to get from persistent cache
+		// Try to get from persistent cache using smart caching (sync fallback)
 		const cacheKey = CACHE_KEYS[internalRange];
 		const cachedData = getCachedDataCompressed<NormalizedCache>(cacheKey);
 
