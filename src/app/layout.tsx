@@ -19,7 +19,6 @@ import {
 import { Analytics } from '@vercel/analytics/react';
 import { ThemeModeScript } from 'flowbite-react';
 import Script from 'next/script';
-import { PostHogProvider } from './providers';
 
 // Enhanced metadata for 2025 SEO standards
 export const metadata = generateEnhancedMetadata({
@@ -154,11 +153,9 @@ export default function RootLayout({
 					/>
 
 					<NextAuthProvider>
-						<PostHogProvider>
-							<LayoutContent>{children}</LayoutContent>
-							<TokenStatus />
-							<WebVitalsMonitor />
-						</PostHogProvider>
+						<LayoutContent>{children}</LayoutContent>
+						<TokenStatus />
+						<WebVitalsMonitor />
 					</NextAuthProvider>
 
 					{/* Vercel Analytics */}
