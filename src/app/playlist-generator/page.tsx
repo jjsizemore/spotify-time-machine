@@ -59,7 +59,8 @@ export default function PlaylistGeneratorPage() {
 
 			setLoadingFilters(true);
 			try {
-				// Fetch top artists
+				// Try to fetch from useUserStats cache first, then get additional artists if needed
+				// This could be optimized to leverage existing cached data
 				const response = await spotifyApi.getMyTopArtists({ limit: 50 });
 				const artists: Artist[] = response.body.items.map((artist: any) => ({
 					id: artist.id,

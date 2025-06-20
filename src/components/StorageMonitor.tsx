@@ -47,6 +47,8 @@ export default function StorageMonitor() {
 	};
 
 	const handleRequestPersistent = async () => {
+		// Note: Chrome auto-grants persistent storage for frequently visited sites
+		// This is mainly useful for Firefox users or low-engagement scenarios
 		const granted = await requestPersistentStorage();
 		setIsPersistent(granted);
 	};

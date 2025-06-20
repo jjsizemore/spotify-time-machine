@@ -278,7 +278,8 @@ export function useLikedTracks() {
 
 			// Then check persistent cache
 			const cacheKey = CACHE_KEYS[internalRange];
-			const cachedData = getCachedDataCompressed<NormalizedCache>(cacheKey);
+			const cachedData =
+				await getCachedDataCompressed<NormalizedCache>(cacheKey);
 
 			if (cachedData) {
 				console.log(`Using persistent normalized cache for ${range}`);
@@ -369,7 +370,7 @@ export function useLikedTracks() {
 
 					// Cache the normalized results using smart caching
 					normalizedCache[internalRange] = normalizedCacheData;
-					setCachedDataSmart(
+					await setCachedDataSmart(
 						cacheKey,
 						normalizedCacheData,
 						CACHE_TTL / (60 * 1000),
@@ -410,14 +411,8 @@ export function useLikedTracks() {
 			return cache.tracks.map(toCompactTrack);
 		}
 
-		// Try to get from persistent cache using smart caching (sync fallback)
-		const cacheKey = CACHE_KEYS[internalRange];
-		const cachedData = getCachedDataCompressed<NormalizedCache>(cacheKey);
-
-		if (cachedData) {
-			normalizedCache[internalRange] = cachedData;
-			return cachedData.tracks.map(toCompactTrack);
-		}
+		// Note: For synchronous compact tracks, we'll just return empty array if not in memory cache
+		// Background loading will eventually populate the cache
 
 		return [];
 	}, []);

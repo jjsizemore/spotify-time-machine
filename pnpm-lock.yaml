@@ -34,6 +34,9 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.2
       flowbite:
         specifier: ^3.1.2
         version: 3.1.2
@@ -41,7 +44,7 @@ importers:
         specifier: ^0.11.8
         version: 0.11.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.10)(typescript@5.8.3)
       next:
-        specifier: 15.3.4
+        specifier: ^15.3.4
         version: 15.3.4(@opentelemetry/api@1.8.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       next-auth:
         specifier: ^4.24.11
@@ -1569,6 +1572,9 @@ packages:
 
   fflate@0.4.8:
     resolution: {integrity: sha512-FJqqoDBR00Mdj9ppamLa/Y7vxm+PRmNWA67N846RvsoYVMKB4q3y/de5PA7gUmRMYK/8CMz2GDZQmCRN1wBcWA==}
+
+  fflate@0.8.2:
+    resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
 
   fill-range@7.1.1:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
@@ -3724,6 +3730,8 @@ snapshots:
       reusify: 1.1.0
 
   fflate@0.4.8: {}
+
+  fflate@0.8.2: {}
 
   fill-range@7.1.1:
     dependencies:

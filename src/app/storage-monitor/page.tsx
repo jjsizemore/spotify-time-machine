@@ -35,7 +35,7 @@ export default function StorageMonitorPage() {
 	return (
 		<PageContainer
 			isLoading={status === 'loading'}
-			maxWidth="4xl"
+			maxWidth="7xl"
 			className="min-h-screen pb-20"
 		>
 			{/* SEO-optimized heading structure */}

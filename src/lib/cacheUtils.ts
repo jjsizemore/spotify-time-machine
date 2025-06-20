@@ -155,23 +155,111 @@ function clearOldestCacheEntry(): boolean {
 }
 
 // Compression utilities for more efficient storage
-function compressData(data: any): string {
+async function compressData(data: any): Promise<string> {
 	try {
 		const jsonString = JSON.stringify(data);
-		// Simple compression using a basic algorithm
-		// For production, consider using libraries like 'pako' for gzip compression
-		return btoa(jsonString);
+		const uint8Array = new TextEncoder().encode(jsonString);
+
+		// Try native browser compression first (supported in modern browsers)
+		if (typeof CompressionStream !== 'undefined') {
+			const compressionStream = new CompressionStream('gzip');
+			const writer = compressionStream.writable.getWriter();
+			const reader = compressionStream.readable.getReader();
+
+			// Write data to compression stream
+			await writer.write(uint8Array);
+			await writer.close();
+
+			// Read compressed chunks
+			const chunks: Uint8Array[] = [];
+			let done = false;
+			while (!done) {
+				const { value, done: readerDone } = await reader.read();
+				done = readerDone;
+				if (value) {
+					chunks.push(value);
+				}
+			}
+
+			// Combine chunks and convert to base64
+			const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+			const combined = new Uint8Array(totalLength);
+			let offset = 0;
+			for (const chunk of chunks) {
+				combined.set(chunk, offset);
+				offset += chunk.length;
+			}
+
+			// Convert to base64 for storage
+			const base64 = btoa(String.fromCharCode(...combined));
+			return base64;
+		} else {
+			// Fallback to fflate for older browsers
+			const { gzipSync } = await import('fflate');
+			const compressed = gzipSync(uint8Array);
+			const base64 = btoa(String.fromCharCode(...compressed));
+			return base64;
+		}
 	} catch (error) {
 		console.warn('Failed to compress data, using uncompressed format:', error);
 		return JSON.stringify(data);
 	}
 }
 
-function decompressData<T>(compressedData: string): T | null {
+async function decompressData<T>(compressedData: string): Promise<T | null> {
 	try {
-		// Try to decompress first
-		const jsonString = atob(compressedData);
-		return JSON.parse(jsonString);
+		// Check if this looks like base64 compressed data
+		if (compressedData.startsWith('{') || compressedData.startsWith('[')) {
+			// This is uncompressed JSON, parse directly
+			return JSON.parse(compressedData);
+		}
+
+		// Decode base64 to Uint8Array
+		const binaryString = atob(compressedData);
+		const compressed = new Uint8Array(binaryString.length);
+		for (let i = 0; i < binaryString.length; i++) {
+			compressed[i] = binaryString.charCodeAt(i);
+		}
+
+		// Try native browser decompression first
+		if (typeof DecompressionStream !== 'undefined') {
+			const decompressionStream = new DecompressionStream('gzip');
+			const writer = decompressionStream.writable.getWriter();
+			const reader = decompressionStream.readable.getReader();
+
+			// Write compressed data to decompression stream
+			await writer.write(compressed);
+			await writer.close();
+
+			// Read decompressed chunks
+			const chunks: Uint8Array[] = [];
+			let done = false;
+			while (!done) {
+				const { value, done: readerDone } = await reader.read();
+				done = readerDone;
+				if (value) {
+					chunks.push(value);
+				}
+			}
+
+			// Combine chunks and convert to string
+			const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+			const combined = new Uint8Array(totalLength);
+			let offset = 0;
+			for (const chunk of chunks) {
+				combined.set(chunk, offset);
+				offset += chunk.length;
+			}
+
+			const jsonString = new TextDecoder().decode(combined);
+			return JSON.parse(jsonString);
+		} else {
+			// Fallback to fflate for older browsers
+			const { gunzipSync } = await import('fflate');
+			const decompressed = gunzipSync(compressed);
+			const jsonString = new TextDecoder().decode(decompressed);
+			return JSON.parse(jsonString);
+		}
 	} catch (_error) {
 		// If decompression fails, try parsing as uncompressed JSON
 		try {
@@ -412,12 +500,12 @@ export function getCachedData<T>(key: string): T | null {
 	}
 }
 
-export function setCachedDataCompressed<T>(
+export async function setCachedDataCompressed<T>(
 	key: string,
 	data: T,
 	ttlMinutes: number,
 	useCompression: boolean = true
-): void {
+): Promise<void> {
 	if (typeof window === 'undefined') {
 		logCacheError({
 			type: 'STORAGE_ACCESS',
@@ -447,7 +535,7 @@ export function setCachedDataCompressed<T>(
 	if (useCompression) {
 		const originalString = JSON.stringify(data);
 		originalSize = new Blob([originalString]).size;
-		compressedData = compressData(data);
+		compressedData = await compressData(data);
 		compressedSize = new Blob([compressedData]).size;
 		compressed = true;
 
@@ -534,7 +622,9 @@ export function setCachedDataCompressed<T>(
 	}
 }
 
-export function getCachedDataCompressed<T>(key: string): T | null {
+export async function getCachedDataCompressed<T>(
+	key: string
+): Promise<T | null> {
 	if (typeof window === 'undefined') {
 		logCacheError({
 			type: 'STORAGE_ACCESS',
@@ -640,7 +730,7 @@ export function getCachedDataCompressed<T>(key: string): T | null {
 
 		// Decompress data if needed
 		const decompressedData = item.compressed
-			? decompressData<T>(item.data)
+			? await decompressData<T>(item.data)
 			: JSON.parse(item.data);
 
 		if (decompressedData === null) {
@@ -886,12 +976,12 @@ function isIndexedDBAvailable(): boolean {
 // Smart cache that uses IndexedDB for large data, localStorage for small data
 const indexedDBStorage = new IndexedDBCacheStorage();
 
-export function setCachedDataSmart<T>(
+export async function setCachedDataSmart<T>(
 	key: string,
 	data: T,
 	ttlMinutes: number,
 	forceIndexedDB: boolean = false
-): void {
+): Promise<void> {
 	// Estimate data size
 	const dataSize = new Blob([JSON.stringify(data)]).size;
 	const sizeKB = Math.round(dataSize / 1024);
@@ -899,26 +989,53 @@ export function setCachedDataSmart<T>(
 	// Use IndexedDB for large data (>1MB) or when explicitly requested
 	const useIndexedDB = forceIndexedDB || sizeKB > 1024;
 
+	console.debug(
+		`🗃️ Cache strategy for ${key}: ${useIndexedDB ? 'IndexedDB' : 'localStorage'} (${sizeKB}KB)`
+	);
+
 	if (useIndexedDB && isIndexedDBAvailable()) {
-		indexedDBStorage.set(key, data, ttlMinutes).catch((error) => {
+		try {
+			await indexedDBStorage.set(key, data, ttlMinutes);
+			console.debug(`✅ Successfully cached to IndexedDB: ${key}`);
+		} catch (error) {
 			console.warn('IndexedDB failed, falling back to localStorage:', error);
-			setCachedDataCompressed(key, data, ttlMinutes, true);
-		});
+			await setCachedDataCompressed(key, data, ttlMinutes, true);
+		}
 	} else {
 		// Use compressed localStorage for smaller data
-		setCachedDataCompressed(key, data, ttlMinutes, true);
+		await setCachedDataCompressed(key, data, ttlMinutes, true);
+		console.debug(`✅ Successfully cached to localStorage: ${key}`);
 	}
 }
 
-export function getCachedDataSmart<T>(key: string): Promise<T | null> {
+export async function getCachedDataSmart<T>(key: string): Promise<T | null> {
+	console.debug(`🔍 Smart cache lookup for: ${key}`);
+
 	if (isIndexedDBAvailable()) {
-		return indexedDBStorage.get<T>(key).catch((error) => {
+		try {
+			const indexedDBResult = await indexedDBStorage.get<T>(key);
+			if (indexedDBResult !== null) {
+				console.debug(`✅ Found in IndexedDB: ${key}`);
+				return indexedDBResult;
+			} else {
+				console.debug(
+					`❌ Not found in IndexedDB: ${key}, trying localStorage...`
+				);
+			}
+		} catch (error) {
 			console.warn('IndexedDB failed, falling back to localStorage:', error);
-			return getCachedDataCompressed<T>(key);
-		});
-	} else {
-		return Promise.resolve(getCachedDataCompressed<T>(key));
+		}
 	}
+
+	// Try localStorage as fallback
+	const localStorageResult = await getCachedDataCompressed<T>(key);
+	if (localStorageResult !== null) {
+		console.debug(`✅ Found in localStorage: ${key}`);
+	} else {
+		console.debug(`❌ Not found in localStorage: ${key}`);
+	}
+
+	return localStorageResult;
 }
 
 export function clearAllCacheSmart(): Promise<number> {

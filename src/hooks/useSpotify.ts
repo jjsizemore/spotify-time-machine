@@ -57,6 +57,14 @@ export const useSpotify = () => {
 		// Clear error when session changes
 		setError(null);
 
+		console.log('useSpotify debug:', {
+			status,
+			hasSession: !!session,
+			hasAccessToken: !!session?.accessToken,
+			hasRefreshToken: !!session?.refreshToken,
+			sessionError: session?.error,
+		});
+
 		if (status === 'loading') {
 			setIsReady(false);
 			return;
@@ -87,6 +95,7 @@ export const useSpotify = () => {
 					spotifyApi.setTokenRefreshCallback(tokenRefreshCallback);
 					setIsReady(true);
 					setError(null);
+					console.log('✅ Spotify API is ready');
 				} catch (err) {
 					console.error('❌ Error setting Spotify access token:', err);
 					setError('Failed to configure Spotify API. Please try again.');

@@ -30,7 +30,7 @@ function EmptyOrErrorDisplay() {
 					className="cursor-pointer text-spotify-green hover:text-spotify-light-green transition-colors underline"
 					onClick={handleClearCache}
 				>
-					Click or tap here to clear the cache and refresh the page :)
+					Click or tap here to clear the cache and refresh the page 🙂
 				</p>
 			</div>
 		</div>
