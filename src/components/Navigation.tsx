@@ -155,37 +155,40 @@ export default function Navigation({ user }: NavigationProps) {
 							}
 							className="!bg-spotify-dark-gray !border !border-spotify-medium-gray/30 !shadow-lg !rounded-md !origin-top-right"
 						>
-							<div className="flex flex-col items-center align-middle">
-								<div className="flex m-2 align-middle">
-									<Link href="/storage-monitor">
-										<ActionButton variant="secondary" className="m-4">
-											<span className="flex items-center gap-2">
-												<HiOutlineChartBar className="h-4 w-4" />
-												Storage Monitor
-											</span>
-										</ActionButton>
-									</Link>
-								</div>
-								<div className="flex m-2 align-middle">
+							<div className="flex flex-col gap-3 p-4 min-w-[180px]">
+								<Link href="/storage-monitor">
 									<ActionButton
-										onClick={handleClearCache}
 										variant="secondary"
-										className="m-4"
+										className="w-full justify-start"
 									>
 										<span className="flex items-center gap-2">
-											<HiOutlineTrash className="h-4 w-4" />
-											Clear Cache
+											<HiOutlineChartBar className="h-4 w-4" />
+											Storage Monitor
 										</span>
 									</ActionButton>
-								</div>
-								<div className="flex m-2 align-middle">
-									<ActionButton onClick={handleLogout} variant="primary">
-										<span className="flex items-center gap-2">
-											<HiOutlineLogout className="h-4 w-4" />
-											Logout
-										</span>
-									</ActionButton>
-								</div>
+								</Link>
+
+								<ActionButton
+									onClick={handleClearCache}
+									variant="secondary"
+									className="w-full justify-start"
+								>
+									<span className="flex items-center gap-2">
+										<HiOutlineTrash className="h-4 w-4" />
+										Clear Cache
+									</span>
+								</ActionButton>
+
+								<ActionButton
+									onClick={handleLogout}
+									variant="primary"
+									className="w-full justify-start"
+								>
+									<span className="flex items-center gap-2">
+										<HiOutlineLogout className="h-4 w-4" />
+										Logout
+									</span>
+								</ActionButton>
 							</div>
 						</Dropdown>
 					</div>

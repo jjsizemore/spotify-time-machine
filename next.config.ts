@@ -141,7 +141,6 @@ const nextConfig: NextConfig = {
 		];
 	},
 
-	// PostHog rewrites
 	async rewrites() {
 		return [
 			{

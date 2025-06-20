@@ -2,7 +2,7 @@ import '@/lib/init';
 import { LayoutContent } from '@/components/LayoutContent';
 import TokenStatus from '@/components/TokenStatus';
 import WebVitalsMonitor from '@/components/WebVitalsMonitor';
-import React from 'react';
+import { ReactNode } from 'react';
 import { NextAuthProvider } from '../components/providers/NextAuthProvider';
 import './globals.css';
 import {
@@ -37,7 +37,7 @@ export const metadata = generateEnhancedMetadata({
 export default function RootLayout({
 	children,
 }: {
-	children: React.ReactNode;
+	children: ReactNode;
 }) {
 	const webAppSchema = generateWebApplicationSchema();
 	const organizationSchema = generateOrganizationSchema();
