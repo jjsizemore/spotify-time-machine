@@ -1013,3 +1013,93 @@ export async function logStorageInfo(): Promise<void> {
 	console.log(`Can Store More: ${info.canStoreMoreData ? '✅' : '❌'}`);
 	console.groupEnd();
 }
+
+/**
+ * Clear all caches without refreshing the page
+ * This function combines localStorage cache clearing with in-memory cache clearing
+ * @param clearInMemoryCaches - Function to clear in-memory caches (optional)
+ * @returns The number of cache items removed
+ */
+export function clearAllCachesOnly(clearInMemoryCaches?: () => void): number {
+	try {
+		// Clear localStorage cache
+		const removedCount = clearAllCache();
+
+		// Clear in-memory caches if function provided
+		if (clearInMemoryCaches) {
+			clearInMemoryCaches();
+		}
+
+		console.log(
+			`Cache cleared: ${removedCount} localStorage items removed${clearInMemoryCaches ? ', in-memory caches cleared' : ''}`
+		);
+
+		return removedCount;
+	} catch (error) {
+		console.error('Error clearing cache:', error);
+		throw error;
+	}
+}
+
+/**
+ * Clear all caches and refresh the page
+ * This function combines localStorage cache clearing with in-memory cache clearing
+ * @param clearInMemoryCaches - Function to clear in-memory caches (optional)
+ * @returns Promise with the number of cache items removed and whether page was refreshed
+ */
+export async function clearAllCachesAndRefresh(
+	clearInMemoryCaches?: () => void
+): Promise<{ removedCount: number; refreshed: boolean }> {
+	try {
+		const removedCount = clearAllCachesOnly(clearInMemoryCaches);
+
+		// Refresh the page
+		if (typeof window !== 'undefined') {
+			window.location.reload();
+		}
+
+		return { removedCount, refreshed: true };
+	} catch (error) {
+		console.error('Error clearing cache:', error);
+		throw error;
+	}
+}
+
+/**
+ * Clear all caches including in-memory caches and refresh the page
+ * This is a convenience function that includes all standard cache clearing
+ * @returns Promise with the number of cache items removed and whether page was refreshed
+ */
+export async function clearAllCachesAndRefreshComplete(): Promise<{
+	removedCount: number;
+	refreshed: boolean;
+}> {
+	// Dynamically import the cache clearing functions to avoid circular dependencies
+	const { clearTracksInMemoryCache } = await import('@/hooks/useLikedTracks');
+	const { clearArtistsInMemoryCache } = await import('@/hooks/useLikedArtists');
+
+	const clearInMemoryCaches = () => {
+		clearTracksInMemoryCache();
+		clearArtistsInMemoryCache();
+	};
+
+	return clearAllCachesAndRefresh(clearInMemoryCaches);
+}
+
+/**
+ * Clear all caches including in-memory caches without refreshing the page
+ * This is a convenience function for when you want to show a toast notification
+ * @returns The number of cache items removed
+ */
+export async function clearAllCachesOnlyComplete(): Promise<number> {
+	// Dynamically import the cache clearing functions to avoid circular dependencies
+	const { clearTracksInMemoryCache } = await import('@/hooks/useLikedTracks');
+	const { clearArtistsInMemoryCache } = await import('@/hooks/useLikedArtists');
+
+	const clearInMemoryCaches = () => {
+		clearTracksInMemoryCache();
+		clearArtistsInMemoryCache();
+	};
+
+	return clearAllCachesOnly(clearInMemoryCaches);
+}
