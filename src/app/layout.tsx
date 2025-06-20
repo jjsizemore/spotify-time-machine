@@ -5,6 +5,7 @@ import WebVitalsMonitor from '@/components/WebVitalsMonitor';
 import { ReactNode } from 'react';
 import { NextAuthProvider } from '../components/providers/NextAuthProvider';
 import './globals.css';
+import { ConsentAwareAnalytics } from '@/components/ConsentAwareAnalytics';
 import {
 	ADVANCED_META_TAGS,
 	generateEnhancedMetadata,
@@ -16,7 +17,7 @@ import {
 	ConsentManagerProvider,
 	CookieBanner,
 } from '@c15t/nextjs';
-import { Analytics } from '@vercel/analytics/react';
+import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
 import { ThemeModeScript } from 'flowbite-react';
 import Script from 'next/script';
 
@@ -45,6 +46,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
+				<GoogleTagManager gtmId="GTM-NFTKSSLM" />
 				<ThemeModeScript />
 
 				{/* Enhanced Meta Tags for 2025 */}
@@ -109,9 +111,7 @@ export default function RootLayout({
 					<CookieBanner />
 					<ConsentManagerDialog />
 
-					{/* Core Web Vitals monitoring is handled by WebVitalsMonitor component */}
-
-					{/* Enhanced Structured Data */}
+					{/* Enhanced Structured Data - These are essential and don't require consent */}
 					<Script
 						id="web-application-schema"
 						type="application/ld+json"
@@ -128,40 +128,17 @@ export default function RootLayout({
 						}}
 					/>
 
-					{/* Google Analytics 4 for Core Web Vitals */}
-					<Script
-						src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"
-						strategy="afterInteractive"
-					/>
-					<Script
-						id="google-analytics"
-						strategy="afterInteractive"
-						dangerouslySetInnerHTML={{
-							__html: `
-							window.dataLayer = window.dataLayer || [];
-							function gtag(){dataLayer.push(arguments);}
-							gtag('js', new Date());
-							gtag('config', 'G-XXXXXXXXXX', {
-								page_title: document.title,
-								page_location: window.location.href,
-								custom_map: {
-									'custom_parameter_1': 'core_web_vitals'
-								}
-							});
-						`,
-						}}
-					/>
+					{/* Analytics that only load with user consent */}
+					<ConsentAwareAnalytics />
 
 					<NextAuthProvider>
 						<LayoutContent>{children}</LayoutContent>
 						<TokenStatus />
+						{/* WebVitalsMonitor - Keep this as it's for performance monitoring, not user tracking */}
 						<WebVitalsMonitor />
 					</NextAuthProvider>
 
-					{/* Vercel Analytics */}
-					<Analytics />
-
-					{/* Service Worker Registration for PWA */}
+					{/* Service Worker Registration for PWA - Essential functionality */}
 					<Script
 						id="service-worker"
 						strategy="afterInteractive"
@@ -183,6 +160,7 @@ export default function RootLayout({
 					/>
 				</ConsentManagerProvider>
 			</body>
+			<GoogleAnalytics gaId="G-CD6VHDL1HS" />
 		</html>
 	);
 }
