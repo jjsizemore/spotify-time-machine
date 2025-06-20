@@ -30,7 +30,7 @@ export default function PageContainer({
 	className = '',
 	isLoading = false,
 	showLoadingOverlay = true,
-	maxWidth = '6xl',
+	maxWidth = '7xl',
 	isAuthLayout = false,
 }: PageContainerProps) {
 	// Component-specific loading state only

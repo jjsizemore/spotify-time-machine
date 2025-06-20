@@ -1,4 +1,9 @@
-import { getCachedData, setCachedData } from '@/lib/cacheUtils';
+import {
+	getCachedData,
+	getCachedDataSmart,
+	setCachedData,
+	setCachedDataSmart,
+} from '@/lib/cacheUtils';
 import { SpotifyApiError } from '@/lib/spotify';
 import { useCallback, useEffect, useState } from 'react';
 import { SavedTrack, TimeRange, useLikedTracks } from './useLikedTracks';
@@ -25,7 +30,7 @@ export interface CompactArtist {
 }
 
 // Maximum cache size for artists
-const MAX_ARTISTS_CACHE_SIZE = 1500;
+const MAX_ARTISTS_CACHE_SIZE = 10000;
 
 // Global artists cache - shared across all hook instances
 const artistsCache = new Map<string, ArtistDetail>();
@@ -47,7 +52,7 @@ const toCompactArtist = (artist: ArtistDetail): CompactArtist => ({
 });
 
 // Helper to check and cleanup cache
-const checkAndCleanupCache = () => {
+const checkAndCleanupCache = async () => {
 	if (artistsCache.size > MAX_ARTISTS_CACHE_SIZE) {
 		console.log(
 			`Cleaning up artist cache (${artistsCache.size} > ${MAX_ARTISTS_CACHE_SIZE})`
@@ -68,11 +73,21 @@ const checkAndCleanupCache = () => {
 			processedArtistIds.add(id);
 		});
 
-		// Update persistent caches
+		// Update persistent caches using smart storage
 		const artistsObject = Object.fromEntries(artistsCache);
 		const compactArtistsObject = Object.fromEntries(compactArtistsCache);
-		setCachedData(ARTISTS_CACHE_KEY, artistsObject, CACHE_TTL);
-		setCachedData(COMPACT_ARTISTS_CACHE_KEY, compactArtistsObject, CACHE_TTL);
+		await Promise.all([
+			setCachedDataSmart(
+				ARTISTS_CACHE_KEY,
+				artistsObject,
+				CACHE_TTL / (60 * 1000)
+			), // Convert to minutes
+			setCachedDataSmart(
+				COMPACT_ARTISTS_CACHE_KEY,
+				compactArtistsObject,
+				CACHE_TTL / (60 * 1000)
+			), // Convert to minutes
+		]);
 
 		console.log(`Cache cleaned up. Now contains ${artistsCache.size} artists`);
 	}
@@ -111,11 +126,12 @@ export function useLikedArtists() {
 			try {
 				// Check if we have cached artist data
 				if (artistsCache.size === 0) {
-					const cachedArtistData =
-						getCachedData<Record<string, ArtistDetail>>(ARTISTS_CACHE_KEY);
-					const cachedCompactData = getCachedData<
-						Record<string, CompactArtist>
-					>(COMPACT_ARTISTS_CACHE_KEY);
+					const [cachedArtistData, cachedCompactData] = await Promise.all([
+						getCachedDataSmart<Record<string, ArtistDetail>>(ARTISTS_CACHE_KEY),
+						getCachedDataSmart<Record<string, CompactArtist>>(
+							COMPACT_ARTISTS_CACHE_KEY
+						),
+					]);
 
 					if (cachedArtistData) {
 						// Restore full cache
@@ -135,7 +151,7 @@ export function useLikedArtists() {
 					console.log(`Restored ${artistsCache.size} artists from cache`);
 
 					// Clean up cache after restoration if needed
-					checkAndCleanupCache();
+					await checkAndCleanupCache();
 				}
 
 				// Collect artist IDs from these tracks that we haven't processed yet
@@ -175,7 +191,7 @@ export function useLikedArtists() {
 				}
 
 				// Check and cleanup cache after fetching new artists
-				checkAndCleanupCache();
+				await checkAndCleanupCache();
 
 				return new Map(artistsCache);
 			} catch (err) {

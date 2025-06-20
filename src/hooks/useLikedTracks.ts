@@ -1,8 +1,10 @@
 import {
 	getCachedData,
 	getCachedDataCompressed,
+	getCachedDataSmart,
 	setCachedData,
 	setCachedDataCompressed,
+	setCachedDataSmart,
 } from '@/lib/cacheUtils';
 import { SpotifyApiError } from '@/lib/spotify';
 import {
@@ -276,7 +278,8 @@ export function useLikedTracks() {
 
 			// Then check persistent cache
 			const cacheKey = CACHE_KEYS[internalRange];
-			const cachedData = getCachedDataCompressed<NormalizedCache>(cacheKey);
+			const cachedData =
+				await getCachedDataCompressed<NormalizedCache>(cacheKey);
 
 			if (cachedData) {
 				console.log(`Using persistent normalized cache for ${range}`);
@@ -365,9 +368,14 @@ export function useLikedTracks() {
 						lastUpdated: Date.now(),
 					};
 
-					// Cache the normalized results
+					// Cache the normalized results using smart caching
 					normalizedCache[internalRange] = normalizedCacheData;
-					setCachedDataCompressed(cacheKey, normalizedCacheData, CACHE_TTL);
+					await setCachedDataSmart(
+						cacheKey,
+						normalizedCacheData,
+						CACHE_TTL / (60 * 1000),
+						true
+					); // Force IndexedDB for large datasets
 
 					console.log(
 						`Cached ${normalizedTracks.length} normalized tracks for ${range} (${Object.keys(albums).length} albums, ${Object.keys(artists).length} artists)`
@@ -403,14 +411,8 @@ export function useLikedTracks() {
 			return cache.tracks.map(toCompactTrack);
 		}
 
-		// Try to get from persistent cache
-		const cacheKey = CACHE_KEYS[internalRange];
-		const cachedData = getCachedDataCompressed<NormalizedCache>(cacheKey);
-
-		if (cachedData) {
-			normalizedCache[internalRange] = cachedData;
-			return cachedData.tracks.map(toCompactTrack);
-		}
+		// Note: For synchronous compact tracks, we'll just return empty array if not in memory cache
+		// Background loading will eventually populate the cache
 
 		return [];
 	}, []);

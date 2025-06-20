@@ -1,3 +1,4 @@
+import { clearAllCachesAndRefreshComplete } from '@/lib/cacheUtils';
 import React, { Suspense, useState, useEffect } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -12,18 +13,26 @@ type VisualizationContainerProps = {
 	emptyDataMessage?: string;
 };
 
-function ErrorDisplay({ message }: { message: string }) {
+function EmptyOrErrorDisplay() {
+	const handleClearCache = async () => {
+		try {
+			await clearAllCachesAndRefreshComplete();
+		} catch (error) {
+			console.error('Error clearing cache:', error);
+		}
+	};
+
 	return (
 		<div className="text-center p-6 text-spotify-red">
-			<p>{message}</p>
-		</div>
-	);
-}
-
-function EmptyDataDisplay({ message }: { message: string }) {
-	return (
-		<div className="text-center p-12 text-spotify-light-gray">
-			<p>{message}</p>
+			<div>
+				<p className="mb-2">It seems like this data is corrupt or missing.</p>
+				<p
+					className="cursor-pointer text-spotify-green hover:text-spotify-light-green transition-colors underline"
+					onClick={handleClearCache}
+				>
+					Click or tap here to clear the cache and refresh the page 🙂
+				</p>
+			</div>
 		</div>
 	);
 }
@@ -36,7 +45,6 @@ export default function VisualizationContainer({
 	isProcessing = false,
 	error = null,
 	isEmpty = false,
-	emptyDataMessage = 'No data available to display. If you think this is an error, please clear your cache (Spotify Account Portrait > Clear Cache) and try again.',
 }: VisualizationContainerProps) {
 	const [showLoading, setShowLoading] = useState(true);
 	const [showProcessing, setShowProcessing] = useState(false);
@@ -94,11 +102,7 @@ export default function VisualizationContainer({
 				</div>
 			)}
 
-			{!showLoading && error && <ErrorDisplay message={error} />}
-
-			{!showLoading && !error && isEmpty && (
-				<EmptyDataDisplay message={emptyDataMessage} />
-			)}
+			{!showLoading && (error || isEmpty) && <EmptyOrErrorDisplay />}
 
 			{!showLoading && !error && !isEmpty && (
 				<Suspense

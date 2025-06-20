@@ -171,7 +171,7 @@ export default function ListeningTrends() {
 				error ? (typeof error === 'string' ? new Error(error) : error) : null
 			}
 			isEmpty={!isOverallLoading && !error && !hasData && !processingData}
-			emptyDataMessage="No listening data available to visualize after processing."
+			emptyDataMessage="No listening data available to visualize after processing. If you think this is an error, please clear your cache (Spotify Account Portrait > Clear Cache) and refresh the page."
 			currentTimeRange={currentTimeRange}
 			setTimeRange={setTimeRange}
 			isLoadingRange={isLoadingRange}

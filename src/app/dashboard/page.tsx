@@ -33,6 +33,16 @@ export default function Dashboard() {
 	const { topArtists, topTracks, recentlyPlayed, isLoading, error, refresh } =
 		useUserStats(timeRange);
 
+	// Debug logging to understand loading state issues
+	console.log('Dashboard debug:', {
+		sessionStatus: status,
+		isLoading,
+		hasTopArtists: topArtists.length,
+		hasTopTracks: topTracks.length,
+		hasRecentlyPlayed: recentlyPlayed.length,
+		error,
+	});
+
 	// Generate enhanced structured data for dashboard
 	const dashboardSchema = generateWebApplicationSchema({
 		'@type': 'WebPage',

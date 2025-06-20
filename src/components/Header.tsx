@@ -8,7 +8,7 @@ export default function Header() {
 	const { data: session } = useSession();
 
 	return (
-		<header className="sticky top-0 z-50 w-full">
+		<header className="sticky top-0 z-100 w-full">
 			<Navigation user={session?.user} />
 		</header>
 	);
