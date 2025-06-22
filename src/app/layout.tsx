@@ -17,7 +17,7 @@ import {
 	ConsentManagerProvider,
 	CookieBanner,
 } from '@c15t/nextjs';
-import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
+import { GoogleTagManager } from '@next/third-parties/google';
 import { ThemeModeScript } from 'flowbite-react';
 import Script from 'next/script';
 
@@ -108,8 +108,8 @@ export default function RootLayout({
 						backendURL: '/api/c15t',
 					}}
 				>
-					<CookieBanner />
-					<ConsentManagerDialog />
+					{/* Analytics that only load with user consent */}
+					<ConsentAwareAnalytics />
 
 					{/* Enhanced Structured Data - These are essential and don't require consent */}
 					<Script
@@ -127,9 +127,6 @@ export default function RootLayout({
 							__html: JSON.stringify(organizationSchema),
 						}}
 					/>
-
-					{/* Analytics that only load with user consent */}
-					<ConsentAwareAnalytics />
 
 					<NextAuthProvider>
 						<LayoutContent>{children}</LayoutContent>
@@ -158,9 +155,10 @@ export default function RootLayout({
 						`,
 						}}
 					/>
+					<CookieBanner />
+					<ConsentManagerDialog />
 				</ConsentManagerProvider>
 			</body>
-			<GoogleAnalytics gaId="G-CD6VHDL1HS" />
 		</html>
 	);
 }

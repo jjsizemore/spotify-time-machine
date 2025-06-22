@@ -43,7 +43,6 @@ const nextConfig: NextConfig = {
 			'date-fns',
 			'react-icons',
 		],
-		webVitalsAttribution: ['CLS', 'LCP', 'FCP', 'FID', 'TTFB'],
 	},
 
 	// Compiler Optimizations
