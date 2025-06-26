@@ -14,7 +14,7 @@ import { generateWebApplicationSchema } from '@/lib/seo';
 import { SpotifyTimeRange, timeRangeDisplays } from '@/lib/timeRanges';
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 
 // Lazy load the visualization components
 const ListeningTrends = lazy(() => import('@/components/ListeningTrends'));

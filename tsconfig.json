@@ -1,33 +1,49 @@
 {
 	"compilerOptions": {
-		"target": "ES2017",
+		"target": "ES2024",
 		"lib": ["dom", "dom.iterable", "esnext"],
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
 		"allowJs": true,
-		"skipLibCheck": true,
+		"checkJs": false,
 		"strict": true,
-		"noEmit": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"allowSyntheticDefaultImports": true,
 		"esModuleInterop": true,
-		"module": "esnext",
-		"moduleResolution": "bundler",
-		"resolveJsonModule": true,
+		"forceConsistentCasingInFileNames": true,
 		"isolatedModules": true,
-		"jsx": "preserve",
+		"resolveJsonModule": true,
+		"allowImportingTsExtensions": false,
+		"allowArbitraryExtensions": false,
+		"noEmit": true,
+		"preserveWatchOutput": true,
+		"removeComments": false,
+		"skipLibCheck": true,
 		"incremental": true,
+		"assumeChangesOnlyAffectDirectDependencies": true,
+		"useDefineForClassFields": true,
+		"verbatimModuleSyntax": false,
+		"jsx": "preserve",
+		"jsxImportSource": "react",
 		"plugins": [
 			{
 				"name": "next"
 			}
 		],
+		"baseUrl": ".",
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@/components/*": ["./src/components/*"],
+			"@/lib/*": ["src/lib/*"],
+			"@/hooks/*": ["./src/hooks/*"],
+			"@/types/*": ["./src/types/*"]
 		}
 	},
-	"include": [
-		"next-env.d.ts",
-		"**/*.ts",
-		"**/*.tsx",
-		".next/types/**/*.ts",
-		"postcss.config.mjs"
-	],
-	"exclude": ["node_modules"]
+	"include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+	"exclude": ["node_modules", ".next", "dist", "build"],
+	"ts-node": {
+		"esm": true
+	}
 }

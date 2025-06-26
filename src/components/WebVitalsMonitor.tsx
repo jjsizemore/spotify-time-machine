@@ -100,8 +100,10 @@ export default function WebVitalsMonitor() {
 				};
 			} catch (error) {
 				console.error('Performance observer error:', error);
+				return undefined; // Explicit return for error case
 			}
 		}
+		return undefined; // Explicit return when observers aren't supported
 	}, []);
 
 	return null; // This component doesn't render anything

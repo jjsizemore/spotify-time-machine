@@ -143,6 +143,8 @@ function SignInContent() {
 
 				return () => clearInterval(timer);
 			}
+			// No cleanup needed for retryable errors
+			return undefined;
 		} else {
 			const signInProcessAlreadyStarted =
 				sessionStorage.getItem(SIGN_IN_PROCESS_STARTED_KEY) === 'true';
@@ -151,6 +153,8 @@ function SignInContent() {
 				sessionStorage.setItem(SIGN_IN_PROCESS_STARTED_KEY, 'true');
 				signIn('spotify', { callbackUrl });
 			}
+			// No cleanup needed for the sign-in process
+			return undefined;
 		}
 	}, [callbackUrl, error, router, errorInfo?.retryable]);
 
