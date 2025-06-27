@@ -14,12 +14,32 @@ export default function manifest(): MetadataRoute.Manifest {
 		categories: ['music', 'entertainment', 'productivity'],
 		lang: 'en-US',
 		scope: '/',
+		// iOS-specific enhancements
+		display_override: ['standalone', 'minimal-ui'],
 		icons: [
 			{
 				src: '/favicon.svg',
 				sizes: 'any',
 				type: 'image/svg+xml',
+				purpose: 'any',
+			},
+			{
+				src: '/favicon.svg',
+				sizes: 'any',
+				type: 'image/svg+xml',
 				purpose: 'maskable',
+			},
+			{
+				src: '/favicon.svg',
+				sizes: '512x512',
+				type: 'image/svg+xml',
+				purpose: 'any',
+			},
+			{
+				src: '/favicon.svg',
+				sizes: '192x192',
+				type: 'image/svg+xml',
+				purpose: 'any',
 			},
 		],
 		screenshots: [

@@ -12,6 +12,9 @@ import {
 	generateOrganizationSchema,
 	generateWebApplicationSchema,
 } from '@/lib/seo';
+import IOSInstallPrompt from '@/ui/IOSInstallPrompt';
+import OfflineIndicator from '@/ui/OfflineIndicator';
+import PWAInstallPrompt from '@/ui/PWAInstallPrompt';
 import {
 	ConsentManagerDialog,
 	ConsentManagerProvider,
@@ -71,6 +74,15 @@ export default function RootLayout({
 					name="apple-mobile-web-app-title"
 					content={ADVANCED_META_TAGS['apple-mobile-web-app-title']}
 				/>
+
+				{/* iOS Safari PWA Enhancements */}
+				<meta name="apple-touch-fullscreen" content="yes" />
+				<meta
+					name="apple-mobile-web-app-status-bar-style"
+					content="black-translucent"
+				/>
+				<meta name="format-detection" content="telephone=no" />
+				<meta name="format-detection" content="email=no" />
 				<meta
 					name="mobile-web-app-capable"
 					content={ADVANCED_META_TAGS['mobile-web-app-capable']}
@@ -92,6 +104,23 @@ export default function RootLayout({
 				<link rel="apple-touch-icon" sizes="180x180" href="/favicon.svg" />
 				<link rel="apple-touch-icon" sizes="152x152" href="/favicon.svg" />
 				<link rel="apple-touch-icon" sizes="120x120" href="/favicon.svg" />
+
+				{/* iOS Splash Screens */}
+				<link
+					rel="apple-touch-startup-image"
+					href="/favicon.svg"
+					media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+				/>
+				<link
+					rel="apple-touch-startup-image"
+					href="/favicon.svg"
+					media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+				/>
+				<link
+					rel="apple-touch-startup-image"
+					href="/favicon.svg"
+					media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+				/>
 
 				{/* DNS Prefetch for Performance */}
 				<link rel="dns-prefetch" href="//i.scdn.co" />
@@ -160,6 +189,15 @@ export default function RootLayout({
 					/>
 					<CookieBanner />
 					<ConsentManagerDialog />
+
+					{/* PWA Install Prompt */}
+					<PWAInstallPrompt />
+
+					{/* iOS Install Prompt */}
+					<IOSInstallPrompt />
+
+					{/* Offline Indicator */}
+					<OfflineIndicator />
 				</ConsentManagerProvider>
 			</body>
 		</html>

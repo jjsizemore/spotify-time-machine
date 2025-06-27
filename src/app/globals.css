@@ -209,3 +209,55 @@ body {
 		padding: 0.5rem;
 	}
 }
+
+/* PWA Install Prompt Animation */
+@keyframes slide-up {
+	from {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+.animate-slide-up {
+	animation: slide-up 0.3s ease-out;
+}
+
+/* iOS-specific PWA optimizations */
+@supports (-webkit-touch-callout: none) {
+	/* iOS Safari specific styles */
+	.layout-content {
+		padding-bottom: env(safe-area-inset-bottom);
+		padding-top: env(safe-area-inset-top);
+	}
+
+	/* Fix iOS viewport issues */
+	html {
+		height: -webkit-fill-available;
+	}
+
+	body {
+		min-height: -webkit-fill-available;
+	}
+
+	/* Improve iOS scrolling */
+	* {
+		-webkit-overflow-scrolling: touch;
+	}
+
+	/* Hide iOS Safari UI when in standalone mode */
+	@media (display-mode: standalone) {
+		/* Status bar styling for iOS PWA */
+		meta[name="apple-mobile-web-app-status-bar-style"] {
+			content: "black-translucent";
+		}
+
+		/* Prevent iOS safari bounce effect */
+		body {
+			overscroll-behavior: none;
+		}
+	}
+}

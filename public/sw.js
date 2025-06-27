@@ -1,9 +1,12 @@
 // Service Worker for Spotify Time Machine PWA
-// 2025 Standards Implementation
+// 2025 Standards Implementation with iOS Optimizations
 
 const CACHE_NAME = 'spotify-time-machine-v1';
 const STATIC_CACHE_NAME = 'spotify-time-machine-static-v1';
 const DYNAMIC_CACHE_NAME = 'spotify-time-machine-dynamic-v1';
+
+// iOS-specific cache optimizations
+const IOS_CACHE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // Assets to cache immediately
 const STATIC_ASSETS = [
