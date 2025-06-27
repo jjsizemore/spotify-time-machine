@@ -2,9 +2,11 @@
 
 import { CompactTrack, useLikedTracks } from '@/hooks/useLikedTracks';
 import { timeRangeDisplays } from '@/lib/timeRanges';
-import React, { useState, useEffect, useRef } from 'react';
-import DataFetcherAndControlsWrapper from './DataFetcherAndControlsWrapper';
-import GranularitySelector, { GranularityOption } from './GranularitySelector';
+import { useEffect, useRef, useState } from 'react';
+import DataFetcherAndControlsWrapper from '../controls/DataFetcherAndControlsWrapper';
+import GranularitySelector, {
+	GranularityOption,
+} from '../controls/GranularitySelector';
 
 interface MonthlyData {
 	month: string;

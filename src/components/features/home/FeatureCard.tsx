@@ -1,6 +1,5 @@
+import ActionButton from '@/components/ui/ActionButton';
 import Link from 'next/link';
-import React from 'react';
-import ActionButton from './ActionButton';
 
 interface FeatureCardProps {
 	title: string;

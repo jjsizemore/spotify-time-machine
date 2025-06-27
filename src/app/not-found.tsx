@@ -1,4 +1,4 @@
-import ActionButton from '@/components/ActionButton';
+import ActionButton from '@/components/ui/ActionButton';
 import Image from 'next/image';
 import Link from 'next/link';
 

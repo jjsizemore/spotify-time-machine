@@ -1,6 +1,5 @@
 import { getTextStyle } from '@/lib/styleUtils';
 import React, { useState } from 'react';
-import TrackItem from './TrackItem';
 
 interface Track {
 	id: string;

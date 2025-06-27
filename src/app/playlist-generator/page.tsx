@@ -1,12 +1,12 @@
 'use client';
 
-import ActionButton from '@/components/ActionButton';
-import Breadcrumb from '@/components/Breadcrumb';
-import FilterSelector from '@/components/FilterSelector';
-import FormField from '@/components/FormField';
-import PageContainer from '@/components/PageContainer';
-import SharePlaylistButton from '@/components/SharePlaylistButton';
-import Toast from '@/components/Toast';
+import FilterSelector from '@/components/features/controls/FilterSelector';
+import SharePlaylistButton from '@/components/features/playlist/SharePlaylistButton';
+import Breadcrumb from '@/components/layout/Breadcrumb';
+import PageContainer from '@/components/layout/PageContainer';
+import ActionButton from '@/components/ui/ActionButton';
+import FormField from '@/components/ui/FormField';
+import Toast from '@/components/ui/Toast';
 import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
 import { Artist } from '@/hooks/useUserStats';

@@ -1,6 +1,6 @@
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { clearAllCachesAndRefreshComplete } from '@/lib/cacheUtils';
-import React, { Suspense, useState, useEffect } from 'react';
-import LoadingSpinner from './LoadingSpinner';
+import { Suspense, useEffect, useState } from 'react';
 
 type VisualizationContainerProps = {
 	title: string;

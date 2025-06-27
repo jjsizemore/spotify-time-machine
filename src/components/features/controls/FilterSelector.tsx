@@ -1,6 +1,5 @@
-import React from 'react';
-import LoadingSpinner from './LoadingSpinner';
-import ToggleButton from './ToggleButton';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ToggleButton from '@/components/ui/ToggleButton';
 
 interface FilterSelectorProps<T> {
 	title: string;

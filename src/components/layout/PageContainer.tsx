@@ -1,5 +1,5 @@
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import React from 'react';
-import LoadingSpinner from './LoadingSpinner';
 
 interface PageContainerProps {
 	children: React.ReactNode;

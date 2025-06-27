@@ -9,8 +9,8 @@ import {
 	mapToSpotifyTimeRange,
 } from '@/lib/timeRanges';
 import React, { useState } from 'react';
-import Toast from './Toast';
-import VisualizationContainer from './VisualizationContainer';
+import Toast from '../../ui/Toast';
+import VisualizationContainer from '../visualization/VisualizationContainer';
 
 interface DataFetcherAndControlsWrapperProps {
 	title: string;

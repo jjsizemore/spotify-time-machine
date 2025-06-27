@@ -1,12 +1,12 @@
 'use client';
 
-import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
-import GranularitySelector, {
-	GranularityOption,
-} from '@/components/GranularitySelector';
 import { useLikedArtists } from '@/hooks/useLikedArtists';
 import { timeRangeDisplays } from '@/lib/timeRanges';
-import React, { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import DataFetcherAndControlsWrapper from '../controls/DataFetcherAndControlsWrapper';
+import GranularitySelector, {
+	GranularityOption,
+} from '../controls/GranularitySelector';
 
 interface GenreTimeData {
 	genre: string;

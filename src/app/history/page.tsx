@@ -1,12 +1,12 @@
 'use client';
 
-import Breadcrumb from '@/components/Breadcrumb';
-import DataFetcherAndControlsWrapper from '@/components/DataFetcherAndControlsWrapper';
-import ErrorDisplay from '@/components/ErrorDisplay';
-import MonthlyTrackList from '@/components/MonthlyTrackList';
-import PageContainer from '@/components/PageContainer';
-import Toast from '@/components/Toast';
-import TrackItem from '@/components/TrackItem';
+import DataFetcherAndControlsWrapper from '@/components/features/controls/DataFetcherAndControlsWrapper';
+import TrackItem from '@/components/features/stats/TrackItem';
+import MonthlyTrackList from '@/components/features/visualization/MonthlyTrackList';
+import Breadcrumb from '@/components/layout/Breadcrumb';
+import PageContainer from '@/components/layout/PageContainer';
+import ErrorDisplay from '@/components/ui/ErrorDisplay';
+import Toast from '@/components/ui/Toast';
 import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
 import { generateWebApplicationSchema } from '@/lib/seo';
