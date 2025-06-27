@@ -1,6 +1,6 @@
 import { PlayHistory } from '@/hooks/useUserStats';
-import ErrorDisplay from '../../ui/ErrorDisplay';
-import LoadingSpinner from '../../ui/LoadingSpinner';
+import ErrorDisplay from '@/ui/ErrorDisplay';
+import LoadingSpinner from '@/ui/LoadingSpinner';
 import TrackItem from './TrackItem';
 
 interface RecentlyPlayedProps {

@@ -1,6 +1,6 @@
 'use client';
 
-import ActionButton from '@/components/ui/ActionButton';
+import ActionButton from '@/ui/ActionButton';
 import { useEffect } from 'react';
 
 export default function ErrorBoundary({

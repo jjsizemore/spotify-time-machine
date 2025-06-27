@@ -1,7 +1,7 @@
 'use client';
 
-import ActionButton from '@/components/ui/ActionButton';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ActionButton from '@/ui/ActionButton';
+import LoadingSpinner from '@/ui/LoadingSpinner';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';

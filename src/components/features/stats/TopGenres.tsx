@@ -1,7 +1,7 @@
-import ErrorDisplay from '@/components/ui/ErrorDisplay';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Artist } from '@/hooks/useUserStats';
 import { extractTopGenres } from '@/lib/genreUtils';
+import ErrorDisplay from '@/ui/ErrorDisplay';
+import LoadingSpinner from '@/ui/LoadingSpinner';
 import { useMemo } from 'react';
 
 interface TopGenresProps {

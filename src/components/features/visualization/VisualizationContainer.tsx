@@ -1,5 +1,5 @@
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { clearAllCachesAndRefreshComplete } from '@/lib/cacheUtils';
+import LoadingSpinner from '@/ui/LoadingSpinner';
 import { Suspense, useEffect, useState } from 'react';
 
 type VisualizationContainerProps = {

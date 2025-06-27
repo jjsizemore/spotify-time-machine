@@ -1,12 +1,12 @@
 'use client';
 
+import DataFetcherAndControlsWrapper from '@/features/controls/DataFetcherAndControlsWrapper';
+import GranularitySelector, {
+	GranularityOption,
+} from '@/features/controls/GranularitySelector';
 import { CompactTrack, useLikedTracks } from '@/hooks/useLikedTracks';
 import { timeRangeDisplays } from '@/lib/timeRanges';
 import { useEffect, useRef, useState } from 'react';
-import DataFetcherAndControlsWrapper from '../controls/DataFetcherAndControlsWrapper';
-import GranularitySelector, {
-	GranularityOption,
-} from '../controls/GranularitySelector';
 
 interface MonthlyData {
 	month: string;

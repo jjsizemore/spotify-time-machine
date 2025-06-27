@@ -1,6 +1,6 @@
-import ErrorDisplay from '@/components/ui/ErrorDisplay';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Track } from '@/hooks/useUserStats';
+import ErrorDisplay from '@/ui/ErrorDisplay';
+import LoadingSpinner from '@/ui/LoadingSpinner';
 import TrackItem from './TrackItem';
 
 interface TopTracksProps {

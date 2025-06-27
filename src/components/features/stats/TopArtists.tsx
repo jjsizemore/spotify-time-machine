@@ -1,7 +1,7 @@
 import { Artist } from '@/hooks/useUserStats';
+import ErrorDisplay from '@/ui/ErrorDisplay';
+import LoadingSpinner from '@/ui/LoadingSpinner';
 import Image from 'next/image';
-import ErrorDisplay from '../../ui/ErrorDisplay';
-import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface TopArtistsProps {
 	artists: Artist[];

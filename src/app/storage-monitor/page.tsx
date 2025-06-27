@@ -1,8 +1,8 @@
 'use client';
 
-import StorageMonitor from '@/components/analytics/StorageMonitor';
-import Breadcrumb from '@/components/layout/Breadcrumb';
-import PageContainer from '@/components/layout/PageContainer';
+import StorageMonitor from '@/analytics/StorageMonitor';
+import Breadcrumb from '@/layout/Breadcrumb';
+import PageContainer from '@/layout/PageContainer';
 import { generateWebApplicationSchema } from '@/lib/seo';
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';

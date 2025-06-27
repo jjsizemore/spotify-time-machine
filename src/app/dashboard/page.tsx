@@ -1,15 +1,15 @@
 'use client';
 
-import DataFetcherAndControlsWrapper from '@/components/features/controls/DataFetcherAndControlsWrapper';
-import FeatureCard from '@/components/features/home/FeatureCard';
-import RecentlyPlayed from '@/components/features/stats/RecentlyPlayed';
-import StatsTabs from '@/components/features/stats/StatsTabs';
-import TopArtists from '@/components/features/stats/TopArtists';
-import TopGenres from '@/components/features/stats/TopGenres';
-import TopTracks from '@/components/features/stats/TopTracks';
-import Breadcrumb from '@/components/layout/Breadcrumb';
-import PageContainer from '@/components/layout/PageContainer';
+import DataFetcherAndControlsWrapper from '@/features/controls/DataFetcherAndControlsWrapper';
+import FeatureCard from '@/features/home/FeatureCard';
+import RecentlyPlayed from '@/features/stats/RecentlyPlayed';
+import StatsTabs from '@/features/stats/StatsTabs';
+import TopArtists from '@/features/stats/TopArtists';
+import TopGenres from '@/features/stats/TopGenres';
+import TopTracks from '@/features/stats/TopTracks';
 import { TimeRange, useUserStats } from '@/hooks/useUserStats';
+import Breadcrumb from '@/layout/Breadcrumb';
+import PageContainer from '@/layout/PageContainer';
 import { generateWebApplicationSchema } from '@/lib/seo';
 import { SpotifyTimeRange, timeRangeDisplays } from '@/lib/timeRanges';
 import { useSession } from 'next-auth/react';
@@ -18,10 +18,10 @@ import React, { useState, lazy, Suspense } from 'react';
 
 // Lazy load the visualization components
 const ListeningTrends = lazy(
-	() => import('@/components/features/visualization/ListeningTrends')
+	() => import('@/features/visualization/ListeningTrends')
 );
 const GenreTrendsVisualization = lazy(
-	() => import('@/components/features/visualization/GenreTrendsVisualization')
+	() => import('@/features/visualization/GenreTrendsVisualization')
 );
 
 type Tab = 'artists' | 'tracks' | 'recent' | 'genres';

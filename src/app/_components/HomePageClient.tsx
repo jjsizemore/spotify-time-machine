@@ -1,8 +1,8 @@
 'use client';
 
-import SpotifySignInButton from '@/components/auth/SpotifySignInButton';
-import FeatureShowcaseItem from '@/components/features/home/FeatureShowcaseItem';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import SpotifySignInButton from '@/auth/SpotifySignInButton';
+import FeatureShowcaseItem from '@/features/home/FeatureShowcaseItem';
+import LoadingSpinner from '@/ui/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';

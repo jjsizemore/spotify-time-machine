@@ -1,19 +1,19 @@
 'use client';
 
-import FilterSelector from '@/components/features/controls/FilterSelector';
-import SharePlaylistButton from '@/components/features/playlist/SharePlaylistButton';
-import Breadcrumb from '@/components/layout/Breadcrumb';
-import PageContainer from '@/components/layout/PageContainer';
-import ActionButton from '@/components/ui/ActionButton';
-import FormField from '@/components/ui/FormField';
-import Toast from '@/components/ui/Toast';
+import FilterSelector from '@/features/controls/FilterSelector';
+import SharePlaylistButton from '@/features/playlist/SharePlaylistButton';
 import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
 import { Artist } from '@/hooks/useUserStats';
+import Breadcrumb from '@/layout/Breadcrumb';
+import PageContainer from '@/layout/PageContainer';
 import { GenreCount, extractTopGenres } from '@/lib/genreUtils';
 import { generateWebApplicationSchema } from '@/lib/seo';
 import { SpotifyApiError } from '@/lib/spotify';
 import { createPlaylist } from '@/lib/spotifyTrackUtils';
+import ActionButton from '@/ui/ActionButton';
+import FormField from '@/ui/FormField';
+import Toast from '@/ui/Toast';
 import { format, isAfter, isBefore, parseISO } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';

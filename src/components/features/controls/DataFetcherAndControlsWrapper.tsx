@@ -1,5 +1,6 @@
 'use client';
 
+import VisualizationContainer from '@/features/visualization/VisualizationContainer';
 import { getTimeRangeButtonTextStyle } from '@/lib/styleUtils';
 import {
 	InternalTimeRange,
@@ -8,9 +9,8 @@ import {
 	mapToInternalTimeRange,
 	mapToSpotifyTimeRange,
 } from '@/lib/timeRanges';
+import Toast from '@/ui/Toast';
 import React, { useState } from 'react';
-import Toast from '../../ui/Toast';
-import VisualizationContainer from '../visualization/VisualizationContainer';
 
 interface DataFetcherAndControlsWrapperProps {
 	title: string;

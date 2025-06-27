@@ -1,5 +1,5 @@
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import ToggleButton from '@/components/ui/ToggleButton';
+import LoadingSpinner from '@/ui/LoadingSpinner';
+import ToggleButton from '@/ui/ToggleButton';
 
 interface FilterSelectorProps<T> {
 	title: string;

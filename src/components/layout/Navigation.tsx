@@ -1,7 +1,7 @@
-import ActionButton from '@/components/ui/ActionButton';
-import Toast from '@/components/ui/Toast';
 import { clearAllCachesOnlyComplete } from '@/lib/cacheUtils';
 import { getTextStyle } from '@/lib/styleUtils';
+import ActionButton from '@/ui/ActionButton';
+import Toast from '@/ui/Toast';
 import { Dropdown } from 'flowbite-react';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';

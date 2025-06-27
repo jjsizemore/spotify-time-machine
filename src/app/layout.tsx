@@ -1,11 +1,11 @@
 import '@/lib/init';
-import WebVitalsMonitor from '@/components/analytics/WebVitalsMonitor';
-import TokenStatus from '@/components/auth/TokenStatus';
-import { LayoutContent } from '@/components/layout/LayoutContent';
-import { NextAuthProvider } from '@/components/providers/NextAuthProvider';
+import WebVitalsMonitor from '@/analytics/WebVitalsMonitor';
+import TokenStatus from '@/auth/TokenStatus';
+import { LayoutContent } from '@/layout/LayoutContent';
+import { NextAuthProvider } from '@/providers/NextAuthProvider';
 import { ReactNode } from 'react';
 import './globals.css';
-import { ConsentAwareAnalytics } from '@/components/analytics/ConsentAwareAnalytics';
+import { ConsentAwareAnalytics } from '@/analytics/ConsentAwareAnalytics';
 import {
 	ADVANCED_META_TAGS,
 	generateEnhancedMetadata,

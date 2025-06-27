@@ -1,4 +1,4 @@
-import ActionButton from '@/components/ui/ActionButton';
+import ActionButton from '@/ui/ActionButton';
 import Link from 'next/link';
 
 interface FeatureCardProps {

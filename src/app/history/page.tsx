@@ -1,14 +1,12 @@
 'use client';
 
-import DataFetcherAndControlsWrapper from '@/components/features/controls/DataFetcherAndControlsWrapper';
-import TrackItem from '@/components/features/stats/TrackItem';
-import MonthlyTrackList from '@/components/features/visualization/MonthlyTrackList';
-import Breadcrumb from '@/components/layout/Breadcrumb';
-import PageContainer from '@/components/layout/PageContainer';
-import ErrorDisplay from '@/components/ui/ErrorDisplay';
-import Toast from '@/components/ui/Toast';
+import DataFetcherAndControlsWrapper from '@/features/controls/DataFetcherAndControlsWrapper';
+import TrackItem from '@/features/stats/TrackItem';
+import MonthlyTrackList from '@/features/visualization/MonthlyTrackList';
 import { useLikedTracks } from '@/hooks/useLikedTracks';
 import { useSpotify } from '@/hooks/useSpotify';
+import Breadcrumb from '@/layout/Breadcrumb';
+import PageContainer from '@/layout/PageContainer';
 import { generateWebApplicationSchema } from '@/lib/seo';
 import {
 	MonthlyTracks,
@@ -22,6 +20,8 @@ import {
 	mapToInternalTimeRange,
 	timeRangeDisplays,
 } from '@/lib/timeRanges';
+import ErrorDisplay from '@/ui/ErrorDisplay';
+import Toast from '@/ui/Toast';
 import { format, parse } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';

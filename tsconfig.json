@@ -36,6 +36,12 @@
 		"paths": {
 			"@/*": ["./src/*"],
 			"@/components/*": ["./src/components/*"],
+			"@/ui/*": ["./src/components/ui/*"],
+			"@/layout/*": ["./src/components/layout/*"],
+			"@/features/*": ["./src/components/features/*"],
+			"@/analytics/*": ["./src/components/analytics/*"],
+			"@/auth/*": ["./src/components/auth/*"],
+			"@/providers/*": ["./src/components/providers/*"],
 			"@/lib/*": ["src/lib/*"],
 			"@/hooks/*": ["./src/hooks/*"],
 			"@/types/*": ["./src/types/*"]
