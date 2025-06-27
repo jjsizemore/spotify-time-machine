@@ -21,15 +21,24 @@ export default function PWAInstallPrompt() {
 			return;
 		}
 
+		// Check if device is mobile (show custom prompt only on mobile)
+		const isMobile =
+			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+				navigator.userAgent
+			) || window.matchMedia('(max-width: 768px)').matches;
+
 		// Listen for beforeinstallprompt event
 		const handleBeforeInstallPrompt = (e: Event) => {
 			e.preventDefault();
 			setDeferredPrompt(e as BeforeInstallPromptEvent);
 
-			// Show install prompt after a delay (better UX)
-			setTimeout(() => {
-				setShowInstallPrompt(true);
-			}, 3000);
+			// Only show custom prompt on mobile devices
+			// Desktop users can use browser's native install UI
+			if (isMobile) {
+				setTimeout(() => {
+					setShowInstallPrompt(true);
+				}, 3000);
+			}
 		};
 
 		// Listen for app installed event
