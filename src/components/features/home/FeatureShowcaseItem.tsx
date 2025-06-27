@@ -1,6 +1,8 @@
 'use client';
 
+import { ImageModal } from '@/ui/ImageModal';
 import Image from 'next/image';
+import { useState } from 'react';
 
 interface FeatureShowcaseItemProps {
 	title: string;
@@ -23,8 +25,29 @@ const FeatureShowcaseItem: React.FC<FeatureShowcaseItemProps> = ({
 	previewUrl,
 	reverseLayout = false,
 }) => {
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isImageLoading, setIsImageLoading] = useState(true);
+
 	const handlePreviewClick = () => {
-		window.open(previewUrl, '_blank');
+		setIsImageLoading(true);
+		setIsModalOpen(true);
+	};
+
+	const handleCloseModal = () => {
+		setIsModalOpen(false);
+		setIsImageLoading(true);
+	};
+
+	const handleImageLoad = () => {
+		setIsImageLoading(false);
+	};
+
+	// Create gallery image object for the modal
+	const galleryImage = {
+		id: 1, // Single image, so ID can be static
+		title: title,
+		description: description,
+		src: previewUrl, // Use the preview URL as the full-size image source
 	};
 
 	return (
@@ -54,6 +77,16 @@ const FeatureShowcaseItem: React.FC<FeatureShowcaseItemProps> = ({
 				<h2 className="text-2xl font-bold text-spotify-white mb-4">{title}</h2>
 				<p className="text-spotify-light-gray mb-4">{description}</p>
 			</div>
+
+			{/* Image Modal */}
+			{isModalOpen && (
+				<ImageModal
+					selectedImage={galleryImage}
+					isLoading={isImageLoading}
+					onClose={handleCloseModal}
+					onImageLoad={handleImageLoad}
+				/>
+			)}
 		</div>
 	);
 };

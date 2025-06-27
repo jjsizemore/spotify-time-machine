@@ -89,6 +89,9 @@ export default function RootLayout({
 				<link rel="manifest" href="/manifest.webmanifest" />
 				<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 				<link rel="apple-touch-icon" href="/favicon.svg" />
+				<link rel="apple-touch-icon" sizes="180x180" href="/favicon.svg" />
+				<link rel="apple-touch-icon" sizes="152x152" href="/favicon.svg" />
+				<link rel="apple-touch-icon" sizes="120x120" href="/favicon.svg" />
 
 				{/* DNS Prefetch for Performance */}
 				<link rel="dns-prefetch" href="//i.scdn.co" />
