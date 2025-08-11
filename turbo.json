@@ -13,13 +13,23 @@
 			"cache": false
 		},
 		"lint": {
-			"inputs": ["**/*.{js,jsx,ts,tsx}"]
+			"inputs": ["**/*.{js,jsx,ts,tsx}", ".eslintrc.*", "eslint.config.*"]
 		},
 		"fmt": {
-			"inputs": ["**/*.{js,jsx,ts,tsx,json,md}"]
+			"inputs": [
+				"**/*.{js,jsx,ts,tsx,json,md}",
+				".prettierrc.*",
+				"prettier.config.*"
+			]
 		},
 		"type-check": {
 			"inputs": ["**/*.{ts,tsx}", "tsconfig.json"]
+		},
+		"check": {
+			"dependsOn": ["lint", "type-check"]
+		},
+		"check:all": {
+			"dependsOn": ["lint", "fmt", "type-check"]
 		},
 		"analyze": {
 			"dependsOn": ["build"],

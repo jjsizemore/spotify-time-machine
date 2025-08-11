@@ -18,6 +18,58 @@ sources = ['package.json', 'pnpm-lock.yaml', 'mise.toml']
 outputs = ['node_modules/.pnpm/lock.yaml']
 
 [tasks.dev]
-description = 'Calls your dev script in `package.json`'
-run = 'node --run dev'
+description = 'Starts the development server with Turborepo'
+run = 'turbo dev'
+depends = ['pnpm-install']
+
+[tasks.build]
+description = 'Builds the application with Turborepo'
+run = 'turbo build'
+depends = ['pnpm-install']
+
+[tasks.lint]
+description = 'Runs linting with Turborepo'
+run = 'turbo lint'
+depends = ['pnpm-install']
+
+[tasks.fmt]
+description = 'Runs formatting with Turborepo'
+run = 'turbo fmt'
+depends = ['pnpm-install']
+
+[tasks.type-check]
+description = 'Runs TypeScript type checking with Turborepo'
+run = 'turbo type-check'
+depends = ['pnpm-install']
+
+[tasks.check]
+description = 'Runs all checks (lint + type-check) with Turborepo'
+run = 'turbo check'
+depends = ['pnpm-install']
+
+[tasks.check-all]
+description = 'Runs all checks (lint + fmt + type-check) with Turborepo'
+run = 'turbo check:all'
+depends = ['pnpm-install']
+
+[tasks.clean]
+description = 'Cleans the project with Turborepo'
+run = 'turbo clean'
+
+[tasks.clean-cache]
+description = 'Cleans cache with Turborepo'
+run = 'turbo clean:cache'
+
+[tasks.clean-all]
+description = 'Cleans everything with Turborepo'
+run = 'turbo clean:all'
+
+[tasks.analyze]
+description = 'Analyzes the build with Turborepo'
+run = 'turbo analyze'
+depends = ['pnpm-install']
+
+[tasks.start]
+description = 'Starts the production server with Turborepo'
+run = 'turbo start'
 depends = ['pnpm-install']
