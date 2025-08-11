@@ -1,0 +1,41 @@
+{
+	"$schema": "https://turborepo.com/schema.json",
+	"tasks": {
+		"dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"build": {
+			"dependsOn": ["type-check"],
+			"outputs": [".next/**", "!.next/cache/**"]
+		},
+		"start": {
+			"cache": false
+		},
+		"lint": {
+			"inputs": ["**/*.{js,jsx,ts,tsx}"]
+		},
+		"fmt": {
+			"inputs": ["**/*.{js,jsx,ts,tsx,json,md}"]
+		},
+		"type-check": {
+			"inputs": ["**/*.{ts,tsx}", "tsconfig.json"]
+		},
+		"analyze": {
+			"dependsOn": ["build"],
+			"cache": false
+		},
+		"clean": {
+			"cache": false
+		},
+		"clean:cache": {
+			"cache": false
+		},
+		"clean:all": {
+			"cache": false
+		},
+		"debug": {
+			"cache": false
+		}
+	}
+}

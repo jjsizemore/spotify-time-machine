@@ -14,7 +14,7 @@ const envSchema = z.object({
 export const validateConfig = () => {
 	const result = envSchema.safeParse(process.env);
 	if (!result.success) {
-		const missingConfigs = result.error.errors.map((err) => err.path.join('.'));
+		const missingConfigs = result.error.issues.map((err) => err.path.join('.'));
 		throw new Error(
 			`Missing or invalid environment variables: ${missingConfigs.join(', ')}`
 		);
