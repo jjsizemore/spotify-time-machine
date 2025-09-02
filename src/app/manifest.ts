@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { SPOTIFY_BLACK, SPOTIFY_GREEN } from '../lib/branding';
 
 export default function manifest(): MetadataRoute.Manifest {
 	return {
@@ -8,8 +9,8 @@ export default function manifest(): MetadataRoute.Manifest {
 			'Your personal Spotify listening history and playlist generator. Relive your music journey, create custom playlists, and explore your listening habits over time.',
 		start_url: '/',
 		display: 'standalone',
-		background_color: '#191414',
-		theme_color: '#1DB954',
+		background_color: SPOTIFY_BLACK,
+		theme_color: SPOTIFY_GREEN,
 		orientation: 'portrait-primary',
 		categories: ['music', 'entertainment', 'productivity'],
 		lang: 'en-US',

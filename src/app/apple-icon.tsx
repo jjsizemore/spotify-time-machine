@@ -1,4 +1,9 @@
 import { ImageResponse } from 'next/og';
+import {
+	SPOTIFY_BLACK,
+	SPOTIFY_DARK_GRAY,
+	SPOTIFY_GREEN,
+} from '../lib/branding';
 
 // Apple icon metadata
 export const size = {
@@ -17,7 +22,7 @@ export default function AppleIcon() {
 				display: 'flex',
 				alignItems: 'center',
 				justifyContent: 'center',
-				background: '#000000',
+				background: SPOTIFY_BLACK,
 			}}
 		>
 			{/* Main circle with stroke */}
@@ -26,8 +31,8 @@ export default function AppleIcon() {
 					width: 140,
 					height: 140,
 					borderRadius: '50%',
-					background: '#121212',
-					border: '3px solid #1DB954',
+					background: SPOTIFY_DARK_GRAY,
+					border: `3px solid ${SPOTIFY_GREEN}`,
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
@@ -40,8 +45,8 @@ export default function AppleIcon() {
 						width: 120,
 						height: 120,
 						borderRadius: '50%',
-						background: '#121212',
-						border: '2px solid #1DB954',
+						background: SPOTIFY_DARK_GRAY,
+						border: `2px solid ${SPOTIFY_GREEN}`,
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
@@ -54,7 +59,7 @@ export default function AppleIcon() {
 							position: 'absolute',
 							width: 4,
 							height: 40,
-							background: '#1DB954',
+							background: SPOTIFY_GREEN,
 							borderRadius: 2,
 							top: 20,
 							left: '50%',
@@ -68,7 +73,7 @@ export default function AppleIcon() {
 							position: 'absolute',
 							width: 30,
 							height: 3,
-							background: '#1DB954',
+							background: SPOTIFY_GREEN,
 							borderRadius: 2,
 							right: 25,
 						}}
@@ -79,7 +84,7 @@ export default function AppleIcon() {
 							width: 8,
 							height: 8,
 							borderRadius: '50%',
-							background: '#1DB954',
+							background: SPOTIFY_GREEN,
 						}}
 					/>
 				</div>

@@ -1,10 +1,11 @@
 // Utility functions and objects for reusable icon and text styles
+import { SPOTIFY_BLACK, SPOTIFY_GREEN, SPOTIFY_LIGHT_GRAY } from './branding';
 
 /**
  * Base style for icons (Spotify light gray, with color transition).
  */
 export const baseIconStyle = {
-	color: '#b3b3b3', // spotify-light-gray
+	color: SPOTIFY_LIGHT_GRAY,
 	transition: 'color 0.3s',
 };
 
@@ -12,14 +13,14 @@ export const baseIconStyle = {
  * Hover style for icons (Spotify green).
  */
 export const hoverIconStyle = {
-	color: '#1db954', // spotify-green
+	color: SPOTIFY_GREEN,
 };
 
 /**
  * Base style for text (Spotify light gray, with color transition).
  */
 export const baseTextStyle = {
-	color: '#b3b3b3', // spotify-light-gray
+	color: SPOTIFY_LIGHT_GRAY,
 	transition: 'color 0.3s',
 };
 
@@ -27,7 +28,7 @@ export const baseTextStyle = {
  * Hover style for text (Spotify green).
  */
 export const hoverTextStyle = {
-	color: '#1db954', // spotify-green
+	color: SPOTIFY_GREEN,
 };
 
 /**
@@ -37,7 +38,7 @@ export const hoverTextStyle = {
  */
 export function getIconStyle(isHover: boolean) {
 	return {
-		color: isHover ? '#1db954' : '#b3b3b3', // spotify-green : spotify-light-gray
+		color: isHover ? SPOTIFY_GREEN : SPOTIFY_LIGHT_GRAY,
 		transition: 'color 0.3s',
 	};
 }
@@ -50,7 +51,7 @@ export function getIconStyle(isHover: boolean) {
  */
 export function getTextStyle(isHover: boolean, isSelected?: boolean) {
 	return {
-		color: isHover || isSelected ? '#1db954' : '#b3b3b3', // spotify-green : spotify-light-gray
+		color: isHover || isSelected ? SPOTIFY_GREEN : SPOTIFY_LIGHT_GRAY,
 		transition: 'color 0.3s',
 	};
 }
@@ -63,7 +64,11 @@ export function getTextStyle(isHover: boolean, isSelected?: boolean) {
  */
 export function getRadioTextStyle(isHovered: boolean, isSelected: boolean) {
 	return {
-		color: isSelected ? '#000000' : isHovered ? '#1db954' : '#b3b3b3', // black : spotify-green : spotify-light-gray
+		color: isSelected
+			? SPOTIFY_BLACK
+			: isHovered
+				? SPOTIFY_GREEN
+				: SPOTIFY_LIGHT_GRAY,
 		transition: 'color 0.3s',
 	};
 }
@@ -79,7 +84,11 @@ export function getTimeRangeButtonTextStyle(
 	isSelected: boolean
 ) {
 	return {
-		color: isSelected ? '#000000' : isHovered ? '#1db954' : '#b3b3b3', // black : spotify-green : spotify-light-gray
+		color: isSelected
+			? SPOTIFY_BLACK
+			: isHovered
+				? SPOTIFY_GREEN
+				: SPOTIFY_LIGHT_GRAY,
 		transition: 'color 0.3s',
 	};
 }

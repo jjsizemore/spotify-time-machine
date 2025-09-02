@@ -16,6 +16,7 @@
 		"type-check": "tsc --noEmit",
 		"analyze": "ANALYZE=true next build",
 		"check": "turbo lint type-check",
+		"check:branding": "grep -RIn --exclude-dir=.next --exclude=**/output.css --exclude=**/*.svg --exclude=BRANDING.md '#1db954\\|#1DB954\\|#191414\\|#121212\\|#b3b3b3' src || true",
 		"check:all": "turbo lint fmt type-check",
 		"prebuild": "turbo type-check"
 	},

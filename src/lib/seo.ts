@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { SPOTIFY_GREEN } from './branding';
 
 // 2025 SEO Configuration
 export const SEO_CONFIG = {
@@ -100,7 +101,7 @@ export function generateEnhancedMetadata({
 			'apple-mobile-web-app-capable': 'yes',
 			'apple-mobile-web-app-status-bar-style': 'black-translucent',
 			'mobile-web-app-capable': 'yes',
-			'theme-color': '#1DB954',
+			'theme-color': SPOTIFY_GREEN,
 		},
 	};
 }
@@ -246,7 +247,7 @@ export const ADVANCED_META_TAGS = {
 	'apple-mobile-web-app-status-bar-style': 'black-translucent',
 	'apple-mobile-web-app-title': 'Spotify Time Machine',
 	'mobile-web-app-capable': 'yes',
-	'msapplication-TileColor': '#1DB954',
+	'msapplication-TileColor': SPOTIFY_GREEN,
 	'msapplication-config': '/browserconfig.xml',
 	'format-detection': 'telephone=no',
 	referrer: 'strict-origin-when-cross-origin',

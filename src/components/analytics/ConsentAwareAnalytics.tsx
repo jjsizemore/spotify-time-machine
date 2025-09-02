@@ -4,6 +4,7 @@ import { useConsentManager } from '@c15t/nextjs';
 import { Analytics } from '@vercel/analytics/react';
 import Script from 'next/script';
 import { useEffect, useState } from 'react';
+import { SPOTIFY_GREEN } from '../../lib/branding';
 
 // List of EEA country codes (EU + Iceland, Liechtenstein, Norway)
 const EEA_COUNTRIES = [
@@ -172,7 +173,7 @@ export function ConsentAwareAnalytics() {
 						position: 'fixed',
 						top: '10px',
 						right: '10px',
-						backgroundColor: '#1DB954',
+						backgroundColor: SPOTIFY_GREEN,
 						color: 'white',
 						padding: '4px 8px',
 						borderRadius: '4px',
