@@ -5,7 +5,9 @@ import { LayoutContent } from '@/layout/LayoutContent';
 import { NextAuthProvider } from '@/providers/NextAuthProvider';
 import { ReactNode } from 'react';
 import './globals.css';
-import { ConsentAwareAnalytics } from '@/analytics/ConsentAwareAnalytics';
+import ClientProviders from '@/components/ClientProviders';
+// ConsentAwareAnalytics is loaded dynamically inside ClientProviders to ensure it runs
+// only after the ConsentManagerProvider is available on the client.
 import {
 	ADVANCED_META_TAGS,
 	generateEnhancedMetadata,
@@ -15,11 +17,6 @@ import {
 import IOSInstallPrompt from '@/ui/IOSInstallPrompt';
 import OfflineIndicator from '@/ui/OfflineIndicator';
 import PWAInstallPrompt from '@/ui/PWAInstallPrompt';
-import {
-	ConsentManagerDialog,
-	ConsentManagerProvider,
-	CookieBanner,
-} from '@c15t/nextjs';
 import { GoogleTagManager } from '@next/third-parties/google';
 import { ThemeModeScript } from 'flowbite-react';
 import Script from 'next/script';
@@ -134,15 +131,7 @@ export default function RootLayout({
 				/>
 			</head>
 			<body className="bg-spotify-black text-spotify-light-gray font-sans min-h-screen flex flex-col layout-content">
-				<ConsentManagerProvider
-					options={{
-						mode: 'c15t',
-						backendURL: '/api/c15t',
-					}}
-				>
-					{/* Analytics that only load with user consent */}
-					<ConsentAwareAnalytics />
-
+				<ClientProviders>
 					{/* Enhanced Structured Data - These are essential and don't require consent */}
 					<Script
 						id="web-application-schema"
@@ -187,8 +176,6 @@ export default function RootLayout({
 						`,
 						}}
 					/>
-					<CookieBanner />
-					<ConsentManagerDialog />
 
 					{/* PWA Install Prompt */}
 					<PWAInstallPrompt />
@@ -198,7 +185,7 @@ export default function RootLayout({
 
 					{/* Offline Indicator */}
 					<OfflineIndicator />
-				</ConsentManagerProvider>
+				</ClientProviders>
 			</body>
 		</html>
 	);

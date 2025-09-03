@@ -66,7 +66,6 @@ const handler = NextAuth({
 		async session({ session, token }) {
 			// Pass token information to the session
 			session.accessToken = token.accessToken as string | undefined;
-			session.refreshToken = token.refreshToken as string | undefined;
 			session.expiresAt = token.expiresAt as number | undefined;
 			session.error = token.error as string | undefined;
 

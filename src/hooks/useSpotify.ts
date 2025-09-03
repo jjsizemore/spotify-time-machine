@@ -9,20 +9,14 @@ export const useSpotify = () => {
 
 	// Token refresh callback for the Spotify API client
 	const tokenRefreshCallback = useCallback(async () => {
-		if (!session?.refreshToken) {
-			throw new Error('No refresh token available');
-		}
+		// No client-side refresh token is required — server will perform refresh using the
+		// NextAuth JWT stored in cookies. Proceed to call the server refresh endpoint.
 
 		try {
-			// Call the NextAuth token refresh endpoint
+			// Call the server-side NextAuth token refresh endpoint. The server will read the refresh token
+			// from the NextAuth JWT stored in cookies and will not expose it to the client.
 			const response = await fetch('/api/auth/refresh-token', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					refreshToken: session.refreshToken,
-				}),
 			});
 
 			if (!response.ok) {
@@ -31,20 +25,20 @@ export const useSpotify = () => {
 
 			const tokenData = await response.json();
 
-			// Update the session with new token data
+			// Update the session with new token data. Do NOT store refresh tokens client-side.
 			await update({
 				...session,
 				accessToken: tokenData.accessToken,
-				refreshToken: tokenData.refreshToken,
 				expiresAt: tokenData.expiresAt,
 				error: undefined,
 			});
 
+			// Return shape includes refreshToken (undefined) to satisfy the SpotifyApi callback contract
 			return {
 				accessToken: tokenData.accessToken,
-				refreshToken: tokenData.refreshToken,
+				refreshToken: undefined,
 				expiresAt: tokenData.expiresAt,
-			};
+			} as const;
 		} catch (error) {
 			console.error('Token refresh failed:', error);
 			// Force re-authentication
@@ -61,7 +55,6 @@ export const useSpotify = () => {
 			status,
 			hasSession: !!session,
 			hasAccessToken: !!session?.accessToken,
-			hasRefreshToken: !!session?.refreshToken,
 			sessionError: session?.error,
 		});
 

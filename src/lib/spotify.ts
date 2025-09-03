@@ -29,7 +29,7 @@ interface QueuedRequest {
 }
 
 interface TokenRefreshCallback {
-	(): Promise<{ accessToken: string; refreshToken: string; expiresAt: number }>;
+	(): Promise<any>;
 }
 
 class SpotifyApi {

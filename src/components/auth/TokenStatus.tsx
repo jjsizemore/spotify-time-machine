@@ -67,7 +67,8 @@ export default function TokenStatus({ className = '' }: TokenStatusProps) {
 			<div className="text-gray-300 space-y-1">
 				<div>🕐 {formatTokenExpiry(session.expiresAt)}</div>
 				<div>🔑 Token: {session.accessToken ? 'Present' : 'Missing'}</div>
-				<div>🔄 Refresh: {session.refreshToken ? 'Present' : 'Missing'}</div>
+				{/* Refresh token is stored server-side only and is not exposed to the client */}
+				<div>🔄 Refresh: Stored server-side</div>
 			</div>
 		</div>
 	);
