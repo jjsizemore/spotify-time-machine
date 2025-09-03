@@ -243,9 +243,41 @@ class SpotifyApi {
 	): Promise<T> {
 		const url = `${SPOTIFY_BASE_URL}${endpoint}`;
 
-		// Create a unique key for request deduplication that includes the full URL and method
+		// Create a unique key for request deduplication with canonical JSON ordering for bodies
 		const method = options.method || 'GET';
-		const requestKey = `${method}:${url}${options.body ? `:${JSON.stringify(options.body)}` : ''}`;
+		let bodyKey = '';
+		if (options.body) {
+			try {
+				const raw = options.body as any;
+				if (typeof raw === 'string') {
+					try {
+						const parsed = JSON.parse(raw);
+						const keys = Object.keys(parsed).sort();
+						const canonical: Record<string, any> = {};
+						keys.forEach((k) => {
+							canonical[k] = parsed[k];
+						});
+						bodyKey = `:${JSON.stringify(canonical)}`;
+					} catch {
+						bodyKey = `:${raw}`; // Non-JSON string body
+					}
+				} else if (raw instanceof Blob || raw instanceof ArrayBuffer) {
+					bodyKey = ':binary';
+				} else if (typeof raw === 'object') {
+					const keys = Object.keys(raw).sort();
+					const canonical: Record<string, any> = {};
+					keys.forEach((k) => {
+						canonical[k] = raw[k];
+					});
+					bodyKey = `:${JSON.stringify(canonical)}`;
+				} else {
+					bodyKey = `:${String(raw)}`;
+				}
+			} catch {
+				bodyKey = ':unserializable';
+			}
+		}
+		const requestKey = `${method}:${url}${bodyKey}`;
 
 		// Check if this exact request is already pending
 		if (this.pendingRequests.has(requestKey)) {

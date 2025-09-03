@@ -12,6 +12,18 @@ interface RateLimitEntry {
 // In-memory store for rate limiting
 // In a production environment, this should be replaced with Redis or another distributed store
 const rateLimitStore = new Map<string, RateLimitEntry>();
+const RATE_LIMIT_STORE_MAX_KEYS = 5000; // Safety cap for memory
+
+function evictIfNeeded() {
+	if (rateLimitStore.size <= RATE_LIMIT_STORE_MAX_KEYS) return;
+	const entries = Array.from(rateLimitStore.entries());
+	entries.sort((a, b) => a[1].resetTime - b[1].resetTime);
+	const removeCount = entries.length - RATE_LIMIT_STORE_MAX_KEYS;
+	for (let i = 0; i < removeCount; i++) {
+		const [key] = entries[i];
+		rateLimitStore.delete(key);
+	}
+}
 
 // Rate limit configuration
 const RATE_LIMIT_MAX = 100; // Maximum requests in time window
@@ -45,7 +57,9 @@ function isRateLimited(ip: string): boolean {
 	rateLimitStore.set(ip, entry);
 
 	// Check if over limit
-	return entry.count > RATE_LIMIT_MAX;
+	const limited = entry.count > RATE_LIMIT_MAX;
+	evictIfNeeded();
+	return limited;
 }
 
 // This function runs before the auth check
@@ -59,7 +73,10 @@ export function middleware(request: NextRequest) {
 		request.cookies.get('__Secure-next-auth.session-token');
 
 	// Reduced logging - only log essential information
-	if (process.env.NODE_ENV === 'development') {
+	if (
+		process.env.NODE_ENV === 'development' ||
+		process.env.NEXT_PUBLIC_DEBUG === 'true'
+	) {
 		console.log('[MIDDLEWARE] Path:', request.nextUrl.pathname);
 		if (request.nextUrl.pathname.startsWith('/api/auth')) {
 			console.log(

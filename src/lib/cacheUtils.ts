@@ -1,3 +1,5 @@
+export const CACHE_VERSION = 'v1'; // Increment to invalidate prior cache schemas
+
 interface CachedData<T> {
 	timestamp: number;
 	data: T;
@@ -18,7 +20,10 @@ interface CacheError {
 	context?: string;
 }
 
-const CACHE_PREFIX = 'spotifyTimeMachineCache_';
+const BASE_CACHE_PREFIX = 'spotifyTimeMachineCache_';
+const CACHE_PREFIX = `${BASE_CACHE_PREFIX}${CACHE_VERSION}_`;
+
+export const debugEnabled = () => process.env.NEXT_PUBLIC_DEBUG === 'true';
 
 function logCacheError(error: CacheError): void {
 	const logMessage = [

@@ -1,4 +1,6 @@
 import {
+	CACHE_VERSION,
+	debugEnabled,
 	getCachedData,
 	getCachedDataSmart,
 	setCachedData,
@@ -36,10 +38,10 @@ const MAX_ARTISTS_CACHE_SIZE = 10000;
 const artistsCache = new Map<string, ArtistDetail>();
 const compactArtistsCache = new Map<string, CompactArtist>();
 
-// Cache keys
-const ARTISTS_CACHE_KEY = 'likedArtists_details';
-const COMPACT_ARTISTS_CACHE_KEY = 'likedArtists_compact';
-const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 3 days
+// Cache keys (versioned)
+const ARTISTS_CACHE_KEY = `${CACHE_VERSION}_likedArtists_details`;
+const COMPACT_ARTISTS_CACHE_KEY = `${CACHE_VERSION}_likedArtists_compact`;
+const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // Track which artists we've already fetched details for
 const processedArtistIds = new Set<string>();
@@ -54,9 +56,10 @@ const toCompactArtist = (artist: ArtistDetail): CompactArtist => ({
 // Helper to check and cleanup cache
 const checkAndCleanupCache = async () => {
 	if (artistsCache.size > MAX_ARTISTS_CACHE_SIZE) {
-		console.log(
-			`Cleaning up artist cache (${artistsCache.size} > ${MAX_ARTISTS_CACHE_SIZE})`
-		);
+		if (debugEnabled())
+			console.log(
+				`Cleaning up artist cache (${artistsCache.size} > ${MAX_ARTISTS_CACHE_SIZE})`
+			);
 
 		// Keep only the most recently added artists
 		const entries = Array.from(artistsCache.entries());
@@ -89,7 +92,10 @@ const checkAndCleanupCache = async () => {
 			), // Convert to minutes
 		]);
 
-		console.log(`Cache cleaned up. Now contains ${artistsCache.size} artists`);
+		if (debugEnabled())
+			console.log(
+				`Cache cleaned up. Now contains ${artistsCache.size} artists`
+			);
 	}
 };
 
@@ -148,7 +154,8 @@ export function useLikedArtists() {
 						});
 					}
 
-					console.log(`Restored ${artistsCache.size} artists from cache`);
+					if (debugEnabled())
+						console.log(`Restored ${artistsCache.size} artists from cache`);
 
 					// Clean up cache after restoration if needed
 					await checkAndCleanupCache();
@@ -166,12 +173,14 @@ export function useLikedArtists() {
 
 				// Skip API call if all needed artists are already cached
 				if (artistIds.size === 0) {
-					console.log('All required artists already in cache');
+					if (debugEnabled())
+						console.log('All required artists already in cache');
 					setIsLoadingArtists(false);
 					return new Map(artistsCache);
 				}
 
-				console.log(`Fetching details for ${artistIds.size} new artists`);
+				if (debugEnabled())
+					console.log(`Fetching details for ${artistIds.size} new artists`);
 
 				// Fetch artists details in batches (Spotify API limits to 50 per request)
 				const batchSize = 50;

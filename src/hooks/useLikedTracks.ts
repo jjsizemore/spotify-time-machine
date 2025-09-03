@@ -1,8 +1,8 @@
 import {
-	getCachedData,
+	CACHE_VERSION,
+	debugEnabled,
 	getCachedDataCompressed,
 	getCachedDataSmart,
-	setCachedData,
 	setCachedDataCompressed,
 	setCachedDataSmart,
 } from '@/lib/cacheUtils';
@@ -78,15 +78,16 @@ interface NormalizedCache {
 // Time ranges supported
 export type TimeRange = InternalTimeRange | SpotifyTimeRange;
 
-// More efficient cache keys - single normalized cache per time range
+// Versioned normalized cache keys per time range
 const CACHE_KEYS = {
-	PAST_YEAR: 'normalizedTracks_pastYear',
-	PAST_TWO_YEARS: 'normalizedTracks_pastTwoYears',
-	ALL_TIME: 'normalizedTracks_allTime',
+	PAST_YEAR: `${CACHE_VERSION}_normalizedTracks_pastYear`,
+	PAST_TWO_YEARS: `${CACHE_VERSION}_normalizedTracks_pastTwoYears`,
+	ALL_TIME: `${CACHE_VERSION}_normalizedTracks_allTime`,
 };
 
 // Cache TTL (24 hours in milliseconds)
-const CACHE_TTL = 24 * 60 * 60 * 1000;
+// Cache TTL in milliseconds (24 hours). NOTE: Functions that expect minutes must convert.
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 // Maximum cache size (in number of tracks) - increased since data is more compact
 const MAX_CACHE_SIZE = 25000;
@@ -105,11 +106,20 @@ const ongoingFetches = {
 	ALL_TIME: null as Promise<NormalizedCache> | null,
 };
 
+// Helper to generate a stable (very low collision) album id without external deps
+const generateAlbumId = (track: SavedTrack): string => {
+	const base =
+		`${track.track.album.name}|${track.track.album.images?.[0]?.url || ''}`.toLowerCase();
+	let hash = 0;
+	for (let i = 0; i < base.length; i++) {
+		hash = (hash * 31 + base.charCodeAt(i)) >>> 0; // unsigned
+	}
+	return `alb_${hash.toString(36)}`;
+};
+
 // Helper to convert SavedTrack to normalized format
 const normalizeTrack = (track: SavedTrack): NormalizedTrack => {
-	// Generate album ID from album name (simple hash alternative)
-	const albumId = track.track.album.name.toLowerCase().replace(/\s+/g, '_');
-
+	const albumId = generateAlbumId(track);
 	return {
 		id: track.track.id,
 		added_at: track.added_at,
@@ -123,9 +133,8 @@ const normalizeTrack = (track: SavedTrack): NormalizedTrack => {
 
 // Helper to extract album data
 const extractAlbumData = (track: SavedTrack): AlbumData => {
-	const albumId = track.track.album.name.toLowerCase().replace(/\s+/g, '_');
 	return {
-		id: albumId,
+		id: generateAlbumId(track),
 		name: track.track.album.name,
 		images: track.track.album.images,
 	};
@@ -219,11 +228,17 @@ const checkAndCleanupCache = (range: TimeRange) => {
 		};
 
 		normalizedCache[internalRange] = trimmedCache;
-		setCachedDataCompressed(cacheKey, trimmedCache, CACHE_TTL);
-
-		console.log(
-			`Cache cleaned up for ${range}: ${trimmedTracks.length} tracks, ${Object.keys(trimmedAlbums).length} albums, ${Object.keys(trimmedArtists).length} artists`
+		// setCachedDataCompressed expects ttl in MINUTES, current constant is in ms
+		setCachedDataCompressed(
+			cacheKey,
+			trimmedCache,
+			Math.floor(CACHE_TTL_MS / (60 * 1000))
 		);
+
+		if (debugEnabled())
+			console.log(
+				`Cache cleaned up for ${range}: ${trimmedTracks.length} tracks, ${Object.keys(trimmedAlbums).length} albums, ${Object.keys(trimmedArtists).length} artists`
+			);
 	}
 };
 
@@ -269,7 +284,8 @@ export function useLikedTracks() {
 
 			// Check in-memory cache first
 			if (normalizedCache[internalRange]) {
-				console.log(`Using in-memory normalized cache for ${range}`);
+				if (debugEnabled())
+					console.log(`Using in-memory normalized cache for ${range}`);
 				const cache = normalizedCache[internalRange]!;
 				return cache.tracks.map((track) =>
 					denormalizeTrack(track, cache.albums, cache.artists)
@@ -282,7 +298,8 @@ export function useLikedTracks() {
 				await getCachedDataCompressed<NormalizedCache>(cacheKey);
 
 			if (cachedData) {
-				console.log(`Using persistent normalized cache for ${range}`);
+				if (debugEnabled())
+					console.log(`Using persistent normalized cache for ${range}`);
 				normalizedCache[internalRange] = cachedData;
 				return cachedData.tracks.map((track) =>
 					denormalizeTrack(track, cachedData.albums, cachedData.artists)
@@ -291,7 +308,8 @@ export function useLikedTracks() {
 
 			// Check if fetch is already in progress
 			if (ongoingFetches[internalRange]) {
-				console.log(`Waiting for ongoing fetch for ${range}`);
+				if (debugEnabled())
+					console.log(`Waiting for ongoing fetch for ${range}`);
 				const cache = await ongoingFetches[internalRange]!;
 				return cache.tracks.map((track) =>
 					denormalizeTrack(track, cache.albums, cache.artists)
@@ -300,7 +318,7 @@ export function useLikedTracks() {
 
 			// Prepare to fetch from API
 			const cutoffDate = getCutoffDate(range);
-			console.log(`Fetching ${range} tracks from API`);
+			if (debugEnabled()) console.log(`Fetching ${range} tracks from API`);
 
 			const fetchPromise = (async (): Promise<NormalizedCache> => {
 				try {
@@ -373,13 +391,14 @@ export function useLikedTracks() {
 					await setCachedDataSmart(
 						cacheKey,
 						normalizedCacheData,
-						CACHE_TTL / (60 * 1000),
+						CACHE_TTL_MS / (60 * 1000),
 						true
-					); // Force IndexedDB for large datasets
+					); // Force IndexedDB for large datasets (TTL passed in minutes)
 
-					console.log(
-						`Cached ${normalizedTracks.length} normalized tracks for ${range} (${Object.keys(albums).length} albums, ${Object.keys(artists).length} artists)`
-					);
+					if (debugEnabled())
+						console.log(
+							`Cached ${normalizedTracks.length} normalized tracks for ${range} (${Object.keys(albums).length} albums, ${Object.keys(artists).length} artists)`
+						);
 
 					// After fetching, check and cleanup cache
 					checkAndCleanupCache(range);
@@ -545,5 +564,5 @@ export function clearTracksInMemoryCache(): void {
 	ongoingFetches.PAST_TWO_YEARS = null;
 	ongoingFetches.ALL_TIME = null;
 
-	console.log('In-memory tracks cache cleared');
+	if (debugEnabled()) console.log('In-memory tracks cache cleared');
 }
