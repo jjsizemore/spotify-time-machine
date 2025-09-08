@@ -40,7 +40,7 @@ importers:
         version: 3.1.2
       flowbite-react:
         specifier: ^0.12.8
-        version: 0.12.8(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.12)(typescript@5.9.2)
+        version: 0.12.8(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.13)(typescript@5.9.2)
       next:
         specifier: ^15.5.2
         version: 15.5.2(@opentelemetry/api@1.8.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -67,8 +67,8 @@ importers:
         version: 4.1.5
     devDependencies:
       '@types/node':
-        specifier: ^24.3.0
-        version: 24.3.0
+        specifier: ^24.3.1
+        version: 24.3.1
       '@types/react':
         specifier: 19.1.12
         version: 19.1.12
@@ -82,8 +82,8 @@ importers:
         specifier: ^0.34.3
         version: 0.34.3
       tailwindcss:
-        specifier: ^4.1.12
-        version: 4.1.12
+        specifier: ^4.1.13
+        version: 4.1.13
       turbo:
         specifier: ^2.5.6
         version: 2.5.6
@@ -1193,8 +1193,8 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
-  '@types/node@24.3.0':
-    resolution: {integrity: sha512-aPTXCrfwnDLj4VvXrm+UUCQjNEvJgNA8s5F1cvwQU+3KNltTOkBm1j30uNLyqqPNe7gE3KFzImYoZEfLhp4Yow==}
+  '@types/node@24.3.1':
+    resolution: {integrity: sha512-3vXmQDXy+woz+gnrTvuvNrPzekOi+Ds0ReMxw0LzBiK3a+1k0kQn9f2NWk+lgD4rJehFUmYy2gMhJ2ZI+7YP9g==}
 
   '@types/react-dom@19.1.9':
     resolution: {integrity: sha512-qXRuZaOsAdXKFyOhRBg6Lqqc0yay13vN7KrIg4L7N4aaHN68ma9OK3NE1BoDFgFOTfM7zg+3/8+2n8rLUH3OKQ==}
@@ -2029,6 +2029,9 @@ packages:
 
   tailwindcss@4.1.12:
     resolution: {integrity: sha512-DzFtxOi+7NsFf7DBtI3BJsynR+0Yp6etH+nRPTbpWnS2pZBaSksv/JGctNwSWzbFjp0vxSqknaUylseZqMDGrA==}
+
+  tailwindcss@4.1.13:
+    resolution: {integrity: sha512-i+zidfmTqtwquj4hMEwdjshYYgMbOrPzb9a0M3ZgNa0JMoZeFC6bxZvO8yr8ozS6ix2SDz0+mvryPeBs2TFE+w==}
 
   tapable@2.2.3:
     resolution: {integrity: sha512-ZL6DDuAlRlLGghwcfmSn9sK3Hr6ArtyudlSAiCqQ6IfE+b+HHbydbYDIG15IfS5do+7XQQBdBiubF/cV2dnDzg==}
@@ -3321,7 +3324,7 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/node@24.3.0':
+  '@types/node@24.3.1':
     dependencies:
       undici-types: 7.10.0
 
@@ -3582,7 +3585,7 @@ snapshots:
     transitivePeerDependencies:
       - rollup
 
-  flowbite-react@0.12.8(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.12)(typescript@5.9.2):
+  flowbite-react@0.12.8(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.13)(typescript@5.9.2):
     dependencies:
       '@floating-ui/core': 1.6.9
       '@floating-ui/react': 0.27.3(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -3600,7 +3603,7 @@ snapshots:
       recast: 0.23.11
       tailwind-merge-v2: tailwind-merge@2.6.0
       tailwind-merge-v3: tailwind-merge@3.0.1
-      tailwindcss: 4.1.12
+      tailwindcss: 4.1.13
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -3911,7 +3914,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 24.3.0
+      '@types/node': 24.3.1
       long: 5.3.2
 
   queue-microtask@1.2.3: {}
@@ -4065,6 +4068,8 @@ snapshots:
   tailwind-merge@3.0.1: {}
 
   tailwindcss@4.1.12: {}
+
+  tailwindcss@4.1.13: {}
 
   tapable@2.2.3: {}
 
