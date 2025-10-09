@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
 	const baseUrl =
-		process.env.NEXT_PUBLIC_BASE_URL || 'https://stm.jermainesizemore.com';
+		process.env.NEXT_PUBLIC_BASE_URL || 'https://tm.jermainesizemore.com';
 
 	return {
 		rules: [
@@ -19,19 +19,16 @@ export default function robots(): MetadataRoute.Robots {
 					'/tmp/',
 					'/cache/',
 				],
-				crawlDelay: 1,
 			},
 			{
 				userAgent: 'Googlebot',
 				allow: '/',
 				disallow: ['/api/', '/auth/', '/admin/', '/private/'],
-				crawlDelay: 0.5,
 			},
 			{
 				userAgent: 'Bingbot',
 				allow: '/',
 				disallow: ['/api/', '/auth/', '/admin/', '/private/'],
-				crawlDelay: 1,
 			},
 			{
 				userAgent: 'facebookexternalhit',
@@ -55,6 +52,5 @@ export default function robots(): MetadataRoute.Robots {
 			},
 		],
 		sitemap: [`${baseUrl}/sitemap.xml`, `${baseUrl}/sitemap-images.xml`],
-		host: baseUrl,
 	};
 }

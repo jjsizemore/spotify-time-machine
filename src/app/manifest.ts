@@ -18,29 +18,13 @@ export default function manifest(): MetadataRoute.Manifest {
 		// iOS-specific enhancements
 		display_override: ['standalone', 'minimal-ui'],
 		icons: [
+			// Scalable SVG entries for standard and maskable purposes.
+			{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
 			{
-				src: '/favicon.svg',
-				sizes: 'any',
-				type: 'image/svg+xml',
-				purpose: 'any',
-			},
-			{
-				src: '/favicon.svg',
+				src: '/icon.svg',
 				sizes: 'any',
 				type: 'image/svg+xml',
 				purpose: 'maskable',
-			},
-			{
-				src: '/favicon.svg',
-				sizes: '512x512',
-				type: 'image/svg+xml',
-				purpose: 'any',
-			},
-			{
-				src: '/favicon.svg',
-				sizes: '192x192',
-				type: 'image/svg+xml',
-				purpose: 'any',
 			},
 		],
 		screenshots: [
@@ -69,7 +53,8 @@ export default function manifest(): MetadataRoute.Manifest {
 		related_applications: [
 			{
 				platform: 'webapp',
-				url: 'https://stm.jermainesizemore.com',
+				url:
+					process.env.NEXT_PUBLIC_BASE_URL || 'https://tm.jermainesizemore.com',
 			},
 		],
 		prefer_related_applications: false,

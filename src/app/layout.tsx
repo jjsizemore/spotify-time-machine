@@ -2,6 +2,7 @@ import '@/lib/init';
 import WebVitalsMonitor from '@/analytics/WebVitalsMonitor';
 import TokenStatus from '@/auth/TokenStatus';
 import { LayoutContent } from '@/layout/LayoutContent';
+import { DomainMigrationHandler } from '@/providers/DomainMigrationHandler';
 import { NextAuthProvider } from '@/providers/NextAuthProvider';
 import { ReactNode } from 'react';
 import './globals.css';
@@ -35,11 +36,7 @@ export const metadata = generateEnhancedMetadata({
 	],
 });
 
-export default function RootLayout({
-	children,
-}: {
-	children: ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
 	const webAppSchema = generateWebApplicationSchema();
 	const organizationSchema = generateOrganizationSchema();
 
@@ -94,30 +91,8 @@ export default function RootLayout({
 				/>
 				<meta name="referrer" content={ADVANCED_META_TAGS['referrer']} />
 
-				{/* PWA and Performance */}
+				{/* PWA manifest (icons & apple-touch-icon generated via metadata icons config) */}
 				<link rel="manifest" href="/manifest.webmanifest" />
-				<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-				<link rel="apple-touch-icon" href="/favicon.svg" />
-				<link rel="apple-touch-icon" sizes="180x180" href="/favicon.svg" />
-				<link rel="apple-touch-icon" sizes="152x152" href="/favicon.svg" />
-				<link rel="apple-touch-icon" sizes="120x120" href="/favicon.svg" />
-
-				{/* iOS Splash Screens */}
-				<link
-					rel="apple-touch-startup-image"
-					href="/favicon.svg"
-					media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
-				/>
-				<link
-					rel="apple-touch-startup-image"
-					href="/favicon.svg"
-					media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
-				/>
-				<link
-					rel="apple-touch-startup-image"
-					href="/favicon.svg"
-					media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
-				/>
 
 				{/* DNS Prefetch for Performance */}
 				<link rel="dns-prefetch" href="//i.scdn.co" />
@@ -182,6 +157,9 @@ export default function RootLayout({
 
 					{/* iOS Install Prompt */}
 					<IOSInstallPrompt />
+
+					{/* Domain Migration Handler */}
+					<DomainMigrationHandler />
 
 					{/* Offline Indicator */}
 					<OfflineIndicator />

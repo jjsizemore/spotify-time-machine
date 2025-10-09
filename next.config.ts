@@ -77,6 +77,11 @@ const nextConfig: NextConfig = {
 						key: 'Referrer-Policy',
 						value: 'strict-origin-when-cross-origin',
 					},
+					// Domain Migration Header
+					{
+						key: 'X-Domain-Migration',
+						value: 'tm.jermainesizemore.com',
+					},
 					// Performance Headers
 					{
 						key: 'X-Clacks-Overhead',

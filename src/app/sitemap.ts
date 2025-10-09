@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
 	const baseUrl =
-		process.env.NEXT_PUBLIC_BASE_URL || 'https://stm.jermainesizemore.com';
+		process.env.NEXT_PUBLIC_BASE_URL || 'https://tm.jermainesizemore.com';
 	const currentDate = new Date();
 	const lastWeek = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
 
@@ -68,7 +68,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 // Enhanced Image Sitemap for 2025 SEO
 export async function generateImageSitemap(): Promise<MetadataRoute.Sitemap> {
 	const baseUrl =
-		process.env.NEXT_PUBLIC_BASE_URL || 'https://stm.jermainesizemore.com';
+		process.env.NEXT_PUBLIC_BASE_URL || 'https://tm.jermainesizemore.com';
 
 	return [
 		{
@@ -90,7 +90,7 @@ export async function generateImageSitemap(): Promise<MetadataRoute.Sitemap> {
 			priority: 0.7,
 		},
 		{
-			url: `${baseUrl}/favicon.svg`,
+			url: `${baseUrl}/icon.svg`,
 			lastModified: new Date('2024-01-01'),
 			changeFrequency: 'yearly',
 			priority: 0.9,

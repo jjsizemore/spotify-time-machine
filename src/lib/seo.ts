@@ -4,7 +4,7 @@ import { SPOTIFY_GREEN } from './branding';
 // 2025 SEO Configuration
 export const SEO_CONFIG = {
 	baseUrl:
-		process.env.NEXT_PUBLIC_BASE_URL || 'https://stm.jermainesizemore.com',
+		process.env.NEXT_PUBLIC_BASE_URL || 'https://tm.jermainesizemore.com',
 	siteName: "Jermaine's Spotify Time Machine",
 	siteDescription:
 		'Your personal Spotify listening history and playlist generator. Relive your music journey, create custom playlists, and explore your listening habits over time.',
@@ -68,6 +68,16 @@ export function generateEnhancedMetadata({
 				'max-image-preview': 'large',
 				'max-video-preview': -1,
 			},
+		},
+		// Centralized icon configuration leveraging Next.js App Router file conventions.
+		// Files present:
+		// - /src/app/icon.svg (served as /icon.svg)
+		// - /src/app/apple-icon.tsx (dynamic 180x180 PNG served as /apple-icon)
+		// These entries ensure consistent <link rel="icon"> & <link rel="apple-touch-icon"> generation.
+		icons: {
+			icon: [{ url: '/icon.svg', type: 'image/svg+xml', sizes: 'any' }],
+			apple: [{ url: '/apple-icon', sizes: '180x180', type: 'image/png' }],
+			shortcut: ['/icon.svg'],
 		},
 		openGraph: {
 			type,
@@ -176,7 +186,7 @@ export function generateOrganizationSchema() {
 		'@type': 'Organization',
 		name: SEO_CONFIG.siteName,
 		url: SEO_CONFIG.baseUrl,
-		logo: `${SEO_CONFIG.baseUrl}/favicon.svg`,
+		logo: `${SEO_CONFIG.baseUrl}/icon.svg`,
 		foundingDate: '2024',
 		founder: {
 			'@type': 'Person',
