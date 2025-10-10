@@ -112,7 +112,7 @@ export function useSpotify() {
     error,
     retry,
     session,
-    getQueueStatus: () => client?.getQueueStatus?.() // Development debugging
+    getQueueStatus: () => client?.getQueueStatus?.(), // Development debugging
   };
 }
 ```
@@ -180,22 +180,9 @@ private async makeRequest<T>(requestFn: () => Promise<T>, retryKey?: string): Pr
 
 ```json
 {
-  "@prisma/client": "^6.9.0",
   "@tanstack/react-query": "^5.80.5",
-  "zod": "^3.25.51",
+  "zod": "^3.25.51"
 }
-```
-
-### **Trunk Configuration Updates**
-
-```yaml
-# .trunk/trunk.yaml
-lint:
-  disabled:
-    - eslint  # Disabled in favor of Biome
-    - prettier  # Disabled in favor of Biome
-  enabled:
-    - biome@1.9.4  # Primary formatter and linter (v2.0 beta available)
 ```
 
 ### **NextAuth Enhanced Settings**
@@ -228,15 +215,13 @@ debug: process.env.NODE_ENV === 'development',
 - ✅ **Real-time debugging** with TokenStatus widget
 - ✅ **Comprehensive logging** with emoji indicators
 - ✅ **Manual testing** capabilities via dedicated endpoint
-- ✅ **Modern tooling** with Biome integration
 - ✅ **Queue status monitoring** for API debugging
 
 ### **Code Quality & Reliability**
 
 - ✅ **Consistent error handling** across all Spotify integrations
 - ✅ **Type safety** with updated TypeScript and Zod versions
-- ✅ **Modern linting and formatting** with Biome 1.9.4
-- ✅ **Database reliability** with Prisma 6.x
+- ✅ **Modern linting and formatting** with Oxlint
 - ✅ **Request resilience** with automatic retry and queuing
 
 ## 🧪 Enhanced Testing Capabilities
@@ -302,7 +287,6 @@ curl -X POST http://localhost:3000/api/auth/refresh-token \
 
 - ✅ **Backward Compatibility**: Existing users unaffected
 - ✅ **Progressive Enhancement**: New features activate seamlessly
-- ✅ **Database Migrations**: Handled by Prisma updates
 - ✅ **Configuration Compatibility**: Environment variables unchanged
 
 ### **Performance Optimizations**
@@ -321,7 +305,7 @@ Your Spotify Time Machine now features **enterprise-grade infrastructure** inclu
 1. **🔄 Advanced Token Management**: Proactive refresh with intelligent queuing
 2. **🛠️ Developer Tooling**: Real-time debugging and monitoring capabilities
 3. **📦 Modern Dependencies**: Latest versions of critical packages
-4. **🎯 Code Quality**: Consistent linting and formatting with Biome
+4. **🎯 Code Quality**: Consistent linting and formatting with Oxlint
 5. **🔍 Comprehensive Testing**: Manual testing endpoints and debugging tools
 6. **⚡ Performance**: Request queuing and intelligent retry mechanisms
 7. **🛡️ Reliability**: Robust error handling and graceful degradation
@@ -338,7 +322,7 @@ Based on the branch diff analysis, here's what was **actually implemented**:
 
 1. **Real Spotify API Client** (`src/lib/spotify.ts`):
    - ✅ Request queuing with priority system
-   - ✅ Exponential backoff with jitter (baseDelay * 2^retryCount + randomJitter)
+   - ✅ Exponential backoff with jitter (baseDelay \* 2^retryCount + randomJitter)
    - ✅ Rate limiting protection (100ms minimum interval)
    - ✅ Request deduplication with pending request map
    - ✅ 60-second request timeout handling
@@ -355,14 +339,8 @@ Based on the branch diff analysis, here's what was **actually implemented**:
    - ✅ Automatic sign-in on `RefreshAccessTokenError`
 
 4. **Package Updates**:
-   - ✅ Prisma 6.9.0 (from 5.x)
    - ✅ React Query 5.80.5 (latest stable)
    - ✅ Zod 3.25.51 (enhanced validation)
-
-5. **Trunk Configuration**:
-   - ✅ ESLint and Prettier disabled in favor of Biome
-   - ✅ Biome 1.9.4 as primary formatter and linter
-   - ✅ Enhanced security scanning tools
 
 ### **🔧 Technical Implementation Details**
 

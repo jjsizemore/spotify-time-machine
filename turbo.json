@@ -1,51 +1,75 @@
 {
-	"$schema": "https://turborepo.com/schema.json",
-	"tasks": {
-		"dev": {
-			"cache": false,
-			"persistent": true
-		},
-		"build": {
-			"dependsOn": ["type-check"],
-			"outputs": [".next/**", "!.next/cache/**"]
-		},
-		"start": {
-			"cache": false
-		},
-		"lint": {
-			"inputs": ["**/*.{js,jsx,ts,tsx}", ".eslintrc.*", "eslint.config.*"]
-		},
-		"fmt": {
-			"inputs": [
-				"**/*.{js,jsx,ts,tsx,json,md}",
-				".prettierrc.*",
-				"prettier.config.*"
-			]
-		},
-		"type-check": {
-			"inputs": ["**/*.{ts,tsx}", "tsconfig.json"]
-		},
-		"check": {
-			"dependsOn": ["lint", "type-check"]
-		},
-		"check:all": {
-			"dependsOn": ["lint", "fmt", "type-check"]
-		},
-		"analyze": {
-			"dependsOn": ["build"],
-			"cache": false
-		},
-		"clean": {
-			"cache": false
-		},
-		"clean:cache": {
-			"cache": false
-		},
-		"clean:all": {
-			"cache": false
-		},
-		"debug": {
-			"cache": false
-		}
-	}
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["type-check"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "start": {
+      "cache": false
+    },
+    "lint": {
+      "inputs": ["**/*.{js,jsx,ts,tsx}", ".eslintrc.*", "eslint.config.*"]
+    },
+    "fmt": {
+      "inputs": ["**/*.{js,jsx,ts,tsx,json,md}", ".prettierrc.*", "prettier.config.*"]
+    },
+    "fmt:check": {
+      "inputs": ["**/*.{js,jsx,ts,tsx,json,md}", ".prettierrc.*", "prettier.config.*"]
+    },
+    "type-check": {
+      "inputs": ["**/*.{ts,tsx}", "tsconfig.json"]
+    },
+    "check": {
+      "dependsOn": ["lint", "type-check"]
+    },
+    "check:all": {
+      "dependsOn": ["lint", "fmt", "type-check"]
+    },
+    "analyze": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    },
+    "clean:cache": {
+      "cache": false
+    },
+    "clean:all": {
+      "cache": false
+    },
+    "debug": {
+      "cache": false
+    },
+    "security": {
+      "cache": false,
+      "inputs": ["src/**", "semgrep.yml", ".env.example", "**/*.sh"]
+    },
+    "security:secrets": {
+      "cache": false
+    },
+    "security:deps": {
+      "cache": false
+    },
+    "security:sast": {
+      "cache": false,
+      "inputs": ["src/**", "semgrep.yml"]
+    },
+    "security:env": {
+      "cache": false,
+      "inputs": [".env.example"]
+    },
+    "spellcheck": {
+      "inputs": ["**/*.{ts,tsx,js,jsx,md,json}", "!node_modules/**", "!.next/**"]
+    },
+    "audit": {
+      "cache": false,
+      "dependsOn": ["security", "spellcheck", "check:all"]
+    }
+  }
 }

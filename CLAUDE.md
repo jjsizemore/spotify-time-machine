@@ -9,18 +9,20 @@ This is a Next.js 15 application called "Jermaine's Spotify Time Machine" that a
 ## Development Commands
 
 ### Primary Development Commands
+
 - `pnpm dev` - Start development server with Turbopack at 127.0.0.1:3000
 - `pnpm build` - Build production version
 - `pnpm start` - Start production server
-- `pnpm lint` - Run Trunk linting (uses Biome 1.9.4)
-- `pnpm fmt` - Format code with Trunk
+- `pnpm lint` - Run Oxlint
+- `pnpm fmt` - Format code with Prettier
 - `pnpm debug` - Clean, install, build, and run dev server
 
 ### Other Commands
+
 - `pnpm clean` - Remove .next directory
-- `pnpm postinstall` - Generate Prisma client and patch Flowbite React
 
 ### Testing Commands
+
 - Linting: `trunk check` or `trunk check --all`
 - Formatting: `trunk fmt`
 - Manual token refresh testing: `curl -X POST http://localhost:3000/api/auth/refresh-token`
@@ -28,14 +30,15 @@ This is a Next.js 15 application called "Jermaine's Spotify Time Machine" that a
 ## High-Level Architecture
 
 ### Core Framework Stack
+
 - **Next.js 15.3.3** with App Router (`src/app/` directory structure)
 - **React 19.1.0** with concurrent features
 - **TypeScript 5.8.3** with strict type checking
 - **Tailwind CSS 4.1.10** for styling (note: uses CSS-based config, not tailwind.config.ts)
-- **Prisma 6.9.0** with PostgreSQL for database
 - **NextAuth.js 4.24.11** for Spotify OAuth authentication
 
 ### Authentication Architecture
+
 The application uses a sophisticated OAuth flow with enhanced security:
 
 - **PKCE (Proof Key for Code Exchange)** implementation with server-side client secret
@@ -45,11 +48,13 @@ The application uses a sophisticated OAuth flow with enhanced security:
 - **Development debugging** with real-time token monitoring
 
 Key files:
+
 - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth configuration
 - `src/hooks/useSpotify.ts` - Central authentication hook
 - `src/lib/tokenUtils.ts` - Token management utilities
 
 ### Spotify API Client Architecture
+
 The application features an enterprise-grade Spotify API client with:
 
 - **Request queuing system** with priority-based processing
@@ -60,10 +65,12 @@ The application features an enterprise-grade Spotify API client with:
 - **Comprehensive error handling** with SpotifyApiError class
 
 Key files:
+
 - `src/lib/spotify.ts` - Main Spotify API client class
 - `src/hooks/useSpotify.ts` - React integration hook
 
 ### Data Management & Caching
+
 Advanced caching system with:
 
 - **Progressive loading** with multiple cache keys
@@ -73,27 +80,32 @@ Advanced caching system with:
 - **React Query 5.80.7** for server state management
 
 Key files:
+
 - `src/lib/cacheUtils.ts` - Cache management utilities
 - `src/hooks/useLikedTracks.ts` - Liked tracks data fetching
 - `src/hooks/useLikedArtists.ts` - Artist data fetching
 - `src/hooks/useUserStats.ts` - User statistics
 
 ### Component Architecture
+
 The UI is built with reusable React components:
 
 **Core Layout Components:**
+
 - `src/app/layout.tsx` - Root layout with providers
 - `src/components/LayoutContent.tsx` - Main page structure
 - `src/components/PageContainer.tsx` - Standard page wrapper
 - `src/components/Navigation.tsx` - Main navigation bar
 
 **Data Visualization Components:**
+
 - `src/components/DataFetcherAndControlsWrapper.tsx` - Standardizes data fetching with controls
 - `src/components/VisualizationContainer.tsx` - Wrapper for visualizations with loading/error states
 - `src/components/ListeningTrends.tsx` - Monthly listening trends chart
 - `src/components/GenreTrendsVisualization.tsx` - Genre evolution over time
 
 **Feature Components:**
+
 - `src/components/MonthlyTrackList.tsx` - Monthly track listings with playlist creation
 - `src/components/TrackItem.tsx` - Individual track display
 - `src/components/FilterSelector.tsx` - Multi-select filter UI
@@ -102,17 +114,20 @@ The UI is built with reusable React components:
 ## Development Tools & Code Quality
 
 ### Linting and Formatting
-- **Biome 1.9.4** for primary linting and formatting (replaces ESLint/Prettier)
-- **Trunk** for comprehensive code quality checks
+
+- **Oxlint** for primary linting
+- **Prettier** for styling
 - **Stylelint** configured for Tailwind CSS v4 compatibility
 
 ### Security & Quality Scanning
+
 - **TruffleHog** for secret detection
 - **OSV Scanner** for vulnerability scanning
 - **Checkov** for infrastructure security
 - **Automatic pre-commit hooks** for code quality
 
 ### Development Debugging
+
 - **TokenStatus widget** (development only) - Real-time token monitoring
 - **Queue status monitoring** via `getQueueStatus()` function
 - **Manual token refresh endpoint** at `/api/auth/refresh-token`
@@ -121,6 +136,7 @@ The UI is built with reusable React components:
 ## Critical Development Patterns
 
 ### 1. Authentication Hook Usage
+
 Always use the enhanced `useSpotify` hook for Spotify API interactions:
 
 ```typescript
@@ -134,6 +150,7 @@ if (error) return <ErrorDisplay message={error} onRetry={retry} />;
 ```
 
 ### 2. Error Handling Pattern
+
 Import and use `SpotifyApiError` consistently:
 
 ```typescript
@@ -152,6 +169,7 @@ try {
 ```
 
 ### 3. Component Development
+
 - Use `DataFetcherAndControlsWrapper` for data-driven visualizations
 - Implement loading states with `LoadingSpinner`
 - Use `ErrorDisplay` with retry functionality for error handling
@@ -160,7 +178,9 @@ try {
 ## Environment Setup
 
 ### Required Environment Variables
+
 Create `.env.local` with:
+
 ```bash
 SPOTIFY_CLIENT_ID=your_spotify_client_id
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
@@ -170,14 +190,15 @@ DATABASE_URL=your_postgresql_connection_string
 ```
 
 ### Development Server Configuration
+
 - Uses Turbopack for faster builds
 - Runs on 127.0.0.1:3000 (not localhost) for OAuth compatibility
-- Prisma generates client on postinstall
 - Flowbite React applies patches automatically
 
 ## Common Workflows
 
 ### Adding New Features
+
 1. Check `TODO.md` for current implementation priorities
 2. Use established patterns from existing components
 3. Implement error handling with `SpotifyApiError`
@@ -186,6 +207,7 @@ DATABASE_URL=your_postgresql_connection_string
 6. Run `trunk check` for code quality
 
 ### API Integration
+
 1. Use the `spotifyApi` instance from `useSpotify` hook
 2. Implement proper error handling with retry logic
 3. Leverage the request queuing system for reliability
@@ -193,25 +215,28 @@ DATABASE_URL=your_postgresql_connection_string
 5. Monitor queue status during development
 
 ### Database Changes
-1. Modify `prisma/schema.prisma`
-2. Generate client with `pnpm run postinstall`
-3. Database uses PostgreSQL with NextAuth.js adapter
+
+1. Modify `backend/src/database/`
+2. Database uses PostgreSQL with NextAuth.js adapter
 
 ## Performance Considerations
 
 ### Spotify API Optimization
+
 - The API client implements sophisticated rate limiting and queuing
 - Requests are automatically deduped to prevent redundant calls
 - Priority system ensures critical requests are processed first
 - Exponential backoff prevents overwhelming the API during issues
 
 ### Caching Strategy
+
 - Implement TTL-based caching for frequently accessed data
 - Use cache size limits to prevent memory issues
 - Leverage React Query for server state management
 - Consider server-side data aggregation for complex visualizations
 
 ### SEO & Performance
+
 - Implements Core Web Vitals monitoring
 - Uses Next.js 15 performance optimizations
 - PWA capabilities with service worker caching

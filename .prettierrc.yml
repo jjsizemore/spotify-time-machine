@@ -1,0 +1,13 @@
+plugins:
+  - '@prettier/plugin-oxc'
+tabWidth: 2
+useTabs: false
+printWidth: 100
+singleQuote: true
+jsxSingleQuote: false
+trailingComma: es5
+bracketSpacing: true
+semi: true
+arrowParens: always
+endOfLine: lf
+bracketSameLine: false

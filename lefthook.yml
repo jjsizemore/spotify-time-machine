@@ -1,0 +1,39 @@
+# Lefthook configuration
+# https://github.com/evilmartians/lefthook
+
+# Uncomment to enable. This is an alternative to husky.
+# To use: mise run hooks-install
+
+pre-commit:
+  parallel: true
+  commands:
+    lint-staged:
+      run: pnpm exec lint-staged
+      glob: '*.{ts,tsx,js,jsx,json,md,css,yaml,yml}'
+      follow: true
+
+    type-check:
+      run: pnpm exec tsc --noEmit
+      glob: '*.{ts,tsx}'
+
+    spellcheck:
+      run: typos {staged_files}
+      glob: '*.{ts,tsx,js,jsx,md}'
+      stage_fixed: true
+
+pre-push:
+  parallel: false
+  commands:
+    security:
+      run: mise run security
+
+    tests:
+      run: pnpm test
+      skip:
+        - merge
+        - rebase
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}

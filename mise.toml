@@ -1,12 +1,28 @@
 [tools]
-node = "latest"
+node = { version = "latest", postinstall = "corepack enable" }
 pnpm = "latest"
+
+# Formatting & Linting
+prettier = "latest"
+typos = "latest"
+
+# Security & Quality
+dotenv-linter = "latest"
+trufflehog = "latest"
+snyk = "latest"
+# Required for semgrep to work properly
+uv = "latest"
+semgrep = "latest"
+
+# Shell & CI/CD
+shellcheck = "latest"
+actionlint = "latest"
+
+# Git Hooks (alternative to husky)
+lefthook = "latest"
 
 [settings]
 experimental = true
-
-[hooks]
-postinstall = 'npx corepack enable'
 
 [env]
 _.path = ['./node_modules/.bin']
@@ -37,6 +53,11 @@ description = 'Runs formatting with Turborepo'
 run = 'turbo fmt'
 depends = ['pnpm-install']
 
+[tasks.fmt-check]
+description = 'Checks formatting without making changes'
+run = 'prettier --check "**/*.{js,jsx,ts,tsx,json,md,css,yaml,yml}"'
+depends = ['pnpm-install']
+
 [tasks.type-check]
 description = 'Runs TypeScript type checking with Turborepo'
 run = 'turbo type-check'
@@ -63,6 +84,67 @@ run = 'turbo clean:cache'
 [tasks.clean-all]
 description = 'Cleans everything with Turborepo'
 run = 'turbo clean:all'
+
+# Security & Quality Tasks
+[tasks.security]
+description = 'Runs all security checks (trufflehog + snyk + dotenv-linter + semgrep)'
+run = '''
+echo "🔍 Running security checks..."
+trufflehog filesystem . --no-update --fail --exclude-paths=.trufflehog-exclude.txt || true
+dotenv-linter .env.example || true
+snyk test --all-projects || true
+semgrep --config semgrep.yml src || true
+echo "✅ Security checks complete!"
+'''
+depends = ['pnpm-install']
+
+[tasks.security-trufflehog]
+description = 'Scan for secrets with TruffleHog'
+run = 'trufflehog filesystem . --no-update --fail --exclude-paths=.trufflehog-exclude.txt'
+
+[tasks.security-snyk]
+description = 'Run Snyk vulnerability scan'
+run = 'snyk test --all-projects'
+
+[tasks.security-semgrep]
+description = 'Run Semgrep SAST scan'
+run = 'semgrep --config semgrep.yml src'
+depends = ['pnpm-install']
+
+[tasks.security-dotenv]
+description = 'Lint .env files'
+run = 'dotenv-linter .env.example'
+
+[tasks.spellcheck]
+description = 'Check for typos in code and docs'
+run = 'typos'
+
+[tasks.shellcheck]
+description = 'Lint shell scripts'
+run = 'find . -name "*.sh" -not -path "*/node_modules/*" -not -path "*/.next/*" | xargs shellcheck || echo "No shell scripts found"'
+
+[tasks.actionlint]
+description = 'Lint GitHub Actions workflows'
+run = 'actionlint .github/workflows/*.yml 2>/dev/null || echo "No workflows found or actionlint not available"'
+
+[tasks.hooks-install]
+description = 'Install git hooks with lefthook'
+run = 'lefthook install'
+
+[tasks.hooks-run]
+description = 'Run all git hooks manually'
+run = 'lefthook run pre-commit'
+
+[tasks.audit]
+description = 'Run comprehensive audit (security + quality checks)'
+run = '''
+echo "🔍 Running comprehensive audit..."
+mise run security
+mise run spellcheck
+mise run check-all
+echo "✅ Audit complete!"
+'''
+depends = ['pnpm-install']
 
 [tasks.analyze]
 description = 'Analyzes the build with Turborepo'

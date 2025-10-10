@@ -11,7 +11,7 @@ updates:
       interval: weekly
       day: monday
       # trunk-ignore(yamllint/quoted-strings)
-      time: "09:00"
+      time: '09:00'
       timezone: America/Los_Angeles
     reviewers:
       - jjsizemore

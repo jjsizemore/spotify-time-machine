@@ -1,55 +1,65 @@
 {
-	"compilerOptions": {
-		"target": "ES2024",
-		"lib": ["dom", "dom.iterable", "esnext"],
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
-		"allowJs": true,
-		"checkJs": false,
-		"strict": true,
-		"noFallthroughCasesInSwitch": true,
-		"noImplicitOverride": true,
-		"noImplicitReturns": true,
-		"allowSyntheticDefaultImports": true,
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"isolatedModules": true,
-		"resolveJsonModule": true,
-		"allowImportingTsExtensions": false,
-		"allowArbitraryExtensions": false,
-		"noEmit": true,
-		"preserveWatchOutput": true,
-		"removeComments": false,
-		"skipLibCheck": true,
-		"incremental": true,
-		"assumeChangesOnlyAffectDirectDependencies": true,
-		"useDefineForClassFields": true,
-		"verbatimModuleSyntax": false,
-		"jsx": "preserve",
-		"jsxImportSource": "react",
-		"plugins": [
-			{
-				"name": "next"
-			}
-		],
-		"baseUrl": ".",
-		"paths": {
-			"@/*": ["./src/*"],
-			"@/components/*": ["./src/components/*"],
-			"@/ui/*": ["./src/components/ui/*"],
-			"@/layout/*": ["./src/components/layout/*"],
-			"@/features/*": ["./src/components/features/*"],
-			"@/analytics/*": ["./src/components/analytics/*"],
-			"@/auth/*": ["./src/components/auth/*"],
-			"@/providers/*": ["./src/components/providers/*"],
-			"@/lib/*": ["src/lib/*"],
-			"@/hooks/*": ["./src/hooks/*"],
-			"@/types/*": ["./src/types/*"]
-		}
-	},
-	"include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
-	"exclude": ["node_modules", ".next", "dist", "build"],
-	"ts-node": {
-		"esm": true
-	}
+  "compilerOptions": {
+    "target": "ES2024",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowJs": true,
+    "checkJs": false,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": false,
+    "allowArbitraryExtensions": false,
+    "noEmit": true,
+    "preserveWatchOutput": true,
+    "removeComments": false,
+    "skipLibCheck": true,
+    "incremental": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    "useDefineForClassFields": true,
+    "verbatimModuleSyntax": false,
+    "jsx": "preserve",
+    "jsxImportSource": "react",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/ui/*": ["./src/components/ui/*"],
+      "@/layout/*": ["./src/components/layout/*"],
+      "@/features/*": ["./src/components/features/*"],
+      "@/analytics/*": ["./src/components/analytics/*"],
+      "@/auth/*": ["./src/components/auth/*"],
+      "@/providers/*": ["./src/components/providers/*"],
+      "@/lib/*": ["src/lib/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/types/*": ["./src/types/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "public/sw.js",
+    "*.config.js",
+    "*.config.mjs",
+    "*.config.ts",
+    ".flowbite-react/init.tsx"
+  ],
+  "exclude": ["node_modules", ".next", "dist", "build", ".next", ".turbo"],
+  "ts-node": {
+    "esm": true
+  }
 }

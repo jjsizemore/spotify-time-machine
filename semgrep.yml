@@ -1,0 +1,37 @@
+rules:
+  - id: 'typescript-react-security'
+    patterns:
+      - pattern: 'dangerouslySetInnerHTML'
+    message: 'Avoid dangerouslySetInnerHTML for security'
+    languages: [typescript, javascript]
+    severity: WARNING
+
+  - id: 'typescript-node-security'
+    patterns:
+      - pattern: 'eval(...)'
+      - pattern: 'new Function(...)'
+    message: 'Avoid eval and Function constructor for security'
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  - id: 'typescript-sql-injection'
+    patterns:
+      - pattern: '$QUERY = "... " + $VAR + " ..."'
+      - pattern: '$QUERY = `... ${$VAR} ...`'
+    message: 'Potential SQL injection vulnerability'
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  - id: 'typescript-unsafe-type-assertion'
+    patterns:
+      - pattern: '$VAR as any'
+    message: 'Avoid unsafe type assertions'
+    languages: [typescript]
+    severity: WARNING
+
+  - id: 'typescript-console-log'
+    patterns:
+      - pattern: 'console.log(...)'
+    message: 'Remove console.log statements in production code'
+    languages: [typescript, javascript]
+    severity: INFO
