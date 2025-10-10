@@ -20,7 +20,6 @@ Successfully enhanced the Spotify Time Machine project with comprehensive DevSec
 - ✅ typos - Lightning-fast spell checker (<100ms)
 - ✅ shellcheck - Shell script linter
 - ✅ actionlint - GitHub Actions validator
-- ⚠️ trunk - Meta-linter (manual install)
 - ⚠️ oxlint - Fast JS/TS linter (in devDependencies)
 
 **Git Hooks (1 new):**
@@ -58,11 +57,10 @@ Successfully enhanced the Spotify Time Machine project with comprehensive DevSec
 
 1. `_typos.toml` - Spell checker config
 2. `.trufflehog-exclude.txt` - Secret scanner exclusions
-3. `lefthook.yml` - Git hooks config (opt-in)
-4. Updated `.lintstagedrc.json` - Added typos + shellcheck
-5. Updated `mise.toml` - Added tools + tasks
-6. Updated `turbo.json` - Added task caching
-7. Updated `package.json` - Added security scripts
+3. `lefthook.yml` - Git hooks config
+4. Updated `mise.toml` - Added tools + tasks
+5. Updated `turbo.json` - Added task caching
+6. Updated `package.json` - Added security scripts
 
 ### Documentation (4 new files)
 
@@ -101,7 +99,6 @@ Successfully enhanced the Spotify Time Machine project with comprehensive DevSec
 - **Spell checking** - Typos in code/docs
 - **Shell linting** - Shellcheck validates scripts
 - **Workflow validation** - Actionlint checks Actions
-- **Multi-linter** - Trunk runs multiple linters
 
 ## 🚀 Quick Start
 
@@ -158,8 +155,7 @@ mise run audit
 
 1. Update CI/CD with security tasks
 2. Consider migrating to lefthook (optional)
-3. Add trunk to project if not installed
-4. Share docs with team
+3. Share docs with team
 
 ### Optional
 
@@ -167,10 +163,6 @@ mise run audit
    - Edit `lefthook.yml` (uncomment hooks)
    - Run `mise run hooks-install`
    - Remove husky from package.json
-
-2. **Add trunk to mise** (when available):
-   - Wait for mise plugin
-   - Or install manually per TOOL_INSTALLATION.md
 
 ## 📚 Documentation Map
 
@@ -208,8 +200,7 @@ A production-ready DevSecOps toolkit with:
 - dotenv-linter, trufflehog, snyk, semgrep, uv
 - typos, shellcheck, actionlint, lefthook
 
-⚠️ Manual Installation (2 tools):
-- trunk (install via curl or homebrew)
+⚠️ Manual Installation (1 tool):
 - oxlint (in package.json devDependencies)
 ```
 

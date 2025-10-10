@@ -113,7 +113,6 @@
     - Graceful degradation assumes non-EEA user if detection fails (privacy-friendly default)
   - ✅ **Comprehensive EEA Coverage**: Includes all 30 EEA countries (EU 27 + Iceland, Liechtenstein, Norway)
   - ✅ **GDPR-Compliant Logic**:
-    - **EEA Users**: Analytics only load after explicit consent via c15t consent manager
     - **Non-EEA Users**: Analytics load by default without requiring consent
     - **Loading State**: Analytics blocked until location detection completes
   - ✅ **Dual Implementation**: Both `ConsentAwareAnalytics.tsx` and `instrumentation-client.ts` updated for consistent behavior
@@ -283,13 +282,11 @@
   - ✅ **Removed** from image sitemap metadata (SEO compliance)
   - ✅ **Retained** appropriate usage in UI components (Navigation, HomePage, Thank You) as part of "Jermaine's {spotify-icon} Time Machine" branding
   - ⚠️ **Important**: Spotify icon should ONLY be used in the context of the app's title, never as app metadata or system notifications
-- **🔧 Fixed Stylelint Errors**: Resolved stylelint configuration issues that were causing trunk check failures
-  - ✅ Created `.trunk/configs/.stylelintrc.json` with Tailwind CSS v4 compatibility
-  - ✅ Added support for Tailwind v4 at-rules: `@import`, `@theme`, `@plugin`, `@source`, `@custom-variant`, `@reference`
+- **🔧 Fixed Stylelint Errors**: Resolved stylelint configuration issues for Tailwind CSS v4 compatibility
   - ✅ Configured CSS custom properties support with `/^--/` pattern matching
   - ✅ Disabled problematic rules that conflict with modern CSS patterns
-  - ✅ Fixed all trunk check failures related to stylelint configuration errors
-- **✅ Build Verification**: All linting checks now pass successfully with `trunk check --all`
+  - ✅ Fixed all stylelint configuration errors
+- **✅ Build Verification**: All linting checks now pass successfully
 - **🎯 Tailwind v4 Ready**: Configuration specifically designed for Tailwind CSS v4 syntax and features
 
 ### ✅ Complete Tailwind CSS v4 Upgrade
@@ -375,9 +372,8 @@
    - ✅ Comprehensive console logging with emoji indicators
 
 4. **Modern Tooling & Code Quality**
-   - ✅ Biome 1.9.4 for primary formatting and linting
+   - ✅ Oxlint + eslint + prettier
    - ✅ React Query 5.80.5 for optimized data fetching
-   - ✅ Trunk configuration optimized for development workflow
 
 5. **🆕 2025 SEO & Performance Standards** ✅
    - ✅ PWA manifest with mobile-first design
@@ -773,15 +769,6 @@ if (error) {
 - **Tailwind CSS 4.1.8**: Latest utility-first CSS framework
 - **Flowbite React 0.11.7**: Component library integration
 
-### Database & ORM
-
-### Development Tools
-
-- **Biome 1.9.4**: Fast linting and formatting
-- **Trunk**: Code quality and security scanning
-
-## Testing Strategy
-
 ### Enhanced Testing Capabilities
 
 1. **Development Testing:**
@@ -866,7 +853,6 @@ if (error) {
 - `postcss.config.mjs`: Tailwind and Autoprefixer
 - `prettier.config.js`: Code formatting (legacy, removed in favor of Biome)
 - `tsconfig.json`: TypeScript configuration
-- `.trunk/trunk.yaml`: **UPDATED** Modern tool configuration with Biome
 - `flowbite-react.config.js`: UI component theme
 - `.vscode/`: Editor settings
 

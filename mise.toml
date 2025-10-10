@@ -5,6 +5,7 @@ pnpm = "latest"
 # Formatting & Linting
 prettier = "latest"
 typos = "latest"
+taplo = "latest"
 
 # Security & Quality
 dotenv-linter = "latest"
@@ -50,13 +51,27 @@ depends = ['pnpm-install']
 
 [tasks.fmt]
 description = 'Runs formatting with Turborepo'
-run = 'turbo fmt'
+run = '''
+turbo fmt
+taplo fmt
+'''
 depends = ['pnpm-install']
 
 [tasks.fmt-check]
 description = 'Checks formatting without making changes'
-run = 'prettier --check "**/*.{js,jsx,ts,tsx,json,md,css,yaml,yml}"'
+run = '''
+prettier --check "**/*.{js,jsx,ts,tsx,json,md,css,yaml,yml}"
+taplo check
+'''
 depends = ['pnpm-install']
+
+[tasks.toml-fmt]
+description = 'Formats TOML files with taplo'
+run = "taplo fmt"
+
+[tasks.toml-check]
+description = 'Checks TOML file formatting with taplo'
+run = "taplo check"
 
 [tasks.type-check]
 description = 'Runs TypeScript type checking with Turborepo'
@@ -69,8 +84,8 @@ run = 'turbo check'
 depends = ['pnpm-install']
 
 [tasks.check-all]
-description = 'Runs all checks (lint + fmt + type-check) with Turborepo'
-run = 'turbo check:all'
+description = 'Runs all checks (lint + fmt + type-check + toml) with Turborepo'
+run = "turbo check:all && taplo check"
 depends = ['pnpm-install']
 
 [tasks.clean]
@@ -91,9 +106,9 @@ description = 'Runs all security checks (trufflehog + snyk + dotenv-linter + sem
 run = '''
 echo "🔍 Running security checks..."
 trufflehog filesystem . --no-update --fail --exclude-paths=.trufflehog-exclude.txt || true
-dotenv-linter .env.example || true
+dotenv-linter || true
 snyk test --all-projects || true
-semgrep --config semgrep.yml src || true
+semgrep --config semgrep.yml || true
 echo "✅ Security checks complete!"
 '''
 depends = ['pnpm-install']
@@ -108,12 +123,12 @@ run = 'snyk test --all-projects'
 
 [tasks.security-semgrep]
 description = 'Run Semgrep SAST scan'
-run = 'semgrep --config semgrep.yml src'
+run = 'semgrep --config semgrep.yml'
 depends = ['pnpm-install']
 
 [tasks.security-dotenv]
 description = 'Lint .env files'
-run = 'dotenv-linter .env.example'
+run = 'dotenv-linter'
 
 [tasks.spellcheck]
 description = 'Check for typos in code and docs'

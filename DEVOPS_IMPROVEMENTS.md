@@ -8,7 +8,6 @@ Added new tools for improved DX and DevSecOps:
 
 **New Tools Added:**
 
-- `trunk` - Meta-linter (consolidates multiple linters)
 - `oxlint` - Fast JavaScript/TypeScript linter
 - `typos` - Fast spell checker for code and docs
 - `shellcheck` - Shell script linting
@@ -84,7 +83,6 @@ Created:
 1. **Spell Checking** - Typos catches typos in code/docs (very fast)
 2. **Shell Script Linting** - Shellcheck validates bash/zsh scripts
 3. **Workflow Validation** - Actionlint checks GitHub Actions
-4. **Multi-Linter** - Trunk runs multiple linters efficiently
 
 ## Usage Examples
 

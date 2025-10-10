@@ -57,7 +57,8 @@ const FeatureShowcaseItem: React.FC<FeatureShowcaseItemProps> = ({
       }`}
     >
       {/* Image Side */}
-      <div
+      <button
+        type="button"
         className="basis-full w-full md:basis-1/3 md:w-1/3 flex items-center justify-center bg-spotify-dark-gray rounded-lg p-4 shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-200"
         onClick={handlePreviewClick}
       >
@@ -69,7 +70,7 @@ const FeatureShowcaseItem: React.FC<FeatureShowcaseItemProps> = ({
           className="rounded-lg w-full h-auto"
           priority={false} // Assuming these are not LCP images
         />
-      </div>
+      </button>
       {/* Text Side */}
       <div className="basis-full w-full md:basis-2/3 md:w-2/3 flex flex-col justify-center py-4 md:py-0 md:pl-8">
         {' '}

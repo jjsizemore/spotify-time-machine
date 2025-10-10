@@ -141,30 +141,6 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  async rewrites() {
-    return [
-      {
-        source: '/api/c15t/:path*',
-        destination: `${process.env.NEXT_PUBLIC_C15T_URL}/:path*`,
-      },
-      {
-        source: '/ingest/static/:path*',
-        destination: 'https://us-assets.i.posthog.com/static/:path*',
-      },
-      {
-        source: '/ingest/:path*',
-        destination: 'https://us.i.posthog.com/:path*',
-      },
-      {
-        source: '/ingest/decide',
-        destination: 'https://us.i.posthog.com/decide',
-      },
-    ];
-  },
-
-  // Required to support PostHog trailing slash API requests
-  skipTrailingSlashRedirect: true,
-
   // Output configuration for deployment
   output: 'standalone',
 

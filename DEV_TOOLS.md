@@ -11,7 +11,6 @@ We use [mise](https://mise.jdx.dev/) for managing development tools. All tools a
 - **Node.js** - JavaScript runtime (latest)
 - **pnpm** - Fast, disk space efficient package manager (latest)
 - **prettier** - Code formatter (latest)
-- **trunk** - Meta linter that runs multiple linters (latest)
 - **oxlint** - Fast JavaScript/TypeScript linter (latest)
 - **typos** - Fast spell checker for code (latest)
 - **dotenv-linter** - Linter for .env files (latest)
@@ -59,7 +58,7 @@ pnpm start
 ### Code Quality
 
 ```bash
-# Run linter (trunk check)
+# Run linter
 mise run lint
 pnpm lint
 
@@ -150,10 +149,10 @@ pnpm clean:all
 
 ### Git Hooks
 
-We use husky by default, but lefthook is available as a faster alternative.
+We use lefthook by default, a faster alternative to husky.
 
 ```bash
-# Install lefthook hooks (alternative to husky)
+# Install lefthook hooks
 mise run hooks-install
 
 # Run pre-commit hooks manually
@@ -194,8 +193,7 @@ All mise tasks can be run in CI/CD pipelines:
 - `turbo.json` - Turborepo task configuration
 - `_typos.toml` - Spell checker configuration
 - `.trufflehog-exclude.txt` - Secret scanner exclusions
-- `lefthook.yml` - Git hooks configuration (optional)
-- `.lintstagedrc.json` - Pre-commit staged files linting
+- `lefthook.yml` - Git hooks configuration
 - `semgrep.yml` - SAST security rules
 
 ## Best Practices
@@ -268,5 +266,4 @@ pnpm install
 
 - [mise Documentation](https://mise.jdx.dev/)
 - [Turborepo Documentation](https://turbo.build/repo/docs)
-- [Trunk Documentation](https://docs.trunk.io/)
 - [Lefthook Documentation](https://github.com/evilmartians/lefthook)

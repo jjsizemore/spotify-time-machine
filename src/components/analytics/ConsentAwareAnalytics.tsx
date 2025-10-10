@@ -1,6 +1,5 @@
 'use client';
 
-import { useConsentManager } from '@c15t/nextjs';
 import { Analytics } from '@vercel/analytics/react';
 import Script from 'next/script';
 import { useEffect, useState } from 'react';
@@ -126,7 +125,6 @@ function useUserLocation() {
 }
 
 export function ConsentAwareAnalytics() {
-  const { hasConsented } = useConsentManager();
   const isEEAUser = useUserLocation();
   const [analyticsLoaded, setAnalyticsLoaded] = useState(false);
 
@@ -138,20 +136,9 @@ export function ConsentAwareAnalytics() {
     return null; // Don't load analytics until we know user's location
   }
 
-  // For EEA users, require explicit consent
-  if (isEEAUser) {
-    const hasAnalyticsConsent = hasConsented();
-    if (!hasAnalyticsConsent) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('📊 Analytics blocked - EEA user without consent');
-      }
-      return null;
-    }
-  }
-
   // Analytics should load - log this in development
   if (process.env.NODE_ENV === 'development' && !analyticsLoaded) {
-    const reason = isEEAUser ? 'EEA user with consent' : 'non-EEA user';
+    const reason = isEEAUser ? 'EEA user' : 'non-EEA user';
     console.log(`📊 Analytics loading for ${reason}`);
     setAnalyticsLoaded(true);
   }
@@ -175,7 +162,7 @@ export function ConsentAwareAnalytics() {
             zIndex: 9999,
             fontFamily: 'monospace',
           }}
-          title={`Analytics active: ${isEEAUser ? 'EEA user with consent' : 'Non-EEA user'}`}
+          title={`Analytics active: ${isEEAUser ? 'EEA user' : 'Non-EEA user'}`}
         >
           📊 Analytics ON
         </div>

@@ -23,8 +23,6 @@ This is a Next.js 15 application called "Jermaine's Spotify Time Machine" that a
 
 ### Testing Commands
 
-- Linting: `trunk check` or `trunk check --all`
-- Formatting: `trunk fmt`
 - Manual token refresh testing: `curl -X POST http://localhost:3000/api/auth/refresh-token`
 
 ## High-Level Architecture
@@ -204,7 +202,7 @@ DATABASE_URL=your_postgresql_connection_string
 3. Implement error handling with `SpotifyApiError`
 4. Add loading states and user feedback
 5. Test with development debugging tools
-6. Run `trunk check` for code quality
+6. Run `pnpm lint` for code quality
 
 ### API Integration
 

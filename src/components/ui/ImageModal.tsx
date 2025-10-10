@@ -18,7 +18,7 @@ type ImageModalProps = {
 };
 
 export const ImageModal = ({ selectedImage, isLoading, onClose, onImageLoad }: ImageModalProps) => {
-  const modalRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!selectedImage) {
@@ -63,17 +63,18 @@ export const ImageModal = ({ selectedImage, isLoading, onClose, onImageLoad }: I
   }, [selectedImage, onClose]);
 
   return (
-    <div
+    <button
       ref={modalRef}
       className="fixed inset-0 bg-spotify-black/90 flex items-center justify-center z-[100] p-2 sm:p-4"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div
         className="relative bg-spotify-dark-gray rounded-lg shadow-2xl max-w-full max-h-full flex flex-col items-center overflow-hidden border border-spotify-medium-gray"
-        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
       >
         {/* Image container - mobile optimized */}
         <div
@@ -153,6 +154,6 @@ export const ImageModal = ({ selectedImage, isLoading, onClose, onImageLoad }: I
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 };

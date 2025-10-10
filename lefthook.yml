@@ -1,24 +1,52 @@
 # Lefthook configuration
 # https://github.com/evilmartians/lefthook
 
-# Uncomment to enable. This is an alternative to husky.
-# To use: mise run hooks-install
-
 pre-commit:
   parallel: true
   commands:
-    lint-staged:
-      run: pnpm exec lint-staged
-      glob: '*.{ts,tsx,js,jsx,json,md,css,yaml,yml}'
+    # Lint and format TypeScript/JavaScript files
+    oxlint:
+      glob: '*.{ts,tsx,js,jsx,cjs,mjs}'
+      run: pnpm exec oxlint --fix {staged_files}
+      stage_fixed: true
 
+    eslint:
+      glob: '*.{ts,tsx,js,jsx,cjs,mjs}'
+      run: pnpm exec eslint --fix {staged_files}
+      stage_fixed: true
+
+    # Format code files
+    prettier-code:
+      glob: '*.{ts,tsx,js,jsx,cjs,mjs}'
+      run: pnpm exec prettier --write {staged_files}
+      stage_fixed: true
+
+    # Format config/doc files
+    prettier-config:
+      glob: '*.{json,md,mdx,css,scss,html,yml,yaml}'
+      run: pnpm exec prettier --write {staged_files}
+      stage_fixed: true
+
+    # Spell check
+    typos:
+      glob: '*.{ts,tsx,js,jsx,cjs,mjs,json,md,mdx,yml,yaml}'
+      run: typos --write-changes {staged_files}
+      stage_fixed: true
+
+    # Security scanning
+    semgrep:
+      glob: '*.{ts,tsx,js,jsx,cjs,mjs}'
+      run: pnpm exec semgrep --config semgrep.yml {staged_files}
+
+    # Shell script linting
+    shellcheck:
+      glob: '*.sh'
+      run: shellcheck {staged_files}
+
+    # Type checking (runs on all files, not just staged)
     type-check:
       run: pnpm exec tsc --noEmit
       glob: '*.{ts,tsx}'
-
-    spellcheck:
-      run: typos {staged_files}
-      glob: '*.{ts,tsx,js,jsx,md}'
-      stage_fixed: true
 
 pre-push:
   parallel: false
