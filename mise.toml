@@ -11,6 +11,7 @@ taplo = "latest"
 dotenv-linter = "latest"
 trufflehog = "latest"
 snyk = "latest"
+
 # Required for semgrep to work properly
 uv = "latest"
 semgrep = "latest"

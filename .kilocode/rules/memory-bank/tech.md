@@ -2,8 +2,8 @@
 
 ## Core Technologies and Frameworks
 
-- **Next.js 15**: React framework for production with App Router, server components, and API routes
-- **React 19**: Latest React version with concurrent features and improved performance
+- **Next.js 15.5.4**: React framework for production with App Router, server components, and API routes
+- **React 19.2.0**: Latest React version with concurrent features and improved performance
 - **TypeScript**: Static type checking throughout the application
 - **NextAuth.js 4.24.11**: Authentication library for Spotify OAuth integration
 - **TanStack Query 5.90.2**: Advanced data fetching and caching library
@@ -30,6 +30,9 @@
 
 - **@next/third-parties**: Third-party integrations for analytics and performance monitoring
 - **@vercel/analytics**: Web analytics and performance tracking
+- **@vercel/speed-insights**: Real-time performance metrics and insights
+- **@sentry/nextjs**: Error tracking and performance monitoring with session replay
+- **posthog-js**: Product analytics and session replay
 - **date-fns**: Modern JavaScript date utility library
 - **fflate**: Fast zlib compression for data processing
 - **react-icons**: Popular icon library for UI components
@@ -44,3 +47,4 @@
 - **Commit Management**: Conventional commits with Husky pre-commit hooks
 - **Build Optimization**: Turbo for efficient builds and caching
 - **Development Debugging**: Enhanced console logging and real-time monitoring tools
+- **Analytics & Monitoring**: Multi-platform analytics with Sentry error tracking, PostHog product analytics, and Vercel Speed Insights
