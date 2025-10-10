@@ -43,7 +43,7 @@
     "flowbite-react": "^0.12.9",
     "next": "^15.5.4",
     "next-auth": "^4.24.11",
-    "posthog-js": "^1.274.1",
+    "posthog-js": "^1.274.2",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-icons": "^5.5.0",
