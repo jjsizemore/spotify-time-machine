@@ -70,7 +70,7 @@ importers:
         version: 4.1.12
     devDependencies:
       '@commitlint/cli':
-        specifier: ^20.0.0
+        specifier: ^20.1.0
         version: 20.1.0(@types/node@24.7.1)(typescript@5.9.3)
       '@commitlint/config-conventional':
         specifier: ^20.0.0
@@ -7141,7 +7141,7 @@ snapshots:
     dependencies:
       debug: 4.4.3
       module-details-from-path: 1.0.4
-      resolve: 1.22.10
+      resolve: 1.22.8
     transitivePeerDependencies:
       - supports-color
 
