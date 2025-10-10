@@ -9,9 +9,7 @@ import { LayoutContent } from '@/layout/LayoutContent';
 import { DomainMigrationHandler } from '@/providers/DomainMigrationHandler';
 import { NextAuthProvider } from '@/providers/NextAuthProvider';
 import './globals.css';
-import ClientProviders from '@/components/ClientProviders';
-// ConsentAwareAnalytics is loaded dynamically inside ClientProviders to ensure it runs
-// only after the ConsentManagerProvider is available on the client.
+import ClientProviders from '@/components/providers/ClientProviders';
 import {
   ADVANCED_META_TAGS,
   generateEnhancedMetadata,
@@ -94,7 +92,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="bg-spotify-black text-spotify-light-gray font-sans min-h-screen flex flex-col layout-content">
         <ClientProviders>
-          {/* Enhanced Structured Data - These are essential and don't require consent */}
+          {/* Structured Data for SEO */}
           <Script
             id="web-application-schema"
             type="application/ld+json"
@@ -114,7 +112,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <NextAuthProvider>
             <LayoutContent>{children}</LayoutContent>
             <TokenStatus />
-            {/* WebVitalsMonitor - Keep this as it's for performance monitoring, not user tracking */}
             <WebVitalsMonitor />
           </NextAuthProvider>
 

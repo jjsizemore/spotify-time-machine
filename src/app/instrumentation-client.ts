@@ -1,2 +1,2 @@
-// Instrumentation client - PostHog and c15t have been removed
+// Instrumentation client - Analytics handled by AnalyticsProviders component
 // This file is kept for Next.js instrumentation compatibility

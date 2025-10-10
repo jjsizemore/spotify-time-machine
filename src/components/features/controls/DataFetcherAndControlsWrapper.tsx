@@ -108,9 +108,12 @@ export default function DataFetcherAndControlsWrapper({
           {displayConfig.map(({ value, label }) => (
             <button
               key={value}
+              type="button"
               style={getTimeRangeButtonTextStyle(hovered === value, currentSpotifyRange === value)}
               onMouseOver={() => setHovered(value)}
               onMouseOut={() => setHovered(null)}
+              onFocus={() => setHovered(value)}
+              onBlur={() => setHovered(null)}
               onClick={() => handleTimeRangeClick(value)}
               className={`px-3 py-1 rounded-full transition font-medium ${
                 currentSpotifyRange === value

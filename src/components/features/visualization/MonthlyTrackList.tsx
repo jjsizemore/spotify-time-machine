@@ -47,9 +47,18 @@ export default function MonthlyTrackList({
       <div
         className="bg-spotify-medium-gray py-4 px-6 flex justify-between items-center cursor-pointer"
         style={getTextStyle(hovered === month, expanded)}
+        tabIndex={0}
         onMouseOver={() => setHovered(month)}
         onMouseOut={() => setHovered(null)}
+        onFocus={() => setHovered(month)}
+        onBlur={() => setHovered(null)}
         onClick={() => onToggle(month)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle(month);
+          }
+        }}
       >
         <h2
           className="text-xl font-bold text-spotify-white"

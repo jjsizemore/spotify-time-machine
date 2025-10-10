@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 
 export default function WebVitalsMonitor() {
   useEffect(() => {
@@ -12,7 +13,7 @@ export default function WebVitalsMonitor() {
           const sendToAnalytics = (metric: any) => {
             console.log('Core Web Vital:', metric);
 
-            // Send to Google Analytics 4 if available
+            // Send to Google Analytics 4
             if (typeof window !== 'undefined' && (window as any).gtag) {
               (window as any).gtag('event', metric.name, {
                 event_category: 'Web Vitals',
@@ -23,7 +24,7 @@ export default function WebVitalsMonitor() {
               });
             }
 
-            // Send to Vercel Analytics if available
+            // Send to Vercel Analytics
             if (typeof window !== 'undefined' && (window as any).va) {
               (window as any).va('track', 'Web Vital', {
                 name: metric.name,
@@ -33,6 +34,22 @@ export default function WebVitalsMonitor() {
                 rating: metric.rating,
               });
             }
+
+            // Send to PostHog
+            if (typeof window !== 'undefined' && (window as any).posthog) {
+              (window as any).posthog.capture('web_vital', {
+                metric_name: metric.name,
+                value: metric.value,
+                id: metric.id,
+                delta: metric.delta,
+                rating: metric.rating,
+              });
+            }
+
+            // Send to Sentry
+            Sentry.metrics.distribution('web_vitals', metric.value, {
+              unit: 'millisecond',
+            });
 
             // Performance monitoring for development
             if (process.env.NODE_ENV === 'development') {

@@ -75,9 +75,9 @@
       - `features/controls/` - Control components (TimeRangeSelector, FilterSelector, DataFetcherAndControlsWrapper, etc.)
       - `features/home/` - Homepage components (FeatureCard, FeatureShowcaseItem)
       - `features/playlist/` - Playlist-related components (SharePlaylistButton)
-    - `analytics/` - Analytics and monitoring components (ConsentAwareAnalytics, WebVitalsMonitor, StorageMonitor)
+    - `analytics/` - Analytics and monitoring components (WebVitalsMonitor, StorageMonitor)
     - `auth/` - Authentication components (SpotifySignInButton, TokenStatus)
-    - `providers/` - Context providers (NextAuthProvider)
+    - `providers/` - Context providers (AnalyticsProviders, ClientProviders, NextAuthProvider)
   - ✅ **Enhanced TypeScript Path Mapping**: Updated `tsconfig.json` with semantic import aliases for cleaner, more readable code
     - `@/ui/*` → `./src/components/ui/*` (e.g., `import ActionButton from '@/ui/ActionButton'`)
     - `@/layout/*` → `./src/components/layout/*` (e.g., `import Header from '@/layout/Header'`)
@@ -104,42 +104,26 @@
 - **🎯 Developer Experience**: Significantly improved component discoverability, maintenance workflows, and import ergonomics
 - **📚 Modern Standards**: Aligns with 2025 React and Next.js community conventions for large-scale applications
 
-### ✅ EEA-Aware Analytics Implementation (Latest)
+### ✅ Analytics Implementation
 
-- **🌍 Geographic-Based Consent Management**: Implemented sophisticated user location detection to only require consent for EEA users while loading analytics by default for non-EEA users
-  - ✅ **Smart Location Detection**: Multi-layered approach using timezone analysis and IP-based geolocation
-    - Primary detection via `Intl.DateTimeFormat().resolvedOptions().timeZone` for performance
-    - Fallback to IP geolocation API (ipapi.co) with 3-second timeout
-    - Graceful degradation assumes non-EEA user if detection fails (privacy-friendly default)
-  - ✅ **Comprehensive EEA Coverage**: Includes all 30 EEA countries (EU 27 + Iceland, Liechtenstein, Norway)
-  - ✅ **GDPR-Compliant Logic**:
-    - **Non-EEA Users**: Analytics load by default without requiring consent
-    - **Loading State**: Analytics blocked until location detection completes
-  - ✅ **Dual Implementation**: Both `ConsentAwareAnalytics.tsx` and `instrumentation-client.ts` updated for consistent behavior
-    - Google Analytics 4 and Vercel Analytics respect EEA consent requirements
-    - PostHog initialization follows same EEA-aware pattern
-    - Proper async handling for location detection in both React and vanilla JS contexts
+- **📊 Multi-Platform Analytics**: Integrated comprehensive analytics and monitoring
+  - ✅ **Google Analytics 4**: Core Web Vitals tracking and page analytics
+  - ✅ **Vercel Analytics**: Performance monitoring and user analytics
+  - ✅ **Vercel Speed Insights**: Real-time performance metrics
+  - ✅ **PostHog**: Product analytics and session replay
+  - ✅ **Sentry**: Error tracking and performance monitoring
+  - ✅ **Unified Web Vitals**: All platforms receive Core Web Vitals data (CLS, INP, LCP, FCP, TTFB)
   - 🔧 **Technical Features**:
-    - `useUserLocation()` custom hook with React state management
-    - Async `isEEAUser()` function for non-React contexts
-    - 3-second timeout on geolocation API calls
-    - Comprehensive error handling with debug logging
-    - Memory of detection results to avoid repeated API calls
+    - Client-side initialization via `AnalyticsProviders` component
+    - Sentry integration across client, server, and edge runtimes
+    - Automatic Vercel Cron Monitors with Sentry
+    - Development logging for debugging analytics events
   - 🛠️ **Development Indicators** (Development Mode Only):
-    - **Visual Indicators**: Fixed-position badges showing active analytics services
-      - Green "📊 Analytics ON" badge for Google Analytics/Vercel Analytics
-      - Orange "🔍 PostHog ON" badge for PostHog (auto-disappears after 10s)
     - **Console Logging**: Comprehensive debug logging with emoji prefixes
-      - `🌍` Location detection (timezone/IP geolocation)
-      - `🍪` Consent state checking and changes
       - `📊` Analytics initialization and events
       - `🔍` PostHog initialization and configuration
-    - **Event Tracking**: Logs analytics events as they occur (Vercel Analytics)
-    - **Script Loading**: Tracks Google Analytics script loading and initialization
-- **✅ Build Verification**: All changes tested and confirmed working with successful production build
-- **🎯 Legal Compliance**: Properly balances GDPR compliance for EEA users with user experience for global users
-- **🔧 Developer Experience**: Clear logging distinguishes between EEA and non-EEA user initialization with visual feedback
-- **⚖️ Privacy-First Design**: Defaults to non-EEA (analytics enabled) when detection fails, avoiding over-blocking
+    - **Event Tracking**: Logs analytics events as they occur
+    - **Script Loading**: Tracks script loading and initialization
 
 ### ✅ Modern Compression Implementation with Native Browser APIs
 
