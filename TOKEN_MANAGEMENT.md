@@ -53,7 +53,7 @@ class SpotifyApiClient {
           }
         },
         resolve,
-        reject
+        reject,
       });
       this.processQueue();
     });
@@ -191,7 +191,7 @@ export function useSpotify() {
     error,
     retry,
     session,
-    getQueueStatus: () => client?.getQueueStatus?.() // Development debugging
+    getQueueStatus: () => client?.getQueueStatus?.(), // Development debugging
   };
 }
 ```
@@ -299,7 +299,8 @@ export function analyzeTokenStatus(expiresAt?: number) {
     return { status: 'expired', message: 'Token expired' };
   }
 
-  if (timeLeft <= 300) { // 5 minutes
+  if (timeLeft <= 300) {
+    // 5 minutes
     return { status: 'expiring', message: `Expires in ${Math.floor(timeLeft / 60)}m` };
   }
 
@@ -312,7 +313,7 @@ export function shouldRefreshToken(expiresAt?: number, bufferMinutes = 5): boole
   const now = Math.floor(Date.now() / 1000);
   const bufferTime = bufferMinutes * 60;
 
-  return now >= (expiresAt - bufferTime);
+  return now >= expiresAt - bufferTime;
 }
 
 export function formatTokenExpiry(expiresAt?: number): string {
@@ -346,14 +347,17 @@ export async function POST(request: Request) {
       success: true,
       accessToken: refreshedToken.access_token,
       expiresIn: refreshedToken.expires_in,
-      refreshToken: refreshedToken.refresh_token
+      refreshToken: refreshedToken.refresh_token,
     });
   } catch (error) {
     console.error('Manual token refresh failed:', error);
-    return NextResponse.json({
-      error: 'Token refresh failed',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Token refresh failed',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }
 ```
@@ -427,18 +431,18 @@ cli:
 
 lint:
   disabled:
-    - eslint    # Disabled in favor of Biome
-    - prettier  # Disabled in favor of Biome
+    - eslint # Disabled in favor of Biome
+    - prettier # Disabled in favor of Biome
   enabled:
-    - biome@1.9.4          # Primary code formatter and linter (v2.0 beta available)
-    - checkov@3.2.435      # Infrastructure security scanning
-    - osv-scanner@2.0.2    # Vulnerability scanning
-    - oxipng@9.1.5         # Image optimization
-    - svgo@3.3.2           # SVG optimization
-    - yamllint@1.37.1      # YAML linting
-    - git-diff-check       # Git hygiene
-    - markdownlint@0.45.0  # Documentation quality
-    - trufflehog@3.88.34   # Secret detection
+    - biome@1.9.4 # Primary code formatter and linter (v2.0 beta available)
+    - checkov@3.2.435 # Infrastructure security scanning
+    - osv-scanner@2.0.2 # Vulnerability scanning
+    - oxipng@9.1.5 # Image optimization
+    - svgo@3.3.2 # SVG optimization
+    - yamllint@1.37.1 # YAML linting
+    - git-diff-check # Git hygiene
+    - markdownlint@0.45.0 # Documentation quality
+    - trufflehog@3.88.34 # Secret detection
 ```
 
 ### **NextAuth Configuration**
@@ -489,15 +493,15 @@ export const authOptions: NextAuthOptions = {
 
 ```typescript
 // tailwind.config.ts
-import type { Config } from "tailwindcss";
-import flowbite from "flowbite/plugin";
+import type { Config } from 'tailwindcss';
+import flowbite from 'flowbite/plugin';
 
 const config: Config = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./node_modules/flowbite-react/lib/**/*.js",
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './node_modules/flowbite-react/lib/**/*.js',
   ],
   theme: {
     extend: {
@@ -515,7 +519,7 @@ export default config;
 ```css
 /* src/app/input.css */
 :root {
-  --spotify-green: #1db954;    /* Lowercase hex for consistency */
+  --spotify-green: #1db954; /* Lowercase hex for consistency */
   --spotify-black: #191414;
   --spotify-white: #ffffff;
   --spotify-gray: #535353;
@@ -657,6 +661,7 @@ class SpotifyApi {
 ### **⚡ Advanced Features Implemented**
 
 1. **Priority Queue System**:
+
    ```typescript
    interface QueuedRequest {
      url: string;
@@ -756,13 +761,13 @@ From `package.json` analysis:
 ```json
 {
   "dependencies": {
-    "@tanstack/react-query": "5.80.5",   // Data fetching library
-    "zod": "3.25.51"                      // Schema validation
+    "@tanstack/react-query": "5.80.5", // Data fetching library
+    "zod": "3.25.51" // Schema validation
   },
   "devDependencies": {
-    "@types/node": "^22.15.29",          // Latest Node types
-    "@types/react": "19.1.6",            // React 19 types
-    "@types/react-dom": "19.1.6",        // React DOM types
+    "@types/node": "^22.15.29", // Latest Node types
+    "@types/react": "19.1.6", // React 19 types
+    "@types/react-dom": "19.1.6" // React DOM types
   }
 }
 ```
@@ -770,21 +775,23 @@ From `package.json` analysis:
 ### **🔧 Configuration Verification**
 
 **Trunk Config** (`.trunk/trunk.yaml`):
+
 ```yaml
 lint:
   disabled:
-    - eslint    # Disabled in favor of Biome
-    - prettier  # Disabled in favor of Biome
+    - eslint # Disabled in favor of Biome
+    - prettier # Disabled in favor of Biome
   enabled:
-    - biome@1.9.4          # Primary code formatter and linter (v2.0 beta available)
-    - checkov@3.2.435      # Infrastructure security scanning
-    - osv-scanner@2.0.2    # Vulnerability scanning
-    - trufflehog@3.88.34   # Secret detection
+    - biome@1.9.4 # Primary code formatter and linter (v2.0 beta available)
+    - checkov@3.2.435 # Infrastructure security scanning
+    - osv-scanner@2.0.2 # Vulnerability scanning
+    - trufflehog@3.88.34 # Secret detection
 ```
 
 ### **🎯 Error Handling Patterns**
 
 **Consistent Error Import Pattern** (Added to all Spotify files):
+
 ```typescript
 import { SpotifyApiError } from 'spotify-web-api-node';
 

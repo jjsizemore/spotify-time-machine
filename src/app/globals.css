@@ -1,8 +1,8 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @plugin "flowbite-react/plugin/tailwindcss";
 @source "../../.flowbite-react/class-list.json";
 
-@import "flowbite/src/themes/default";
+@import 'flowbite/src/themes/default';
 @plugin "flowbite/plugin";
 @source "../node_modules/flowbite";
 @source "../node_modules/flowbite-react";
@@ -10,173 +10,172 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-	/* Spotify color palette */
-	--color-spotify-green: #1db954;
-	--color-spotify-black: #191414;
-	--color-spotify-dark-gray: #121212;
-	--color-spotify-medium-gray: #535353;
-	--color-spotify-light-gray: #b3b3b3;
+  /* Spotify color palette */
+  --color-spotify-green: #1db954;
+  --color-spotify-black: #191414;
+  --color-spotify-dark-gray: #121212;
+  --color-spotify-medium-gray: #535353;
+  --color-spotify-light-gray: #b3b3b3;
 
-	/* Theme system colors */
-	--color-primary-50: #eff6ff;
-	--color-primary-100: #dbeafe;
-	--color-primary-200: #bfdbfe;
-	--color-primary-300: #93c5fd;
-	--color-primary-400: #60a5fa;
-	--color-primary-500: #3b82f6;
-	--color-primary-600: #2563eb;
-	--color-primary-700: #1d4ed8;
-	--color-primary-800: #1e40af;
-	--color-primary-900: #1e3a8a;
+  /* Theme system colors */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
 
-	/* Font families */
-	--font-sans: "system-ui", "Segoe UI", "Roboto", "Helvetica Neue", "Arial",
-		"sans-serif";
-	--font-body: "system-ui", "Segoe UI", "Roboto", "Helvetica Neue", "Arial",
-		"sans-serif";
-	--font-mono: "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas",
-		"Liberation Mono", "Courier New", "monospace";
+  /* Font families */
+  --font-sans: 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif';
+  --font-body: 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif';
+  --font-mono:
+    'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono',
+    'Courier New', 'monospace';
 }
 
 /* Base theme variables */
 :root {
-	/* Spotify's default dark theme colors */
-	--bg-primary: #121212;
-	--bg-secondary: #181818;
-	--bg-tertiary: #282828;
-	--bg-tertiary-hover: rgba(40, 40, 40, 0.8);
-	--text-primary: #ffffff;
-	--text-secondary: #b3b3b3;
-	--accent-color: #1db954;
-	--accent-hover: #1ed760;
-	--accent-disabled: #1aa34a;
-	--text-on-accent: #191414;
-	--error-color: #e91429;
-	--border-color: #333333;
-	--scrollbar-thumb-color: #535353;
+  /* Spotify's default dark theme colors */
+  --bg-primary: #121212;
+  --bg-secondary: #181818;
+  --bg-tertiary: #282828;
+  --bg-tertiary-hover: rgba(40, 40, 40, 0.8);
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --accent-color: #1db954;
+  --accent-hover: #1ed760;
+  --accent-disabled: #1aa34a;
+  --text-on-accent: #191414;
+  --error-color: #e91429;
+  --border-color: #333333;
+  --scrollbar-thumb-color: #535353;
 }
 
 /* Light theme overrides */
 html.theme-light {
-	--bg-primary: #f8f8f8;
-	--bg-secondary: #ffffff;
-	--bg-tertiary: #e8e8e8;
-	--text-primary: #121212;
-	--text-secondary: #535353;
-	--border-color: #dddddd;
+  --bg-primary: #f8f8f8;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e8e8e8;
+  --text-primary: #121212;
+  --text-secondary: #535353;
+  --border-color: #dddddd;
 }
 
 /* Custom utility classes */
 .bg-spotify-black {
-	background-color: var(--bg-primary);
+  background-color: var(--bg-primary);
 }
 
 .bg-spotify-dark-gray {
-	background-color: var(--bg-secondary);
+  background-color: var(--bg-secondary);
 }
 
 .bg-spotify-medium-gray {
-	background-color: var(--bg-tertiary);
+  background-color: var(--bg-tertiary);
 }
 
 .text-spotify-black {
-	color: var(--text-on-accent);
+  color: var(--text-on-accent);
 }
 
 .text-spotify-white {
-	color: var(--text-primary);
+  color: var(--text-primary);
 }
 
 .text-spotify-light-gray {
-	color: var(--text-secondary);
+  color: var(--text-secondary);
 }
 
 .bg-spotify-green {
-	background-color: var(--accent-color);
+  background-color: var(--accent-color);
 }
 
 .text-spotify-green {
-	color: var(--accent-color);
+  color: var(--accent-color);
 }
 
 .border-spotify-medium-gray {
-	border-color: var(--border-color);
+  border-color: var(--border-color);
 }
 
 .hover\:bg-spotify-green\/90:hover {
-	background-color: var(--accent-hover);
+  background-color: var(--accent-hover);
 }
 
 .bg-spotify-red {
-	background-color: var(--error-color);
+  background-color: var(--error-color);
 }
 
 .hover\:bg-spotify-medium-gray-hover:hover {
-	background-color: var(--bg-tertiary-hover);
+  background-color: var(--bg-tertiary-hover);
 }
 
 /* Additional utility classes can be added here if needed */
 
 @theme inline {
-	--color-background: var(--background);
-	--color-foreground: var(--foreground);
-	--font-sans: var(--font-geist-sans);
-	--font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
-	font-family: Arial, Helvetica, sans-serif;
-	@reference bg-spotify-black text-spotify-light-gray font-sans min-h-screen;
+  font-family: Arial, Helvetica, sans-serif;
+  @reference bg-spotify-black text-spotify-light-gray font-sans min-h-screen;
 }
 
 ::selection {
-	background: var(--accent-color);
-	color: var(--text-on-accent);
+  background: var(--accent-color);
+  color: var(--text-on-accent);
 }
 
 ::-webkit-scrollbar {
-	width: 8px;
-	background: var(--bg-primary);
+  width: 8px;
+  background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-	background: var(--scrollbar-thumb-color);
-	border-radius: 4px;
+  background: var(--scrollbar-thumb-color);
+  border-radius: 4px;
 }
 
 /* Update the slideDown animation */
 @keyframes slideDown {
-	from {
-		opacity: 0;
-		transform: translateY(-10px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-slideDown {
-	animation: slideDown 0.2s ease-out forwards;
+  animation: slideDown 0.2s ease-out forwards;
 }
 
 @layer components {
-	.spotify-button {
-		background-color: var(--accent-color);
-		color: var(--text-on-accent);
-		@reference font-bold px-6 py-3 rounded-full shadow-lg hover:bg-green-500/90 transition text-lg flex items-center gap-2;
-	}
+  .spotify-button {
+    background-color: var(--accent-color);
+    color: var(--text-on-accent);
+    @reference font-bold px-6 py-3 rounded-full shadow-lg hover:bg-green-500/90 transition text-lg flex items-center gap-2;
+  }
 
-	.spotify-button:hover {
-		background-color: var(--accent-hover);
-	}
+  .spotify-button:hover {
+    background-color: var(--accent-hover);
+  }
 
-	.card {
-		background-color: var(--bg-secondary);
-		@reference p-6 rounded-lg hover:bg-gray-800/80 transition;
-	}
-	.card:hover {
-		background-color: rgba(var(--bg-secondary-rgb), 0.8);
-	}
+  .card {
+    background-color: var(--bg-secondary);
+    @reference p-6 rounded-lg hover:bg-gray-800/80 transition;
+  }
+  .card:hover {
+    background-color: rgba(var(--bg-secondary-rgb), 0.8);
+  }
 }
 
 /* Helper for card hover if bg-secondary is hex. This assumes --bg-secondary is #181818 */
@@ -184,82 +183,82 @@ body {
 
 /* Critical CSS for Core Web Vitals optimization */
 .layout-content {
-	min-height: 100vh;
-	display: flex;
-	flex-direction: column;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Reduce CLS with skeleton styles */
 .loading-skeleton {
-	background: linear-gradient(90deg, #191414 25%, #282828 50%, #191414 75%);
-	background-size: 200% 100%;
-	animation: loading 1.5s infinite;
+  background: linear-gradient(90deg, #191414 25%, #282828 50%, #191414 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
 }
 
 @keyframes loading {
-	0% {
-		background-position: 200% 0;
-	}
-	100% {
-		background-position: -200% 0;
-	}
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Mobile-first responsive design */
 @media (max-width: 768px) {
-	.layout-content {
-		padding: 0.5rem;
-	}
+  .layout-content {
+    padding: 0.5rem;
+  }
 }
 
 /* PWA Install Prompt Animation */
 @keyframes slide-up {
-	from {
-		transform: translateY(100%);
-		opacity: 0;
-	}
-	to {
-		transform: translateY(0);
-		opacity: 1;
-	}
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .animate-slide-up {
-	animation: slide-up 0.3s ease-out;
+  animation: slide-up 0.3s ease-out;
 }
 
 /* iOS-specific PWA optimizations */
 @supports (-webkit-touch-callout: none) {
-	/* iOS Safari specific styles */
-	.layout-content {
-		padding-bottom: env(safe-area-inset-bottom);
-		padding-top: env(safe-area-inset-top);
-	}
+  /* iOS Safari specific styles */
+  .layout-content {
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
+  }
 
-	/* Fix iOS viewport issues */
-	html {
-		height: -webkit-fill-available;
-	}
+  /* Fix iOS viewport issues */
+  html {
+    height: -webkit-fill-available;
+  }
 
-	body {
-		min-height: -webkit-fill-available;
-	}
+  body {
+    min-height: -webkit-fill-available;
+  }
 
-	/* Improve iOS scrolling */
-	* {
-		-webkit-overflow-scrolling: touch;
-	}
+  /* Improve iOS scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
 
-	/* Hide iOS Safari UI when in standalone mode */
-	@media (display-mode: standalone) {
-		/* Status bar styling for iOS PWA */
-		meta[name="apple-mobile-web-app-status-bar-style"] {
-			content: "black-translucent";
-		}
+  /* Hide iOS Safari UI when in standalone mode */
+  @media (display-mode: standalone) {
+    /* Status bar styling for iOS PWA */
+    meta[name='apple-mobile-web-app-status-bar-style'] {
+      content: 'black-translucent';
+    }
 
-		/* Prevent iOS safari bounce effect */
-		body {
-			overscroll-behavior: none;
-		}
-	}
+    /* Prevent iOS safari bounce effect */
+    body {
+      overscroll-behavior: none;
+    }
+  }
 }

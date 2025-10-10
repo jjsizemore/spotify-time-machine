@@ -1,75 +1,73 @@
 'use client';
 
-import { analyzeTokenStatus, formatTokenExpiry } from '@/lib/tokenUtils';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
+import { analyzeTokenStatus, formatTokenExpiry } from '@/lib/tokenUtils';
 
 interface TokenStatusProps {
-	className?: string;
+  className?: string;
 }
 
 export default function TokenStatus({ className = '' }: TokenStatusProps) {
-	const { data: session } = useSession();
-	const [mounted, setMounted] = useState(false);
+  const { data: session } = useSession();
+  const [mounted, setMounted] = useState(false);
 
-	useEffect(() => {
-		setMounted(true);
-	}, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-	// Only show in development mode and after mounting
-	if (!mounted || process.env.NODE_ENV !== 'development') {
-		return null;
-	}
+  // Only show in development mode and after mounting
+  if (!mounted || process.env.NODE_ENV !== 'development') {
+    return null;
+  }
 
-	if (!session) {
-		return (
-			<div
-				className={`fixed bottom-4 right-4 bg-gray-800 text-white p-3 rounded-lg text-xs font-mono border border-gray-600 z-50 ${className}`}
-			>
-				<div className="text-red-400">🔴 No Session</div>
-			</div>
-		);
-	}
+  if (!session) {
+    return (
+      <div
+        className={`fixed bottom-4 right-4 bg-gray-800 text-white p-3 rounded-lg text-xs font-mono border border-gray-600 z-50 ${className}`}
+      >
+        <div className="text-red-400">🔴 No Session</div>
+      </div>
+    );
+  }
 
-	const tokenInfo = analyzeTokenStatus(session.expiresAt);
-	const hasError = !!session.error;
+  const tokenInfo = analyzeTokenStatus(session.expiresAt);
+  const hasError = !!session.error;
 
-	const statusColor = hasError
-		? 'text-red-400'
-		: tokenInfo.isValid
-			? tokenInfo.isExpiringSoon
-				? 'text-yellow-400'
-				: 'text-green-400'
-			: 'text-red-400';
+  const statusColor = hasError
+    ? 'text-red-400'
+    : tokenInfo.isValid
+      ? tokenInfo.isExpiringSoon
+        ? 'text-yellow-400'
+        : 'text-green-400'
+      : 'text-red-400';
 
-	const statusIcon = hasError
-		? '🔴'
-		: tokenInfo.isValid
-			? tokenInfo.isExpiringSoon
-				? '🟡'
-				: '🟢'
-			: '🔴';
+  const statusIcon = hasError
+    ? '🔴'
+    : tokenInfo.isValid
+      ? tokenInfo.isExpiringSoon
+        ? '🟡'
+        : '🟢'
+      : '🔴';
 
-	return (
-		<div
-			className={`fixed bottom-4 right-4 bg-gray-800 text-white p-3 rounded-lg text-xs font-mono border border-gray-600 z-50 max-w-xs ${className}`}
-		>
-			<div className="mb-2 font-bold">Token Status (Dev)</div>
+  return (
+    <div
+      className={`fixed bottom-4 right-4 bg-gray-800 text-white p-3 rounded-lg text-xs font-mono border border-gray-600 z-50 max-w-xs ${className}`}
+    >
+      <div className="mb-2 font-bold">Token Status (Dev)</div>
 
-			<div className={`mb-1 ${statusColor}`}>
-				{statusIcon} {tokenInfo.status.replace('_', ' ').toUpperCase()}
-			</div>
+      <div className={`mb-1 ${statusColor}`}>
+        {statusIcon} {tokenInfo.status.replace('_', ' ').toUpperCase()}
+      </div>
 
-			{session.error && (
-				<div className="text-red-400 mb-1">❌ Error: {session.error}</div>
-			)}
+      {session.error && <div className="text-red-400 mb-1">❌ Error: {session.error}</div>}
 
-			<div className="text-gray-300 space-y-1">
-				<div>🕐 {formatTokenExpiry(session.expiresAt)}</div>
-				<div>🔑 Token: {session.accessToken ? 'Present' : 'Missing'}</div>
-				{/* Refresh token is stored server-side only and is not exposed to the client */}
-				<div>🔄 Refresh: Stored server-side</div>
-			</div>
-		</div>
-	);
+      <div className="text-gray-300 space-y-1">
+        <div>🕐 {formatTokenExpiry(session.expiresAt)}</div>
+        <div>🔑 Token: {session.accessToken ? 'Present' : 'Missing'}</div>
+        {/* Refresh token is stored server-side only and is not exposed to the client */}
+        <div>🔄 Refresh: Stored server-side</div>
+      </div>
+    </div>
+  );
 }

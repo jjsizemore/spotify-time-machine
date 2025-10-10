@@ -1,60 +1,56 @@
 'use client';
 
-import ActionButton from '@/ui/ActionButton';
 import { useEffect } from 'react';
+import ActionButton from '@/ui/ActionButton';
 
 export default function ErrorBoundary({
-	error,
-	reset,
+  error,
+  reset,
 }: {
-	error: Error & { digest?: string };
-	reset: () => void;
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
-	useEffect(() => {
-		// Log the error to an error reporting service
-		console.error('Application error:', error);
-	}, [error]);
+  useEffect(() => {
+    // Log the error to an error reporting service
+    console.error('Application error:', error);
+  }, [error]);
 
-	return (
-		<div className="min-h-screen bg-spotify-black flex items-center justify-center px-4">
-			<div className="text-center max-w-md">
-				<div className="mb-8">
-					<div className="text-6xl mb-4">🎵</div>
-					<h1 className="text-2xl font-bold text-spotify-white mb-4">
-						Oops! Something went wrong
-					</h1>
-					<p className="text-spotify-light-gray mb-6">
-						We encountered an unexpected error. This might be due to Spotify API
-						limitations or a temporary issue.
-					</p>
-				</div>
+  return (
+    <div className="min-h-screen bg-spotify-black flex items-center justify-center px-4">
+      <div className="text-center max-w-md">
+        <div className="mb-8">
+          <div className="text-6xl mb-4">🎵</div>
+          <h1 className="text-2xl font-bold text-spotify-white mb-4">Oops! Something went wrong</h1>
+          <p className="text-spotify-light-gray mb-6">
+            We encountered an unexpected error. This might be due to Spotify API limitations or a
+            temporary issue.
+          </p>
+        </div>
 
-				<div className="space-y-4">
-					<ActionButton onClick={reset} variant="primary">
-						Try Again
-					</ActionButton>
+        <div className="space-y-4">
+          <ActionButton onClick={reset} variant="primary">
+            Try Again
+          </ActionButton>
 
-					<ActionButton
-						onClick={() => {
-							window.location.href = '/';
-						}}
-						variant="secondary"
-					>
-						Go Home
-					</ActionButton>
-				</div>
+          <ActionButton
+            onClick={() => {
+              window.location.href = '/';
+            }}
+            variant="secondary"
+          >
+            Go Home
+          </ActionButton>
+        </div>
 
-				{process.env.NODE_ENV === 'development' && (
-					<details className="mt-6 text-left bg-spotify-dark-gray p-4 rounded-lg">
-						<summary className="text-spotify-white cursor-pointer">
-							Error Details (Development Only)
-						</summary>
-						<pre className="text-xs text-red-400 mt-2 overflow-auto">
-							{error.message}
-						</pre>
-					</details>
-				)}
-			</div>
-		</div>
-	);
+        {process.env.NODE_ENV === 'development' && (
+          <details className="mt-6 text-left bg-spotify-dark-gray p-4 rounded-lg">
+            <summary className="text-spotify-white cursor-pointer">
+              Error Details (Development Only)
+            </summary>
+            <pre className="text-xs text-red-400 mt-2 overflow-auto">{error.message}</pre>
+          </details>
+        )}
+      </div>
+    </div>
+  );
 }
