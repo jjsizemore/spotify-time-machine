@@ -64,12 +64,15 @@ self.addEventListener('activate', (event) => {
           clients.forEach((client) => {
             const clientUrl = new URL(client.url);
             if (clientUrl.hostname === OLD_DOMAIN) {
-              client.postMessage({
-                type: 'DOMAIN_MIGRATION',
-                oldDomain: OLD_DOMAIN,
-                newDomain: NEW_DOMAIN,
-                message: `This app has moved to ${NEW_DOMAIN}. Please reinstall from the new domain.`,
-              });
+              client.postMessage(
+                {
+                  type: 'DOMAIN_MIGRATION',
+                  oldDomain: OLD_DOMAIN,
+                  newDomain: NEW_DOMAIN,
+                  message: `This app has moved to ${NEW_DOMAIN}. Please reinstall from the new domain.`,
+                },
+                client.location.origin
+              );
             }
           });
         });

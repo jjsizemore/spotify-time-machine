@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Artist } from '@/hooks/useUserStats';
 import ErrorDisplay from '@/ui/ErrorDisplay';
 import LoadingSpinner from '@/ui/LoadingSpinner';
@@ -34,7 +35,7 @@ export default function TopArtists({ artists, isLoading, error, onRetry }: TopAr
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {artists.map((artist) => (
-        <a
+        <Link
           key={artist.id}
           href={artist.external_urls.spotify}
           target="_blank"
@@ -51,7 +52,7 @@ export default function TopArtists({ artists, isLoading, error, onRetry }: TopAr
           </div>
           <h3 className="font-medium text-white truncate">{artist.name}</h3>
           <p className="text-xs text-spotify-light-gray">{artist.genres.slice(0, 2).join(', ')}</p>
-        </a>
+        </Link>
       ))}
     </div>
   );

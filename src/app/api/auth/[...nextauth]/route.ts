@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import SpotifyProvider from 'next-auth/providers/spotify';
+import * as Sentry from '@sentry/nextjs';
 import { refreshAccessToken, scopes } from '@/lib/spotify';
 
 const handler = NextAuth({
@@ -38,7 +39,15 @@ const handler = NextAuth({
       // Token will expire soon or has expired, refresh it
       console.log('⏰ Token expires soon or has expired, refreshing...');
       try {
-        const refreshedToken = await refreshAccessToken(token.refreshToken as string);
+        const refreshedToken = await Sentry.startSpan(
+          {
+            name: 'refreshAccessToken',
+            op: 'function',
+          },
+          async (_span) => {
+            return await refreshAccessToken(token.refreshToken as string);
+          }
+        );
 
         console.log('✅ Token refresh successful');
 

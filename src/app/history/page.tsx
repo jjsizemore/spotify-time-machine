@@ -27,6 +27,19 @@ import {
 import ErrorDisplay from '@/ui/ErrorDisplay';
 import Toast from '@/ui/Toast';
 
+// Render a track item
+const renderTrackItem = (track: SavedTrack) => {
+  return (
+    <TrackItem
+      key={track.track.id}
+      track={track.track}
+      addedAt={track.added_at}
+      showAddedDate={true}
+      onClick={() => window.open(`https://open.spotify.com/track/${track.track.id}`, '_blank')}
+    />
+  );
+};
+
 export default function HistoryPage() {
   const { status } = useSession();
   const { spotifyApi, isReady } = useSpotify();
@@ -91,19 +104,6 @@ export default function HistoryPage() {
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     }
-  };
-
-  // Render a track item
-  const renderTrackItem = (track: SavedTrack) => {
-    return (
-      <TrackItem
-        key={track.track.id}
-        track={track.track}
-        addedAt={track.added_at}
-        showAddedDate={true}
-        onClick={() => window.open(`https://open.spotify.com/track/${track.track.id}`, '_blank')}
-      />
-    );
   };
 
   // Combined loading state for the wrapper

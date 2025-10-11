@@ -1,5 +1,6 @@
 import Script from 'next/script';
 import React from 'react';
+import Link from 'next/link';
 import { generateBreadcrumbSchema } from '@/lib/seo';
 
 export interface BreadcrumbItem {
@@ -42,9 +43,9 @@ export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
                     {item.name}
                   </span>
                 ) : (
-                  <a href={item.url} className="hover:text-spotify-green transition-colors">
+                  <Link href={item.url} className="hover:text-spotify-green transition-colors">
                     {item.name}
-                  </a>
+                  </Link>
                 )}
               </li>
               {index < breadcrumbItems.length - 1 && (

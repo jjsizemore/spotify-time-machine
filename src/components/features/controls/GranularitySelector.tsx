@@ -36,7 +36,9 @@ export default function GranularitySelector({
             selectedValue === option.value
           )}
           onMouseOver={() => onHover(option.value)}
+          onFocus={() => onHover(option.value)}
           onMouseOut={() => onHover(null)}
+          onBlur={() => onHover(null)}
           className={`px-2 py-0.5 rounded-full text-xs ${
             selectedValue === option.value
               ? 'bg-spotify-green'

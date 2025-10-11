@@ -185,7 +185,7 @@ const checkAndCleanupCache = (range: TimeRange) => {
   if (cache && cache.tracks.length > MAX_CACHE_SIZE) {
     // Keep only the most recent tracks
     const trimmedTracks = cache.tracks
-      .sort((a, b) => new Date(b.added_at).getTime() - new Date(a.added_at).getTime())
+      .toSorted((a, b) => new Date(b.added_at).getTime() - new Date(a.added_at).getTime())
       .slice(0, MAX_CACHE_SIZE);
 
     // Remove unused albums and artists

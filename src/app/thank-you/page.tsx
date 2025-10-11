@@ -3,27 +3,27 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+
+const clearAllAuth = async () => {
+  try {
+    sessionStorage.removeItem('sign_in_process_started'); // Clear sign-in attempt flag
+    // Clear any localStorage/sessionStorage auth data
+    localStorage.removeItem('spotify-auth-state');
+    sessionStorage.removeItem('spotify-auth-state');
+
+    // Clear auth cookies via our API
+    await fetch('/api/auth/clear-session');
+  } catch (error) {
+    console.error('Error clearing auth state:', error);
+  }
+};
 
 export default function ThankYouPage() {
   const router = useRouter();
 
   // Ensure all auth tokens are cleared on page load
   useEffect(() => {
-    const clearAllAuth = async () => {
-      try {
-        sessionStorage.removeItem('sign_in_process_started'); // Clear sign-in attempt flag
-        // Clear any localStorage/sessionStorage auth data
-        localStorage.removeItem('spotify-auth-state');
-        sessionStorage.removeItem('spotify-auth-state');
-
-        // Clear auth cookies via our API
-        await fetch('/api/auth/clear-session');
-      } catch (error) {
-        console.error('Error clearing auth state:', error);
-      }
-    };
-
     clearAllAuth();
   }, []);
 

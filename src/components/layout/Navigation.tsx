@@ -94,6 +94,8 @@ export default function Navigation({ user }: NavigationProps) {
                 style={getTextStyle(hovered === label, pathname === href)}
                 onMouseOver={() => setHovered(label)}
                 onMouseOut={() => setHovered(null)}
+                onFocus={() => setHovered(label)}
+                onBlur={() => setHovered(null)}
               >
                 {label}
               </Link>
@@ -136,6 +138,8 @@ export default function Navigation({ user }: NavigationProps) {
                     style={getTextStyle(hovered === 'UserDropdown')}
                     onMouseOver={() => setHovered('UserDropdown')}
                     onMouseOut={() => setHovered(null)}
+                    onFocus={() => setHovered('UserDropdown')}
+                    onBlur={() => setHovered(null)}
                   >
                     {user?.name}
                   </span>

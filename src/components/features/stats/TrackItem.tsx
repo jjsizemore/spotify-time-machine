@@ -45,9 +45,10 @@ export default function TrackItem({
   const artistNames = track.artists.map((a) => a.name).join(', ');
 
   return (
-    <div
+    <button
       className={`flex items-center p-2 rounded-md hover:bg-spotify-medium-gray/20 transition cursor-pointer ${className}`}
       onClick={onClick}
+      type="button"
     >
       <div className="w-12 h-12 shrink-0 relative mr-3 rounded overflow-hidden">
         <Image
@@ -69,6 +70,6 @@ export default function TrackItem({
       {rightContent && (
         <div className="text-xs text-spotify-light-gray shrink-0 ml-2">{rightContent}</div>
       )}
-    </div>
+    </button>
   );
 }

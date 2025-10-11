@@ -10,6 +10,23 @@ interface RecentlyPlayedProps {
   onRetry?: () => void;
 }
 
+const formatPlayTime = (timestamp: string) => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 60) {
+    return `${diffMins} ${diffMins === 1 ? 'minute' : 'minutes'} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
+  } else {
+    return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+  }
+};
+
 export default function RecentlyPlayed({ tracks, isLoading, error, onRetry }: RecentlyPlayedProps) {
   if (isLoading) {
     return (
@@ -32,22 +49,6 @@ export default function RecentlyPlayed({ tracks, isLoading, error, onRetry }: Re
   }
 
   // Format timestamp to a human-readable format
-  const formatPlayTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffMins < 60) {
-      return `${diffMins} ${diffMins === 1 ? 'minute' : 'minutes'} ago`;
-    } else if (diffHours < 24) {
-      return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
-    } else {
-      return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
-    }
-  };
 
   return (
     <div className="space-y-3">

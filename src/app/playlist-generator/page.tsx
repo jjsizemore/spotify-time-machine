@@ -19,16 +19,16 @@ import ActionButton from '@/ui/ActionButton';
 import FormField from '@/ui/FormField';
 import Toast from '@/ui/Toast';
 
+// Get current date in YYYY-MM-DD format for defaults and validation
+const getCurrentDate = () => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+};
+
 export default function PlaylistGeneratorPage() {
   const { status } = useSession();
   const { spotifyApi, isReady } = useSpotify();
   const { tracks, isLoading: isLoadingTracks, error: tracksError } = useLikedTracks();
-
-  // Get current date in YYYY-MM-DD format for defaults and validation
-  const getCurrentDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
 
   const [startDate, setStartDate] = useState(getCurrentDate());
   const [endDate, setEndDate] = useState(getCurrentDate());

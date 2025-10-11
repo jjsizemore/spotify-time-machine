@@ -81,7 +81,7 @@ export function groupTracksByMonth(tracks: SavedTrack[]): MonthlyTracks[] {
       tracks,
       expanded: false,
     }))
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       // Parse the month strings using date-fns
       const dateA = parse(a.month, 'MMMM yyyy', new Date());
       const dateB = parse(b.month, 'MMMM yyyy', new Date());

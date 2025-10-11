@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { FiGithub, FiHome, FiLinkedin, FiMail } from 'react-icons/fi';
+import Link from 'next/link';
 import { getIconStyle } from '@/lib/styleUtils';
 
 type IconComponent = typeof FiHome;
@@ -44,7 +45,7 @@ export default function Footer() {
         <div className="flex flex-col items-center">
           <div className="flex" style={{ gap: '1rem', marginBottom: '1rem' }}>
             {socialIcons.map(({ icon: Icon, href, label }) => (
-              <a
+              <Link
                 key={label}
                 href={href}
                 target={href.startsWith('mailto:') ? undefined : '_blank'}
@@ -58,7 +59,7 @@ export default function Footer() {
                 onBlur={() => setHovered(null)}
               >
                 <Icon size={24} />
-              </a>
+              </Link>
             ))}
           </div>
           <p className="text-spotify-light-gray text-center text-sm mb-4">

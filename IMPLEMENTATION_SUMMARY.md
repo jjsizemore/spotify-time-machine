@@ -352,7 +352,7 @@ private async processQueue(): Promise<void> {
   this.isProcessingQueue = true;
 
   // Sort by priority (lower number = higher priority)
-  this.requestQueue.sort((a, b) => a.priority - b.priority);
+  this.requestQueue.toSorted((a, b) => a.priority - b.priority);
 
   while (this.requestQueue.length > 0) {
     const request = this.requestQueue.shift()!;

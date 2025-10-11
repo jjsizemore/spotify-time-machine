@@ -149,12 +149,12 @@ export default function GenreTrendsVisualization() {
         });
 
         currentTopGenres = Object.entries(genreCounts)
-          .sort((a, b) => b[1] - a[1])
+          .toSorted((a, b) => b[1] - a[1])
           .map((entry) => entry[0])
           .slice(0, 20); // Take top 20 genres
 
         // Get unique periods and sort them chronologically
-        currentPeriods = [...new Set(currentGenreTimeData.map((item) => item.period))].sort();
+        currentPeriods = [...new Set(currentGenreTimeData.map((item) => item.period))].toSorted();
 
         if (isMountedRef.current) {
           setTopGenres(currentTopGenres);
@@ -177,6 +177,7 @@ export default function GenreTrendsVisualization() {
       console.error('Error processing genre trends data:', err);
       setProcessingData(false);
     }
+    // oxlint-disable-next-line exhaustive-deps
   }, [tracks, artistsDetails, currentTimeRange, granularity, getCompactArtists]);
 
   // Reset granularity when time range changes away from 'ALL_TIME'

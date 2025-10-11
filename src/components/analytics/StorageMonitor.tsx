@@ -11,18 +11,30 @@ interface StorageInfo {
   canStoreMoreData: boolean;
 }
 
+const formatBytes = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const getStatusColor = (percentUsed: number) => {
+  if (percentUsed < 50) return 'text-green-400';
+  if (percentUsed < 80) return 'text-yellow-400';
+  return 'text-red-400';
+};
+
+const getProgressBarColor = (percentUsed: number) => {
+  if (percentUsed < 50) return 'bg-green-500';
+  if (percentUsed < 80) return 'bg-yellow-500';
+  return 'bg-red-500';
+};
+
 export default function StorageMonitor() {
   const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null);
   const [isPersistent, setIsPersistent] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
 
   const refreshStorageInfo = async () => {
     setIsLoading(true);
@@ -71,18 +83,6 @@ export default function StorageMonitor() {
       </div>
     );
   }
-
-  const getStatusColor = (percentUsed: number) => {
-    if (percentUsed < 50) return 'text-green-400';
-    if (percentUsed < 80) return 'text-yellow-400';
-    return 'text-red-400';
-  };
-
-  const getProgressBarColor = (percentUsed: number) => {
-    if (percentUsed < 50) return 'bg-green-500';
-    if (percentUsed < 80) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
 
   return (
     <div className="bg-spotify-gray rounded-lg p-4 space-y-4">

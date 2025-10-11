@@ -26,5 +26,5 @@ export function extractTopGenres(artists: Artist[], limit: number = 10): GenreCo
   }));
 
   // Sort by count (descending) and take top N
-  return genreArray.sort((a, b) => b.count - a.count).slice(0, limit);
+  return genreArray.toSorted((a, b) => b.count - a.count).slice(0, limit);
 }

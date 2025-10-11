@@ -13,6 +13,15 @@ interface MonthlyData {
 
 const CHUNK_SIZE = 250; // Process 250 tracks per chunk
 
+const formatPeriodLabel = (periodStr: string) => {
+  if (periodStr.includes('Q')) {
+    const [year, quarter] = periodStr.split('-Q');
+    return `Q${quarter} ${year}`;
+  }
+  const [year, month] = periodStr.split('-');
+  return `${new Date(parseInt(year), parseInt(month) - 1).toLocaleString('default', { month: 'short' })} ${year}`;
+};
+
 export default function ListeningTrends() {
   const {
     tracks,
@@ -94,7 +103,7 @@ export default function ListeningTrends() {
             month,
             count,
           }))
-          .sort((a, b) => a.month.localeCompare(b.month));
+          .toSorted((a, b) => a.month.localeCompare(b.month));
 
         currentMaxVal = Math.max(0, ...monthlyDataArray.map((item) => item.count));
 
@@ -121,15 +130,6 @@ export default function ListeningTrends() {
   const isOverallLoading = isLoading && tracks.length === 0;
   const isIncrementallyProcessing = processingData && !isOverallLoading;
   const hasData = monthlyData.length > 0;
-
-  const formatPeriodLabel = (periodStr: string) => {
-    if (periodStr.includes('Q')) {
-      const [year, quarter] = periodStr.split('-Q');
-      return `Q${quarter} ${year}`;
-    }
-    const [year, month] = periodStr.split('-');
-    return `${new Date(parseInt(year), parseInt(month) - 1).toLocaleString('default', { month: 'short' })} ${year}`;
-  };
 
   const granularityOptions: GranularityOption[] = [
     { value: 'monthly', label: 'Monthly' },

@@ -855,7 +855,7 @@ class IndexedDBCacheStorage implements IndexedDBStorage {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version);
 
-      request.onerror = () => reject(request.error);
+      request.addEventListener('error', () => reject(request.error));
       request.onsuccess = () => resolve(request.result);
 
       request.onupgradeneeded = (event) => {
@@ -887,7 +887,7 @@ class IndexedDBCacheStorage implements IndexedDBStorage {
       await new Promise<void>((resolve, reject) => {
         const request = store.put(item);
         request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
+        request.addEventListener('error', () => reject(request.error));
       });
 
       console.debug(`IndexedDB cache set: ${key} (TTL: ${ttlMinutes}min)`);
@@ -906,7 +906,7 @@ class IndexedDBCacheStorage implements IndexedDBStorage {
       const item = await new Promise<any>((resolve, reject) => {
         const request = store.get(CACHE_PREFIX + key);
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        request.addEventListener('error', () => reject(request.error));
       });
 
       if (!item) {
@@ -957,7 +957,7 @@ class IndexedDBCacheStorage implements IndexedDBStorage {
             resolve();
           }
         };
-        request.onerror = () => reject(request.error);
+        request.addEventListener('error', () => reject(request.error));
       });
 
       console.info(`IndexedDB cache cleared: Removed ${removedCount} items`);

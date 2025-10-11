@@ -26,12 +26,20 @@ function EmptyOrErrorDisplay() {
     <div className="text-center p-6 text-spotify-red">
       <div>
         <p className="mb-2">It seems like this data is corrupt or missing.</p>
-        <p
+        <button
           className="cursor-pointer text-spotify-green hover:text-spotify-light-green transition-colors underline"
           onClick={handleClearCache}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleClearCache();
+            }
+          }}
+          tabIndex={0}
+          type="button"
         >
           Click or tap here to clear the cache and refresh the page 🙂
-        </p>
+        </button>
       </div>
     </div>
   );

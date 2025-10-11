@@ -2,7 +2,7 @@ import eslint from '@eslint/js';
 import tsParser from '@typescript-eslint/parser';
 import type { Linter } from 'eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
-import importX from 'eslint-plugin-import-x';
+import importXPlugin from 'eslint-plugin-import-x';
 import oxlint from 'eslint-plugin-oxlint';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import { flatConfig as nextEslintConfig } from '@next/eslint-plugin-next';
@@ -60,7 +60,7 @@ export default [
     },
   },
   {
-    plugins: { 'import-x': importX },
+    plugins: { 'import-x': importXPlugin },
     rules: { 'import-x/order': ['error', { groups: ['builtin', 'external', 'internal'] }] },
   },
   ...oxlint.configs['flat/recommended'],

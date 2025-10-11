@@ -10,6 +10,13 @@ interface TopTracksProps {
   onRetry?: () => void;
 }
 
+// Format milliseconds to minutes:seconds
+const formatDuration = (ms: number) => {
+  const minutes = Math.floor(ms / 60000);
+  const seconds = Math.floor((ms % 60000) / 1000);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+
 export default function TopTracks({ tracks, isLoading, error, onRetry }: TopTracksProps) {
   if (isLoading) {
     return (
@@ -30,13 +37,6 @@ export default function TopTracks({ tracks, isLoading, error, onRetry }: TopTrac
       </div>
     );
   }
-
-  // Format milliseconds to minutes:seconds
-  const formatDuration = (ms: number) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   return (
     <div className="space-y-3">

@@ -1,6 +1,8 @@
 // Enhanced Spotify API client with request queuing, retry logic, and automatic token refresh
 // This eliminates rate limiting issues and provides robust error handling
 
+import * as Sentry from '@sentry/nextjs';
+
 const SPOTIFY_BASE_URL = 'https://api.spotify.com/v1';
 const SPOTIFY_ACCOUNTS_URL = 'https://accounts.spotify.com/api/token';
 
@@ -98,44 +100,58 @@ class SpotifyApi {
   }
 
   private async makeRawRequest(url: string, options: RequestInit = {}): Promise<Response> {
-    if (!this.accessToken) {
-      throw new SpotifyApiError('No access token available', 401);
-    }
-
-    // Check rate limit
-    const now = Date.now();
-    if (now < this.rateLimitResetTime) {
-      const waitTime = this.rateLimitResetTime - now;
-      console.warn(`Rate limited, waiting ${waitTime}ms...`);
-      await this.sleep(waitTime);
-    }
-
-    // Throttle requests
-    const timeSinceLastRequest = now - this.lastRequestTime;
-    if (timeSinceLastRequest < this.minRequestInterval) {
-      await this.sleep(this.minRequestInterval - timeSinceLastRequest);
-    }
-
-    this.lastRequestTime = Date.now();
-
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        'Content-Type': 'application/json',
-        ...options.headers,
+    return Sentry.startSpan(
+      {
+        name: `Spotify API ${options.method || 'GET'} ${url}`,
+        op: 'http.client',
       },
-    });
+      async (_span) => {
+        Sentry.setContext('spotify_api', {
+          url,
+          method: options.method || 'GET',
+          hasAuth: !!this.accessToken,
+        });
 
-    // Handle rate limiting
-    if (response.status === 429) {
-      const retryAfter = response.headers.get('Retry-After');
-      const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 1000;
-      this.rateLimitResetTime = Date.now() + waitTime;
-      throw new SpotifyApiError('API rate limit exceeded', 429);
-    }
+        if (!this.accessToken) {
+          throw new SpotifyApiError('No access token available', 401);
+        }
 
-    return response;
+        // Check rate limit
+        const now = Date.now();
+        if (now < this.rateLimitResetTime) {
+          const waitTime = this.rateLimitResetTime - now;
+          console.warn(`Rate limited, waiting ${waitTime}ms...`);
+          await this.sleep(waitTime);
+        }
+
+        // Throttle requests
+        const timeSinceLastRequest = now - this.lastRequestTime;
+        if (timeSinceLastRequest < this.minRequestInterval) {
+          await this.sleep(this.minRequestInterval - timeSinceLastRequest);
+        }
+
+        this.lastRequestTime = Date.now();
+
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json',
+            ...options.headers,
+          },
+        });
+
+        // Handle rate limiting
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After');
+          const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 1000;
+          this.rateLimitResetTime = Date.now() + waitTime;
+          throw new SpotifyApiError('API rate limit exceeded', 429);
+        }
+
+        return response;
+      }
+    );
   }
 
   private async processRequest(queuedRequest: QueuedRequest): Promise<void> {
@@ -240,7 +256,7 @@ class SpotifyApi {
         if (typeof raw === 'string') {
           try {
             const parsed = JSON.parse(raw);
-            const keys = Object.keys(parsed).sort();
+            const keys = Object.keys(parsed).toSorted();
             const canonical: Record<string, any> = {};
             keys.forEach((k) => {
               canonical[k] = parsed[k];
@@ -252,7 +268,7 @@ class SpotifyApi {
         } else if (raw instanceof Blob || raw instanceof ArrayBuffer) {
           bodyKey = ':binary';
         } else if (typeof raw === 'object') {
-          const keys = Object.keys(raw).sort();
+          const keys = Object.keys(raw).toSorted();
           const canonical: Record<string, any> = {};
           keys.forEach((k) => {
             canonical[k] = raw[k];
@@ -445,49 +461,57 @@ export const scopes = [
 ].join(' ');
 
 export const refreshAccessToken = async (refreshToken: string) => {
-  try {
-    console.log('🔄 Attempting to refresh Spotify access token...');
+  return Sentry.startSpan(
+    {
+      name: 'refreshAccessToken',
+      op: 'function',
+    },
+    async (_span) => {
+      try {
+        console.log('🔄 Attempting to refresh Spotify access token...');
 
-    const response = await fetch(SPOTIFY_ACCOUNTS_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Authorization: `Basic ${Buffer.from(
-          `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
-        ).toString('base64')}`,
-      },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-      }),
-      // Critical: Add no-cache to prevent stale responses
-      cache: 'no-cache',
-    });
+        const response = await fetch(SPOTIFY_ACCOUNTS_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: `Basic ${Buffer.from(
+              `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
+            ).toString('base64')}`,
+          },
+          body: new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken,
+          }),
+          // Critical: Add no-cache to prevent stale responses
+          cache: 'no-cache',
+        });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('❌ Spotify token refresh failed:', {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorData,
-      });
-      throw new Error(
-        `Token refresh failed: ${response.status} ${response.statusText} - ${errorData}`
-      );
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('❌ Spotify token refresh failed:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorData,
+          });
+          throw new Error(
+            `Token refresh failed: ${response.status} ${response.statusText} - ${errorData}`
+          );
+        }
+
+        const body = await response.json();
+
+        console.log('✅ Successfully refreshed Spotify access token');
+
+        return {
+          accessToken: body.access_token,
+          // Important: Use new refresh token if provided, otherwise fall back to old one
+          refreshToken: body.refresh_token ?? refreshToken,
+          expiresAt: Math.floor(Date.now() / 1000) + body.expires_in,
+        };
+      } catch (error) {
+        console.error('❌ Error refreshing access token:', error);
+        throw error;
+      }
     }
-
-    const body = await response.json();
-
-    console.log('✅ Successfully refreshed Spotify access token');
-
-    return {
-      accessToken: body.access_token,
-      // Important: Use new refresh token if provided, otherwise fall back to old one
-      refreshToken: body.refresh_token ?? refreshToken,
-      expiresAt: Math.floor(Date.now() / 1000) + body.expires_in,
-    };
-  } catch (error) {
-    console.error('❌ Error refreshing access token:', error);
-    throw error;
-  }
+  );
 };

@@ -1,3 +1,4 @@
+// oxlint-disable-next-line
 import '@/lib/init';
 import { ReactNode } from 'react';
 import { GoogleTagManager } from '@next/third-parties/google';
@@ -8,6 +9,7 @@ import TokenStatus from '@/auth/TokenStatus';
 import { LayoutContent } from '@/layout/LayoutContent';
 import { DomainMigrationHandler } from '@/providers/DomainMigrationHandler';
 import { NextAuthProvider } from '@/providers/NextAuthProvider';
+// oxlint-disable-next-line
 import './globals.css';
 import ClientProviders from '@/components/providers/ClientProviders';
 import {
