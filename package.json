@@ -31,7 +31,7 @@
     "prebuild": "turbo type-check"
   },
   "dependencies": {
-    "@next/third-parties": "^15.5.4",
+    "@next/third-parties": "^15.5.5",
     "@sentry/nextjs": "^10.19.0",
     "@tailwindcss/cli": "^4.1.14",
     "@tailwindcss/postcss": "^4.1.14",
@@ -43,7 +43,7 @@
     "fflate": "^0.8.2",
     "flowbite": "^3.1.2",
     "flowbite-react": "^0.12.9",
-    "next": "^15.5.4",
+    "next": "^15.5.5",
     "next-auth": "^4.24.11",
     "posthog-js": "^1.275.1",
     "react": "19.2.0",
