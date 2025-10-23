@@ -54,7 +54,7 @@ pre-push:
   parallel: false
   commands:
     security:
-      run: mise run security
+      run: TERM=dumb mise run security
 
 commit-msg:
   commands:
