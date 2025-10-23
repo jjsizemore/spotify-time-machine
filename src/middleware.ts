@@ -2,6 +2,7 @@ import { ipAddress } from '@vercel/functions';
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { log } from './lib/logger';
 
 // Define a basic rate limiting structure
 interface RateLimitEntry {
@@ -74,9 +75,9 @@ export function middleware(request: NextRequest) {
 
   // Reduced logging - only log essential information
   if (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DEBUG === 'true') {
-    console.log('[MIDDLEWARE] Path:', request.nextUrl.pathname);
+    log.http('Middleware processing request', { path: request.nextUrl.pathname });
     if (request.nextUrl.pathname.startsWith('/api/auth')) {
-      console.log('[MIDDLEWARE] OAuth flow - auth session present:', !!authSession);
+      log.auth('OAuth flow - auth session present', { hasSession: !!authSession });
     }
   }
 

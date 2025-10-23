@@ -2,6 +2,7 @@
 // This eliminates rate limiting issues and provides robust error handling
 
 import * as Sentry from '@sentry/nextjs';
+import { log } from './logger';
 
 const SPOTIFY_BASE_URL = 'https://api.spotify.com/v1';
 const SPOTIFY_ACCOUNTS_URL = 'https://accounts.spotify.com/api/token';
@@ -80,19 +81,19 @@ class SpotifyApi {
     }
 
     if (!this.tokenRefreshCallback) {
-      console.error('No token refresh callback set');
+      log.error('No token refresh callback set');
       return false;
     }
 
     this.isRefreshing = true;
     try {
-      console.log('🔄 Refreshing access token...');
+      log.auth('Refreshing access token...');
       const tokenData = await this.tokenRefreshCallback();
       this.accessToken = tokenData.accessToken;
-      console.log('✅ Access token refreshed successfully');
+      log.auth('Access token refreshed successfully');
       return true;
     } catch (error) {
-      console.error('❌ Failed to refresh access token:', error);
+      log.error('Failed to refresh access token', error, { category: 'auth' });
       return false;
     } finally {
       this.isRefreshing = false;
@@ -120,7 +121,7 @@ class SpotifyApi {
         const now = Date.now();
         if (now < this.rateLimitResetTime) {
           const waitTime = this.rateLimitResetTime - now;
-          console.warn(`Rate limited, waiting ${waitTime}ms...`);
+          log.warn('Rate limited, waiting...', { waitTime, url });
           await this.sleep(waitTime);
         }
 
@@ -182,9 +183,12 @@ class SpotifyApi {
         if (response.status === 429 && retryCount < this.maxRetries) {
           // Retry rate limited requests
           const delay = this.calculateBackoffDelay(retryCount);
-          console.warn(
-            `Rate limited, retrying in ${delay}ms (attempt ${retryCount + 1}/${this.maxRetries})`
-          );
+          log.warn('Rate limited, retrying...', {
+            delay,
+            attempt: retryCount + 1,
+            maxRetries: this.maxRetries,
+            url,
+          });
           await this.sleep(delay);
           queuedRequest.retryCount++;
           this.requestQueue.unshift(queuedRequest);
@@ -202,9 +206,12 @@ class SpotifyApi {
         if (error.status === 429 && retryCount < this.maxRetries) {
           // Retry on rate limit
           const delay = this.calculateBackoffDelay(retryCount);
-          console.warn(
-            `Request failed with rate limit, retrying in ${delay}ms (attempt ${retryCount + 1}/${this.maxRetries})`
-          );
+          log.warn('Request failed with rate limit, retrying...', {
+            delay,
+            attempt: retryCount + 1,
+            maxRetries: this.maxRetries,
+            url,
+          });
           await this.sleep(delay);
           queuedRequest.retryCount++;
           this.requestQueue.unshift(queuedRequest);
@@ -285,7 +292,7 @@ class SpotifyApi {
 
     // Check if this exact request is already pending
     if (this.pendingRequests.has(requestKey)) {
-      console.log(`🔄 Deduplicating request: ${method} ${endpoint}`);
+      log.debug('Deduplicating request', { method, endpoint });
       return this.pendingRequests.get(requestKey)!;
     }
 

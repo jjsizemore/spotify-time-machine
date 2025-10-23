@@ -9,6 +9,7 @@ import Toast from '@/ui/Toast';
 import ActionButton from '@/ui/ActionButton';
 import { getTextStyle } from '@/lib/styleUtils';
 import { clearAllCachesOnlyComplete } from '@/lib/cacheUtils';
+import { log } from '@/lib/logger';
 
 interface NavigationProps {
   user?:
@@ -33,12 +34,13 @@ export default function Navigation({ user }: NavigationProps) {
       // Clear all caches without page refresh (we want to show toast first)
       await clearAllCachesOnlyComplete();
 
+      log.info('Cache cleared successfully by user', { userId: user?.name });
       setToast({
         message: `Cache cleared successfully!`,
         type: 'warning',
       });
     } catch (error) {
-      console.error('Error clearing cache:', error);
+      log.error('Error clearing cache', error, { userId: user?.name });
       // Show error toast
       setToast({
         message: 'Failed to clear cache. Please try again.',
@@ -55,6 +57,7 @@ export default function Navigation({ user }: NavigationProps) {
 
       await fetch('/api/auth/clear-session');
 
+      log.auth('User logged out successfully', { userId: user?.name });
       await signOut({
         redirect: false,
         callbackUrl: '/thank-you',
@@ -62,7 +65,7 @@ export default function Navigation({ user }: NavigationProps) {
 
       router.push('/thank-you');
     } catch (error) {
-      console.error('Error during logout:', error);
+      log.error('Error during logout', error, { userId: user?.name, category: 'auth' });
       window.location.href = '/thank-you';
     }
   };

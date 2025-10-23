@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import ActionButton from '@/ui/ActionButton';
+import { log } from '@/lib/logger';
 
 export default function AuthError({
   error,
@@ -11,7 +12,11 @@ export default function AuthError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Authentication error:', error);
+    log.error('Authentication error caught', error, {
+      digest: error.digest,
+      name: error.name,
+      category: 'auth',
+    });
   }, [error]);
 
   return (

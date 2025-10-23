@@ -5,6 +5,7 @@ import DataFetcherAndControlsWrapper from '@/features/controls/DataFetcherAndCon
 import GranularitySelector, { GranularityOption } from '@/features/controls/GranularitySelector';
 import { useLikedArtists } from '@/hooks/useLikedArtists';
 import { timeRangeDisplays } from '@/lib/timeRanges';
+import { log } from '@/lib/logger';
 
 interface GenreTimeData {
   genre: string;
@@ -174,7 +175,7 @@ export default function GenreTrendsVisualization() {
       // Start processing immediately
       processChunk(0);
     } catch (err) {
-      console.error('Error processing genre trends data:', err);
+      log.error('Error processing genre trends data', err);
       setProcessingData(false);
     }
     // oxlint-disable-next-line exhaustive-deps

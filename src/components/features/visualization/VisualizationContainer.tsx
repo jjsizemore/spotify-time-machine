@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { clearAllCachesAndRefreshComplete } from '@/lib/cacheUtils';
 import LoadingSpinner from '@/ui/LoadingSpinner';
+import { log } from '@/lib/logger';
 
 type VisualizationContainerProps = {
   title: string;
@@ -18,7 +19,7 @@ function EmptyOrErrorDisplay() {
     try {
       await clearAllCachesAndRefreshComplete();
     } catch (error) {
-      console.error('Error clearing cache:', error);
+      log.error('Error clearing cache', error);
     }
   };
 

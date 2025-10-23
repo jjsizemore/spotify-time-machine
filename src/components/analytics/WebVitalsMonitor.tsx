@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/nextjs';
+import { log } from '@/lib/logger';
 
 export default function WebVitalsMonitor() {
   useEffect(() => {
@@ -11,7 +12,12 @@ export default function WebVitalsMonitor() {
         .then((webVitals) => {
           // Send metrics to analytics
           const sendToAnalytics = (metric: any) => {
-            console.log('Core Web Vital:', metric);
+            log.performance('Core Web Vital recorded', {
+              metricName: metric.name,
+              value: metric.value,
+              rating: metric.rating,
+              id: metric.id,
+            });
 
             // Send to Google Analytics 4
             if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -53,7 +59,7 @@ export default function WebVitalsMonitor() {
 
             // Performance monitoring for development
             if (process.env.NODE_ENV === 'development') {
-              console.table({
+              log.debug('Web Vital details', {
                 Metric: metric.name,
                 Value: metric.value,
                 Rating: metric.rating,
@@ -74,7 +80,7 @@ export default function WebVitalsMonitor() {
           webVitals.onTTFB(sendToAnalytics);
         })
         .catch((error) => {
-          console.error('Failed to load web-vitals:', error);
+          log.error('Failed to load web-vitals', error);
         });
     }
   }, []);

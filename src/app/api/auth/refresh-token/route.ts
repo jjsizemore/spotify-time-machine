@@ -2,6 +2,7 @@ import { JWT, getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { refreshAccessToken } from '@/lib/spotify';
+import { log } from '@/lib/logger';
 
 export async function POST(request: Request) {
   return Sentry.startSpan(
@@ -18,7 +19,11 @@ export async function POST(request: Request) {
         });
 
         if (!nextAuthToken || !nextAuthToken.refreshToken) {
-          console.error('No refresh token available in server session');
+          log.error('No refresh token available in server session', undefined, {
+            hasToken: !!nextAuthToken,
+            hasRefreshToken: !!nextAuthToken?.refreshToken,
+            category: 'auth',
+          });
           Sentry.setContext('auth', {
             hasToken: !!nextAuthToken,
             hasRefreshToken: !!nextAuthToken?.refreshToken,
@@ -28,13 +33,14 @@ export async function POST(request: Request) {
 
         const tokenData = await refreshAccessToken(nextAuthToken.refreshToken);
 
+        log.auth('Token refreshed successfully via API');
         // IMPORTANT: Do not return the refresh token to the client. Only return access token and expiry.
         return NextResponse.json({
           accessToken: tokenData.accessToken,
           expiresAt: tokenData.expiresAt,
         });
       } catch (error) {
-        console.error('Token refresh API error:', error);
+        log.error('Token refresh API error', error, { category: 'auth' });
         Sentry.captureException(error);
         return NextResponse.json({ error: 'Failed to refresh token' }, { status: 500 });
       }
