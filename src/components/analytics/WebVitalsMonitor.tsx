@@ -1,124 +1,162 @@
 'use client';
 
+import { useReportWebVitals } from 'next/web-vitals';
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/nextjs';
 
+// Enhanced Web Vitals monitoring with Next.js v16 patterns
 export default function WebVitalsMonitor() {
+  // Use Next.js v16 useReportWebVitals hook
+  useReportWebVitals((metric) => {
+    console.log('Core Web Vital:', metric);
+
+    // Send to Google Analytics 4
+    if (globalThis.window !== undefined && (globalThis as any).gtag) {
+      (globalThis as any).gtag('event', metric.name, {
+        event_category: 'Web Vitals',
+        event_label: metric.id,
+        value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+        non_interaction: true,
+        custom_parameter_1: 'core_web_vitals',
+      });
+    }
+
+    // Send to Vercel Analytics
+    if (globalThis.window !== undefined && (globalThis as any).va) {
+      (globalThis as any).va('track', 'Web Vital', {
+        name: metric.name,
+        value: metric.value,
+        id: metric.id,
+        delta: metric.delta,
+        rating: metric.rating,
+      });
+    }
+
+    // Send to PostHog
+    if (globalThis.window !== undefined && (globalThis as any).posthog) {
+      (globalThis as any).posthog.capture('web_vital', {
+        metric_name: metric.name,
+        value: metric.value,
+        id: metric.id,
+        delta: metric.delta,
+        rating: metric.rating,
+      });
+    }
+
+    // Send to Sentry with enhanced metrics
+    Sentry.metrics.distribution('web_vitals', metric.value, {
+      unit: 'millisecond',
+    });
+
+    // Performance monitoring for development
+    if (process.env.NODE_ENV === 'development') {
+      console.table({
+        Metric: metric.name,
+        Value: metric.value,
+        Rating: metric.rating,
+        Delta: metric.delta,
+        ID: metric.id,
+        Navigation: metric.navigationType,
+      });
+    }
+  });
+
+  // Enhanced Performance Observer for additional metrics
   useEffect(() => {
-    // Initialize Core Web Vitals monitoring
-    if (typeof window !== 'undefined') {
-      import('web-vitals')
-        .then((webVitals) => {
-          // Send metrics to analytics
-          const sendToAnalytics = (metric: any) => {
-            console.log('Core Web Vital:', metric);
+    if (globalThis.window === undefined || !('PerformanceObserver' in globalThis.window)) {
+      return undefined;
+    }
 
-            // Send to Google Analytics 4
-            if (typeof window !== 'undefined' && (window as any).gtag) {
-              (window as any).gtag('event', metric.name, {
-                event_category: 'Web Vitals',
-                event_label: metric.id,
-                value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
-                non_interaction: true,
-                custom_parameter_1: 'core_web_vitals',
-              });
-            }
+    try {
+      // Monitor long tasks (blocking the main thread)
+      const longTaskObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (entry.duration > 50) {
+            console.warn('Long task detected:', {
+              duration: entry.duration,
+              startTime: entry.startTime,
+              name: entry.name,
+            });
 
-            // Send to Vercel Analytics
-            if (typeof window !== 'undefined' && (window as any).va) {
-              (window as any).va('track', 'Web Vital', {
-                name: metric.name,
-                value: metric.value,
-                id: metric.id,
-                delta: metric.delta,
-                rating: metric.rating,
-              });
-            }
-
-            // Send to PostHog
-            if (typeof window !== 'undefined' && (window as any).posthog) {
-              (window as any).posthog.capture('web_vital', {
-                metric_name: metric.name,
-                value: metric.value,
-                id: metric.id,
-                delta: metric.delta,
-                rating: metric.rating,
-              });
-            }
-
-            // Send to Sentry
-            Sentry.metrics.distribution('web_vitals', metric.value, {
+            // Send long task metrics to Sentry
+            Sentry.metrics.distribution('long_task_duration', entry.duration, {
               unit: 'millisecond',
             });
-
-            // Performance monitoring for development
-            if (process.env.NODE_ENV === 'development') {
-              console.table({
-                Metric: metric.name,
-                Value: metric.value,
-                Rating: metric.rating,
-                Delta: metric.delta,
-                ID: metric.id,
-              });
-            }
-          };
-
-          // Initialize Core Web Vitals (web-vitals v5.0.2)
-          // Core Web Vitals: CLS, INP, LCP
-          webVitals.onCLS(sendToAnalytics);
-          webVitals.onINP(sendToAnalytics); // INP replaced FID in v5
-          webVitals.onLCP(sendToAnalytics);
-
-          // Other Web Vitals: FCP, TTFB
-          webVitals.onFCP(sendToAnalytics);
-          webVitals.onTTFB(sendToAnalytics);
-        })
-        .catch((error) => {
-          console.error('Failed to load web-vitals:', error);
-        });
-    }
-  }, []);
-
-  // Performance observer for additional metrics
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
-      // Monitor long tasks
-      try {
-        const longTaskObserver = new PerformanceObserver((list) => {
-          for (const entry of list.getEntries()) {
-            if (entry.duration > 50) {
-              console.warn('Long task detected:', {
-                duration: entry.duration,
-                startTime: entry.startTime,
-                name: entry.name,
-              });
-            }
           }
-        });
-        longTaskObserver.observe({ entryTypes: ['longtask'] });
+        }
+      });
 
-        // Monitor layout shifts
-        const layoutShiftObserver = new PerformanceObserver((list) => {
-          for (const entry of list.getEntries()) {
-            if ((entry as any).hadRecentInput) continue;
-            console.log('Layout shift:', {
-              value: (entry as any).value,
-              sources: (entry as any).sources,
+      // Monitor layout shifts for debugging
+      const layoutShiftObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          const layoutShiftEntry = entry as any;
+
+          // Skip layout shifts caused by user input
+          if (layoutShiftEntry.hadRecentInput) continue;
+
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Layout shift detected:', {
+              value: layoutShiftEntry.value,
+              sources: layoutShiftEntry.sources?.length || 0,
+              startTime: entry.startTime,
             });
           }
-        });
-        layoutShiftObserver.observe({ entryTypes: ['layout-shift'] });
 
-        return () => {
-          longTaskObserver.disconnect();
-          layoutShiftObserver.disconnect();
-        };
-      } catch (error) {
-        console.error('Performance observer error:', error);
-        return undefined; // Explicit return for error case
-      }
+          // Track significant layout shifts
+          if (layoutShiftEntry.value > 0.1) {
+            Sentry.metrics.distribution('layout_shift_value', layoutShiftEntry.value, {
+              unit: 'none',
+            });
+          }
+        }
+      });
+
+      // Monitor navigation performance
+      const navigationObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          const navEntry = entry as PerformanceNavigationTiming;
+
+          const metrics = {
+            dns_lookup: navEntry.domainLookupEnd - navEntry.domainLookupStart,
+            tcp_connection: navEntry.connectEnd - navEntry.connectStart,
+            ssl_handshake: navEntry.secureConnectionStart
+              ? navEntry.connectEnd - navEntry.secureConnectionStart
+              : 0,
+            server_response: navEntry.responseStart - navEntry.requestStart,
+            dom_processing: navEntry.domContentLoadedEventStart - navEntry.responseStart,
+            resource_loading: navEntry.loadEventStart - navEntry.domContentLoadedEventStart,
+          };
+
+          if (process.env.NODE_ENV === 'development') {
+            console.table(metrics);
+          }
+
+          // Send navigation metrics to Sentry
+          for (const [name, value] of Object.entries(metrics)) {
+            if (value > 0) {
+              Sentry.metrics.distribution(`navigation_${name}`, value, {
+                unit: 'millisecond',
+              });
+            }
+          }
+        }
+      });
+
+      // Start observing
+      longTaskObserver.observe({ entryTypes: ['longtask'] });
+      layoutShiftObserver.observe({ entryTypes: ['layout-shift'] });
+      navigationObserver.observe({ entryTypes: ['navigation'] });
+
+      return () => {
+        longTaskObserver.disconnect();
+        layoutShiftObserver.disconnect();
+        navigationObserver.disconnect();
+      };
+    } catch (error) {
+      console.error('Performance observer setup error:', error);
+      Sentry.captureException(error);
+      return undefined;
     }
-    return undefined; // Explicit return when observers aren't supported
   }, []);
 
   return null; // This component doesn't render anything

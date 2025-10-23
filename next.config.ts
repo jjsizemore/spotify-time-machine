@@ -5,6 +5,30 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['127.0.0.1'],
   reactStrictMode: true,
+  output: 'standalone',
+
+  // Next.js 16 Performance Features
+  reactCompiler: true, // Enable React Compiler for automatic memoization
+  cacheComponents: true, // Enable component caching (replaces experimental.ppr and experimental.dynamicIO)
+
+  // Better server component optimization - moved out of experimental in Next.js 16
+  serverExternalPackages: ['sharp'],
+
+  // Performance and SEO Optimizations for Next.js v16
+  experimental: {
+    // Enable Turbopack filesystem caching for faster dev builds across restarts
+    turbopackFileSystemCacheForDev: true,
+
+    optimizePackageImports: [
+      '@tanstack/react-query',
+      'date-fns',
+      'react-icons',
+      'flowbite-react',
+      '@sentry/nextjs',
+    ],
+    // Enhanced CSS optimization
+    optimizeCss: true,
+  },
 
   // Enhanced Image Optimization for 2025
   images: {
@@ -37,14 +61,43 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
-  // Performance and SEO Optimizations
-  experimental: {
-    optimizePackageImports: ['@tanstack/react-query', 'date-fns', 'react-icons'],
-  },
-
-  // Compiler Optimizations
+  // Enhanced Compiler Optimizations for v16
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
+    // Remove React dev tools in production
+    reactRemoveProperties: process.env.NODE_ENV === 'production',
+    // Enable SWC minification
+    styledComponents: true,
+  },
+
+  // Enhanced bundling and optimization
+  webpack: (config, { isServer }) => {
+    // Optimize bundle splitting
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
+    }
+
+    // Add bundle analyzer in production
+    if (process.env.ANALYZE === 'true') {
+      const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          openAnalyzer: false,
+        })
+      );
+    }
+
+    return config;
+  },
+
+  // Enhanced runtime configuration
+  env: {
+    NEXT_RUNTIME_ENV: process.env.NODE_ENV,
+    BUILD_ID: process.env.VERCEL_GIT_COMMIT_SHA || 'development',
   },
 
   // PWA and Caching
@@ -84,6 +137,38 @@ const nextConfig: NextConfig = {
             key: 'X-Clacks-Overhead',
             value: 'GNU Terry Pratchett',
           },
+          // Content Security Policy - Only apply in production
+          ...(process.env.NODE_ENV === 'production'
+            ? [
+                {
+                  key: 'Content-Security-Policy',
+                  value: `
+              default-src 'self';
+              script-src 'self' 'unsafe-eval' 'unsafe-inline' 
+                https://app.posthog.com 
+                https://*.i.posthog.com 
+                https://www.googletagmanager.com 
+                https://va.vercel-scripts.com 
+                https://*.vercel-scripts.com;
+              connect-src 'self' 
+                https://app.posthog.com 
+                https://*.i.posthog.com 
+                https://www.google-analytics.com 
+                https://analytics.google.com 
+                https://vitals.vercel-analytics.com 
+                https://*.vercel-analytics.com;
+              img-src 'self' data: blob: https: http:;
+              style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+              font-src 'self' 
+                https://fonts.gstatic.com 
+                https://r2cdn.perplexity.ai;
+              worker-src 'self' blob:;
+            `
+                    .replaceAll(/\s+/g, ' ')
+                    .trim(),
+                },
+              ]
+            : []),
         ],
       },
       {
@@ -142,9 +227,6 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Output configuration for deployment
-  output: 'standalone',
-
   // Disable powered by header
   poweredByHeader: false,
 
@@ -157,8 +239,8 @@ const nextConfig: NextConfig = {
   // Trailing slash redirect
   trailingSlash: false,
 
-  // Skip middleware for specific paths
-  skipMiddlewareUrlNormalize: false,
+  // Skip proxy URL normalization for specific paths
+  skipProxyUrlNormalize: false,
 };
 
 // Wrap with Sentry for error tracking

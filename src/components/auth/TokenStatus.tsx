@@ -13,7 +13,10 @@ export default function TokenStatus({ className = '' }: TokenStatusProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    requestAnimationFrame(() => setMounted(true));
+    return () => {
+      requestAnimationFrame(() => setMounted(false));
+    };
   }, []);
 
   // Only show in development mode and after mounting

@@ -252,7 +252,7 @@ function SignInContent() {
         <LoadingSpinner size="lg" />
         <h2 className="text-xl font-semibold text-spotify-white">Connecting to Spotify</h2>
         <p className="text-spotify-light-gray">
-          You'll be redirected to Spotify to authorize the app...
+          You&apos;ll be redirected to Spotify to authorize the app...
         </p>
         <div className="max-w-md mx-auto mt-6">
           <div className="bg-spotify-dark-gray rounded-lg p-4 text-sm text-spotify-light-gray">

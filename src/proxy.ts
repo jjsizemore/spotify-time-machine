@@ -1,5 +1,4 @@
 import { ipAddress } from '@vercel/functions';
-import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -62,48 +61,30 @@ function isRateLimited(ip: string): boolean {
   return limited;
 }
 
-// This function runs before the auth check
-export function middleware(request: NextRequest) {
-  // Get client IP
-  const ip = ipAddress(request) || 'unknown';
-
-  // Check for auth session and state cookies
+// Helper function to check if user is authenticated
+function isAuthenticated(request: NextRequest): boolean {
+  // Check for auth session cookies
   const authSession =
     request.cookies.get('next-auth.session-token') ||
     request.cookies.get('__Secure-next-auth.session-token');
 
+  return !!authSession;
+}
+
+// Next.js 16 proxy function (replaces middleware)
+export function proxy(request: NextRequest) {
+  // Get client IP
+  const ip = ipAddress(request) || 'unknown';
+
   // Reduced logging - only log essential information
   if (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DEBUG === 'true') {
-    console.log('[MIDDLEWARE] Path:', request.nextUrl.pathname);
-    if (request.nextUrl.pathname.startsWith('/api/auth')) {
-      console.log('[MIDDLEWARE] OAuth flow - auth session present:', !!authSession);
-    }
+    console.log('[PROXY] Path:', request.nextUrl.pathname);
   }
 
-  // For auth callback routes, allow all requests through with minimal processing
-  if (request.nextUrl.pathname.startsWith('/api/auth/callback')) {
-    // Don't interfere with OAuth callback flow - let NextAuth handle everything
-    return NextResponse.next();
-  }
-
-  // For other auth routes, also allow through
+  // For ALL auth routes, bypass completely - no checks, no rate limiting
+  // This is critical for OAuth flow (PKCE, callbacks, sessions, etc.)
   if (request.nextUrl.pathname.startsWith('/api/auth')) {
-    // Only apply rate limiting to API routes
-    if (isRateLimited(ip)) {
-      return new NextResponse(
-        JSON.stringify({
-          error: 'Too many requests',
-          message: 'Please try again later',
-        }),
-        {
-          status: 429,
-          headers: {
-            'Content-Type': 'application/json',
-            'Retry-After': '60',
-          },
-        }
-      );
-    }
+    // Pass through without any interference - NextAuth needs full control
     return NextResponse.next();
   }
 
@@ -113,7 +94,7 @@ export function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/history') ||
     request.nextUrl.pathname.startsWith('/playlist-generator');
 
-  if (isProtectedRoute && !authSession) {
+  if (isProtectedRoute && !isAuthenticated(request)) {
     // Redirect to landing page if auth is missing
     return NextResponse.redirect(new URL('/', request.url));
   }
@@ -141,7 +122,7 @@ export function middleware(request: NextRequest) {
     }
 
     // For API routes that require auth, check if auth session exists
-    if (!authSession) {
+    if (!isAuthenticated(request)) {
       return new NextResponse(
         JSON.stringify({
           error: 'Unauthorized',
@@ -176,19 +157,7 @@ if (typeof setInterval !== 'undefined') {
   );
 }
 
-// Use withAuth to protect routes that require authentication
-export default withAuth({
-  callbacks: {
-    authorized: ({ token }) => {
-      return !!token;
-    },
-  },
-  pages: {
-    signIn: '/auth/signin',
-  },
-});
-
 // Specify which routes should be protected
 export const config = {
-  matcher: ['/dashboard/:path*', '/history/:path*', '/playlist-generator/:path*'],
+  matcher: ['/dashboard/:path*', '/history/:path*', '/playlist-generator/:path*', '/api/:path*'],
 };

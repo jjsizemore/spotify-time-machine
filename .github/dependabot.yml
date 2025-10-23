@@ -16,9 +16,25 @@ updates:
       - jjsizemore
     labels:
       - dependencies
-    # Group dependencies to organize pull requests
+    # Limit the number of open pull requests
+    open-pull-requests-limit: 5
+    # Automatically rebase PRs when they become outdated
+    rebase-strategy: auto
+    # Commit message configuration
+    commit-message:
+      prefix: 'chore(deps)'
+      prefix-development: 'chore(deps-dev)'
+      include: 'scope'
+    # Group ALL dependencies together to minimize noise
     groups:
-      production-dependencies:
-        dependency-type: production
-      development-dependencies:
-        dependency-type: development
+      all-dependencies:
+        patterns:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      major-updates:
+        patterns:
+          - '*'
+        update-types:
+          - 'major'

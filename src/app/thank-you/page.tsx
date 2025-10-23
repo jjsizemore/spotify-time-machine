@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
 const clearAllAuth = async () => {
@@ -21,13 +21,17 @@ const clearAllAuth = async () => {
 
 export default function ThankYouPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const type = searchParams.get('type');
 
-  // Ensure all auth tokens are cleared on page load
+  // For logout, clear auth tokens
   useEffect(() => {
-    clearAllAuth();
-  }, []);
+    if (type !== 'feedback') {
+      clearAllAuth();
+    }
+  }, [type]);
 
-  // Automatically redirect to the home page after 5 seconds
+  // Automatically redirect after 5 seconds
   useEffect(() => {
     const redirectTimer = setTimeout(() => {
       router.push('/');
@@ -36,12 +40,14 @@ export default function ThankYouPage() {
     return () => clearTimeout(redirectTimer);
   }, [router]);
 
+  const isFeedbackThankYou = type === 'feedback';
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-spotify-black p-6 text-center">
       <div className="max-w-lg mx-auto">
         <div className="mb-8 flex justify-center">
           <Link href="/" className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-spotify-green">Jermaine's</h1>
+            <h1 className="text-2xl font-bold text-spotify-green">Jermaine&apos;s</h1>
             <Image
               src="/spotify-icon.png"
               alt="Spotify Logo"
@@ -53,12 +59,28 @@ export default function ThankYouPage() {
           </Link>
         </div>
 
-        <h2 className="text-3xl font-bold text-spotify-white mb-4">
-          Thanks for Using Jermaine's Spotify Time Machine!
-        </h2>
-        <p className="text-spotify-light-gray mb-8">
-          You have been successfully logged out. We hope you enjoyed exploring your Spotify history!
-        </p>
+        {isFeedbackThankYou ? (
+          <>
+            <h2 className="text-3xl font-bold text-spotify-white mb-4">
+              Thank You for Your Feedback!
+            </h2>
+            <p className="text-spotify-light-gray mb-8">
+              We&apos;ve received your feedback and truly appreciate you taking the time to help us
+              improve. Your input helps us make the Spotify Time Machine experience better for
+              everyone.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="text-3xl font-bold text-spotify-white mb-4">
+              Thanks for Using Jermaine&apos;s Spotify Time Machine!
+            </h2>
+            <p className="text-spotify-light-gray mb-8">
+              You have been successfully logged out. We hope you enjoyed exploring your Spotify
+              history!
+            </p>
+          </>
+        )}
 
         <p className="text-spotify-light-gray text-sm mb-12">
           You will be redirected to the home page in 5 seconds...

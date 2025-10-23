@@ -18,15 +18,23 @@ export function DomainMigrationHandler() {
   useEffect(() => {
     // Check if user is on old domain
     if (typeof window !== 'undefined' && window.location.hostname === OLD_DOMAIN) {
-      setMigrationMessage(
-        `This app has moved to ${NEW_DOMAIN}. Redirecting you to the new domain...`
-      );
-      setShowMigrationNotice(true);
+      // Use setTimeout to avoid cascading renders
+      const stateTimer = setTimeout(() => {
+        setMigrationMessage(
+          `This app has moved to ${NEW_DOMAIN}. Redirecting you to the new domain...`
+        );
+        setShowMigrationNotice(true);
+      }, 0);
 
       // Redirect after 3 seconds
-      setTimeout(() => {
+      const redirectTimer = setTimeout(() => {
         window.location.href = `https://${NEW_DOMAIN}${window.location.pathname}${window.location.search}`;
       }, 3000);
+
+      return () => {
+        clearTimeout(stateTimer);
+        clearTimeout(redirectTimer);
+      };
     }
 
     // Listen for service worker migration messages
@@ -53,15 +61,19 @@ export function DomainMigrationHandler() {
       const lastDomain = localStorage.getItem('app_domain');
 
       if (lastDomain === OLD_DOMAIN && window.location.hostname === OLD_DOMAIN) {
-        setMigrationMessage(
-          `Please reinstall this app from ${NEW_DOMAIN} for the best experience.`
-        );
-        setShowMigrationNotice(true);
+        requestAnimationFrame(() => {
+          setMigrationMessage(
+            `Please reinstall this app from ${NEW_DOMAIN} for the best experience.`
+          );
+          setShowMigrationNotice(true);
+        });
       }
 
       // Update stored domain
       localStorage.setItem('app_domain', window.location.hostname);
     }
+
+    return undefined;
   }, []);
 
   if (!showMigrationNotice) return null;

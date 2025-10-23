@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+test-results/
+.vitest-reports/
+tests/**/__screenshots__/
 
 # next.js
 /.next/

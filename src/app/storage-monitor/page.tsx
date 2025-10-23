@@ -35,7 +35,7 @@ export default function StorageMonitorPage() {
     <PageContainer isLoading={status === 'loading'} maxWidth="7xl" className="min-h-screen pb-20">
       {/* SEO-optimized heading structure */}
       <header className="mb-8">
-        <h1 className="sr-only">Storage Monitor - Manage Your App's Storage Usage</h1>
+        <h1 className="sr-only">Storage Monitor - Manage Your App&apos;s Storage Usage</h1>
         <Breadcrumb
           items={[
             { name: 'Home', url: '/dashboard' },

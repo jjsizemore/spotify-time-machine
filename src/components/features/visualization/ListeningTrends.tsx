@@ -51,23 +51,33 @@ export default function ListeningTrends() {
     };
   }, []);
 
-  // Process data when tracks are loaded
-  useEffect(() => {
+  // Cleanup function for processing timeout
+  const cleanupProcessing = () => {
     if (processingTimeoutRef.current) {
       clearTimeout(processingTimeoutRef.current);
     }
+  };
+
+  // Process data when tracks are loaded
+  useEffect(() => {
+    cleanupProcessing();
 
     // Only set to empty state if we have no data yet
     if (isLoading && tracks.length === 0) {
-      setMonthlyData([]);
-      setMaxCount(0);
-      setProcessingData(false);
-      return;
+      const timer = setTimeout(() => {
+        setMonthlyData([]);
+        setMaxCount(0);
+        setProcessingData(false);
+      }, 0);
+      return () => {
+        clearTimeout(timer);
+        cleanupProcessing();
+      };
     }
 
     // If we have tracks, process them incrementally
     if (tracks.length > 0) {
-      setProcessingData(true);
+      requestAnimationFrame(() => setProcessingData(true));
 
       // Use compact tracks for trends
       const compactTracks: CompactTrack[] = getCompactTracks(currentTimeRange);
@@ -123,7 +133,11 @@ export default function ListeningTrends() {
 
       // Start processing immediately
       processChunk(0);
+
+      return cleanupProcessing;
     }
+
+    return undefined;
   }, [tracks, isLoading, currentTimeRange, getCompactTracks, granularity]);
 
   // Determine UI states
@@ -197,7 +211,7 @@ export default function ListeningTrends() {
           </div>
 
           <div className="flex justify-between text-sm text-spotify-light-gray mt-8">
-            <div>Timeline of songs you've liked</div>
+            <div>Timeline of songs you&apos;ve liked</div>
             <div>Total: {monthlyData.reduce((sum, data) => sum + data.count, 0)} tracks</div>
           </div>
         </>

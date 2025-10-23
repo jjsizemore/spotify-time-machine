@@ -59,14 +59,22 @@ export default function HistoryPage() {
   // Process tracks into monthly groups whenever tracks change
   useEffect(() => {
     if (tracks.length > 0) {
-      setIsProcessingMonthlyTracks(true);
-      const groupedTracks = processAndGroupTracks(tracks);
-      setMonthlyTracks(groupedTracks);
-      setIsProcessingMonthlyTracks(false);
+      // Use setTimeout to avoid cascading renders
+      const timer = setTimeout(() => {
+        setIsProcessingMonthlyTracks(true);
+        const groupedTracks = processAndGroupTracks(tracks);
+        setMonthlyTracks(groupedTracks);
+        setIsProcessingMonthlyTracks(false);
+      }, 0);
+      return () => clearTimeout(timer);
     } else if (!isLoadingTracksFromHook) {
-      setMonthlyTracks([]);
-      setIsProcessingMonthlyTracks(false);
+      const timer = setTimeout(() => {
+        setMonthlyTracks([]);
+        setIsProcessingMonthlyTracks(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
+    return undefined;
   }, [tracks, isLoadingTracksFromHook]);
 
   // Toggle expanded state for a month

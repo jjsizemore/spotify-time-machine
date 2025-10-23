@@ -69,15 +69,25 @@ export default function GenreTrendsVisualization() {
     };
   }, []);
 
+  // Separate cleanup function for the main processing effect
+  const cleanupProcessing = () => {
+    if (processingTimeoutRef.current) {
+      clearTimeout(processingTimeoutRef.current);
+    }
+  };
+
   // Process the genre data whenever we get new tracks or artist details
   useEffect(() => {
     // Skip if we don't have the minimum data needed
     if (isLoading || tracks.length === 0 || artistsDetails.size === 0) {
-      setProcessingData(false);
-      return;
+      const timer = setTimeout(() => setProcessingData(false), 0);
+      return () => {
+        clearTimeout(timer);
+        cleanupProcessing();
+      };
     }
 
-    setProcessingData(true);
+    requestAnimationFrame(() => setProcessingData(true));
 
     try {
       // Get compact artists for better performance
@@ -175,16 +185,20 @@ export default function GenreTrendsVisualization() {
       processChunk(0);
     } catch (err) {
       console.error('Error processing genre trends data:', err);
-      setProcessingData(false);
+      requestAnimationFrame(() => setProcessingData(false));
     }
+
+    return cleanupProcessing;
     // oxlint-disable-next-line exhaustive-deps
   }, [tracks, artistsDetails, currentTimeRange, granularity, getCompactArtists]);
 
   // Reset granularity when time range changes away from 'ALL_TIME'
   useEffect(() => {
     if (currentTimeRange !== 'ALL_TIME') {
-      setGranularity('quarterly');
+      const timer = setTimeout(() => setGranularity('quarterly'), 0);
+      return () => clearTimeout(timer);
     }
+    return undefined;
   }, [currentTimeRange]);
 
   // Combined processing state that includes initial loading and artist loading

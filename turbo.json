@@ -28,7 +28,27 @@
       "dependsOn": ["lint", "type-check"]
     },
     "check:all": {
-      "dependsOn": ["lint", "fmt", "type-check"]
+      "dependsOn": ["lint", "fmt", "type-check", "test"]
+    },
+    "test": {
+      "inputs": ["src/**", "tests/**", "vitest.config.ts", "vitest.workspace.ts"],
+      "outputs": ["coverage/**", "test-results/**"]
+    },
+    "test:unit": {
+      "inputs": ["src/**", "tests/unit/**", "tests/setup/**"],
+      "outputs": ["coverage/**"]
+    },
+    "test:integration": {
+      "inputs": ["src/**", "tests/integration/**", "tests/setup/**"],
+      "outputs": ["test-results/**"]
+    },
+    "test:browser": {
+      "inputs": ["src/**", "tests/browser/**", "tests/setup/**"],
+      "outputs": ["test-results/**", "playwright-report/**"]
+    },
+    "test:coverage": {
+      "dependsOn": ["test"],
+      "outputs": ["coverage/**"]
     },
     "analyze": {
       "dependsOn": ["build"],
