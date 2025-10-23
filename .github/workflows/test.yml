@@ -93,7 +93,8 @@ jobs:
       - name: Run tests (sharded)
         run: |
           # Set max threads per shard for optimal performance on GitHub Actions (4-core machines)
-          export VITEST_MAX_THREADS=7
+          # GitHub Actions runners have 4 cores: 1 main thread + 3 worker threads = 4 total
+          export VITEST_MAX_THREADS=3
           pnpm test:shard --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
         env:
           NODE_ENV: test
@@ -196,11 +197,8 @@ jobs:
           pattern: test-report-shard-*
           merge-multiple: true
 
-      - name: Merge test reports
-        run: pnpm test:merge-reports
-
-      - name: Generate coverage report
-        run: pnpm test:coverage
+      - name: Merge test reports and coverage
+        run: pnpm test:merge-reports --coverage.enabled=true --coverage.reporter=text --coverage.reporter=json --coverage.reporter=html --coverage.reporter=lcov --coverage.reporter=json-summary
         env:
           NODE_ENV: test
 
