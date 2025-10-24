@@ -147,7 +147,7 @@ export default defineConfig({
     // Coverage configuration (v4 optimizations)
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov', 'json-summary', 'blob'],
+      reporter: ['text', 'json', 'html', 'lcov', 'json-summary'],
 
       // Enhanced include/exclude patterns for v4
       include: [

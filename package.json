@@ -41,7 +41,7 @@
     "test:benchmark": "vitest bench",
     "test:typecheck": "vitest typecheck",
     "test:reporter": "vitest run --reporter=verbose --reporter=json --outputFile=test-results/results.json",
-    "test:shard": "vitest run --project=unit --project=integration --reporter=blob --coverage.enabled=true --coverage.reporter=blob",
+    "test:shard": "vitest run --project=unit --project=integration --reporter=blob --coverage.enabled=true",
     "test:merge-reports": "vitest run --merge-reports",
     "test:related": "vitest related",
     "playwright:install": "playwright install"

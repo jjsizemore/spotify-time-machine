@@ -59,6 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint-and-typecheck]
     strategy:
+      fail-fast: false # Continue running other shards even if one fails
       matrix:
         shardIndex: [1, 2, 3, 4]
         shardTotal: [4]
@@ -95,9 +96,21 @@ jobs:
           # Set max threads per shard for optimal performance on GitHub Actions (4-core machines)
           # GitHub Actions runners have 4 cores: 1 main thread + 3 worker threads = 4 total
           export VITEST_MAX_THREADS=3
+
+          # Debug: List test files that will be run
+          echo "📋 Test files for shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}:"
+          pnpm vitest list --project=unit --project=integration --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} || echo "No tests found for this shard"
+
+          # Run the shard
           pnpm test:shard --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
         env:
           NODE_ENV: test
+
+      - name: Debug - List report files
+        if: ${{ !cancelled() }}
+        run: |
+          echo "📁 Contents of .vitest-reports/:"
+          ls -lah .vitest-reports/ || echo "Directory does not exist"
 
       - name: Upload shard report
         if: ${{ !cancelled() }}
@@ -197,8 +210,16 @@ jobs:
           pattern: test-report-shard-*
           merge-multiple: true
 
+      - name: Debug - List downloaded reports
+        run: |
+          echo "📁 Downloaded reports:"
+          find .vitest-reports -type f -ls || echo "No reports found"
+          echo "📊 Total files: $(find .vitest-reports -type f | wc -l)"
+
       - name: Merge test reports and coverage
-        run: pnpm test:merge-reports --coverage.enabled=true --coverage.reporter=text --coverage.reporter=json --coverage.reporter=html --coverage.reporter=lcov --coverage.reporter=json-summary
+        run: |
+          echo "🔄 Merging reports from $(find .vitest-reports -name '*.json' | wc -l) blob files..."
+          pnpm test:merge-reports --coverage.enabled=true --coverage.reporter=text --coverage.reporter=json --coverage.reporter=html --coverage.reporter=lcov --coverage.reporter=json-summary
         env:
           NODE_ENV: test
 
