@@ -1,0 +1,87 @@
+name: Cache Cleanup
+
+on:
+  pull_request:
+    types:
+      - closed
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC to clean up stale caches
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup-pr-caches:
+    name: Cleanup PR Caches
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup PR branch caches
+        run: |
+          echo "🗑️  Cleaning up caches for PR #${{ github.event.pull_request.number }}"
+          echo "Fetching list of cache keys..."
+
+          # Get cache keys for this PR branch (up to 100 entries)
+          cacheKeysForPR=$(gh cache list --ref $BRANCH --limit 100 --json id --jq '.[].id')
+
+          if [ -z "$cacheKeysForPR" ]; then
+            echo "No caches found for this PR"
+            exit 0
+          fi
+
+          # Count caches
+          cacheCount=$(echo "$cacheKeysForPR" | wc -l)
+          echo "Found $cacheCount cache(s) to delete"
+
+          # Delete each cache (continue even if some deletions fail)
+          set +e
+          deletedCount=0
+          for cacheKey in $cacheKeysForPR; do
+            if gh cache delete $cacheKey; then
+              deletedCount=$((deletedCount + 1))
+            fi
+          done
+
+          echo "✅ Successfully deleted $deletedCount out of $cacheCount cache(s)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
+
+  cleanup-stale-caches:
+    name: Cleanup Stale Caches
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup old caches
+        run: |
+          echo "🗑️  Cleaning up stale caches older than 7 days"
+
+          # Get all caches sorted by last accessed time
+          allCaches=$(gh cache list --limit 100 --json id,key,createdAt,lastAccessedAt --jq '.[] | select(.lastAccessedAt < (now - 604800 | todate)) | .id')
+
+          if [ -z "$allCaches" ]; then
+            echo "No stale caches found"
+            exit 0
+          fi
+
+          # Count caches
+          cacheCount=$(echo "$allCaches" | wc -l)
+          echo "Found $cacheCount stale cache(s) to delete"
+
+          # Delete stale caches
+          set +e
+          deletedCount=0
+          for cacheId in $allCaches; do
+            if gh cache delete $cacheId; then
+              deletedCount=$((deletedCount + 1))
+            fi
+          done
+
+          echo "✅ Successfully deleted $deletedCount out of $cacheCount stale cache(s)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
