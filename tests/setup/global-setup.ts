@@ -2,6 +2,12 @@
  * Global Setup for Vitest
  * Runs once before all tests start and can provide context to tests
  * Available since Vitest v2+, enhanced in v4
+ *
+ * IMPORTANT: This setup provides TEST mock values, NOT production values from .env
+ * Tests must be isolated from actual environment configuration to ensure:
+ * - Reproducible test behavior across environments
+ * - No accidental use of production credentials in tests
+ * - Tests can run without requiring actual credentials
  */
 
 import type { TestProject } from 'vitest/node';
@@ -16,15 +22,19 @@ declare module 'vitest' {
 }
 
 export default function globalSetup(project: TestProject) {
-  // Provide global values that can be injected in tests
+  // Provide test mock values (NOT from production .env)
+  // Use explicit test values to maintain test isolation
+  // NEVER use getEnvOrDefault() here - that reads from actual .env file!
+
+  const testBaseUrl = process.env.TEST_BASE_URL || 'http://localhost:3000';
+  const testSpotifyClientId = process.env.TEST_SPOTIFY_CLIENT_ID || 'test-spotify-client-id';
+
   project.provide('testStartTime', Date.now());
-  project.provide('baseUrl', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000');
-  project.provide('spotifyClientId', process.env.SPOTIFY_CLIENT_ID || 'test-client-id');
+  project.provide('baseUrl', testBaseUrl);
+  project.provide('spotifyClientId', testSpotifyClientId);
 
   // Set up mock server or other global resources
   console.log('🧪 Setting up global test environment...');
-
-  // Initialize MSW or other mocking libraries here if needed
 
   // Handle test reruns (v3+ feature)
   project.onTestsRerun(async () => {

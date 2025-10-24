@@ -1,5 +1,9 @@
 export const CACHE_VERSION = 'v1'; // Increment to invalidate prior cache schemas
 
+import { getValidatedEnv } from './envConfig';
+
+const env = getValidatedEnv();
+
 interface CachedData<T> {
   timestamp: number;
   data: T;
@@ -18,7 +22,7 @@ interface CacheError {
 const BASE_CACHE_PREFIX = 'spotifyTimeMachineCache_';
 const CACHE_PREFIX = `${BASE_CACHE_PREFIX}${CACHE_VERSION}_`;
 
-export const debugEnabled = () => process.env.NEXT_PUBLIC_DEBUG === 'true';
+export const debugEnabled = () => env.NEXT_PUBLIC_DEBUG === 'true';
 
 function logCacheError(error: CacheError): void {
   const logMessage = [

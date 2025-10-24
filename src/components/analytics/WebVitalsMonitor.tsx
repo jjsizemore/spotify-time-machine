@@ -49,7 +49,7 @@ export default function WebVitalsMonitor() {
     });
 
     // Performance monitoring for development
-    if (process.env.NODE_ENV === 'development') {
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
       console.table({
         Metric: metric.name,
         Value: metric.value,
@@ -94,7 +94,7 @@ export default function WebVitalsMonitor() {
           // Skip layout shifts caused by user input
           if (layoutShiftEntry.hadRecentInput) continue;
 
-          if (process.env.NODE_ENV === 'development') {
+          if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
             console.log('Layout shift detected:', {
               value: layoutShiftEntry.value,
               sources: layoutShiftEntry.sources?.length || 0,
@@ -127,7 +127,7 @@ export default function WebVitalsMonitor() {
             resource_loading: navEntry.loadEventStart - navEntry.domContentLoadedEventStart,
           };
 
-          if (process.env.NODE_ENV === 'development') {
+          if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
             console.table(metrics);
           }
 

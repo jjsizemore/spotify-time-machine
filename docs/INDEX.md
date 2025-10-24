@@ -20,9 +20,16 @@ Currently no tutorial documents. Consider adding:
 
 _Practical guides for accomplishing specific tasks_
 
-- [CI/CD Optimization Guide](./how-to/CI_CD_OPTIMIZATION.md) - Complete guide to optimizing CI/CD pipeline
-- [CI/CD Summary](./how-to/CI_CD_SUMMARY.md) - Quick overview of CI/CD improvements
-- [Sharded Test Fixes](./how-to/SHARDED_TEST_FIXES.md) - Fixing and debugging sharded tests
+**CI/CD & Testing:**
+
+- [CI/CD Optimization Guide](./how-to/ci-cd-optimization.md) - Complete guide to optimizing CI/CD pipeline
+- [CI/CD Summary](./how-to/ci-cd-summary.md) - Quick overview of CI/CD improvements
+- [Sharded Test Fixes](./how-to/sharded-test-fixes.md) - Fixing and debugging sharded tests
+- [Codecov Setup](./how-to/codecov-setup.md) - Set up code coverage tracking
+
+**Configuration:**
+
+- [Environment Setup](./how-to/environment-setup.md) - Configure environment variables
 
 ### 📖 Reference (Information-Oriented)
 
@@ -31,20 +38,21 @@ _Technical descriptions and specifications_
 **Core Documentation:**
 
 - [README](./README.md) - Project overview and quick start
-- [LLM Context](./reference/LLM_CONTEXT.md) - Comprehensive project context for AI assistants
-- [TODO](./reference/TODO.md) - Feature implementation checklist and roadmap
-- [Branding Guide](./reference/BRANDING.md) - Spotify design guidelines and color tokens
+- [LLM Context](./reference/llm-context.md) - Comprehensive project context for AI assistants
+- [TODO](./reference/todo.md) - Feature implementation checklist and roadmap
+- [Branding Guide](./reference/branding.md) - Spotify design guidelines and color tokens
 
 **Quick References:**
 
-- [Quick Reference](./reference/QUICK_REFERENCE.md) - Fast lookup for common tasks
-- [CI/CD Quick Reference](./reference/CI_CD_QUICK_REFERENCE.md) - CI/CD commands and troubleshooting
+- [Quick Reference](./reference/quick-reference.md) - Fast lookup for common tasks
+- [CI/CD Quick Reference](./reference/ci-cd-quick-reference.md) - CI/CD commands and troubleshooting
+- [Environment Configuration](./reference/environment-configuration.md) - Complete environment variable reference
 
 **Testing & Debug References:**
 
-- [Sharded Test Debug Checklist](./reference/SHARDED_TEST_DEBUG_CHECKLIST.md) - Debugging test sharding issues
-- [Sharding Quick Debug](./reference/SHARDING_QUICK_DEBUG.md) - Fast debugging for test shards
-- [Sharding Verification](./reference/SHARDING_VERIFICATION.md) - Test shard verification procedures
+- [Sharded Test Debug Checklist](./reference/sharded-test-debug-checklist.md) - Debugging test sharding issues
+- [Sharding Quick Debug](./reference/sharding-quick-debug.md) - Fast debugging for test shards
+- [Sharding Verification](./reference/sharding-verification.md) - Test shard verification procedures
 
 ### 💡 Explanation (Understanding-Oriented)
 
@@ -52,24 +60,29 @@ _Background and context to deepen understanding_
 
 **Migration Guides:**
 
-- [Analytics Migration](./explanation/ANALYTICS_MIGRATION.md) - Analytics platform migration details
-- [Domain Migration](./explanation/DOMAIN_MIGRATION.md) - Domain transition process
-- [Oxlint Migration](./explanation/OXLINT_MIGRATION.md) - Switching from ESLint to Oxlint
+- [Analytics Migration](./explanation/analytics-migration.md) - Analytics platform migration details
+- [Domain Migration](./explanation/domain-migration.md) - Domain transition process
+- [Oxlint Migration](./explanation/oxlint-migration.md) - Switching from ESLint to Oxlint
+- [Environment Migration](./explanation/environment-migration.md) - Environment configuration system migration
+- [Migration Complete Summary](./explanation/migration-complete.md) - Process.env migration summary
 
 **Implementation Details:**
 
-- [Implementation Summary](./explanation/IMPLEMENTATION_SUMMARY.md) - Overview of major implementations
-- [Improvements Summary](./explanation/IMPROVEMENTS_SUMMARY.md) - Summary of project improvements
-- [DevOps Improvements](./explanation/DEVOPS_IMPROVEMENTS.md) - Infrastructure and DevOps enhancements
-- [Token Management](./explanation/TOKEN_MANAGEMENT.md) - Authentication and token handling
-- [Sharding Fix Applied](./explanation/SHARDING_FIX_APPLIED.md) - Test sharding implementation details
+- [Implementation Summary](./explanation/implementation-summary.md) - Overview of major implementations
+- [Improvements Summary](./explanation/improvements-summary.md) - Summary of project improvements
+- [DevOps Improvements](./explanation/devops-improvements.md) - Infrastructure and DevOps enhancements
+- [Token Management](./explanation/token-management.md) - Authentication and token handling
+- [Sharding Fix Applied](./explanation/sharding-fix-applied.md) - Test sharding implementation details
+- [Codecov Integration](./explanation/codecov-integration.md) - Code coverage integration architecture
+- [Test Environment Isolation](./explanation/test-environment-isolation.md) - Test isolation strategy
+- [MSW LocalStorage Issue](./explanation/msw-localstorage-issue.md) - MSW localStorage fix explanation
 
 ### 🛠️ Development (Developer Resources)
 
 _Tools, setup, and development workflows_
 
-- [Dev Tools](./development/DEV_TOOLS.md) - Developer experience and DevSecOps tools
-- [Tool Installation](./development/TOOL_INSTALLATION.md) - Installing and configuring development tools
+- [Dev Tools](./development/dev-tools.md) - Developer experience and DevSecOps tools
+- [Tool Installation](./development/tool-installation.md) - Installing and configuring development tools
 
 ---
 

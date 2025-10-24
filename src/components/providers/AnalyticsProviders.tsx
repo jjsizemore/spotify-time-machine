@@ -35,7 +35,7 @@ export function AnalyticsProviders() {
   return (
     <>
       {/* Google Analytics 4 - Only in Production */}
-      {process.env.NODE_ENV === 'production' && (
+      {typeof process !== 'undefined' && process.env.NODE_ENV === 'production' && (
         <>
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-CD6VHDL1HS"
@@ -62,7 +62,7 @@ export function AnalyticsProviders() {
         </>
       )}{' '}
       {/* Vercel Analytics - Only in Production */}
-      {process.env.NODE_ENV === 'production' ? (
+      {typeof process !== 'undefined' && process.env.NODE_ENV === 'production' ? (
         <>
           <Analytics />
           <SpeedInsights />

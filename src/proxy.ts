@@ -1,6 +1,7 @@
 import { ipAddress } from '@vercel/functions';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getValidatedEnv } from '@/lib/envConfig';
 
 // Define a basic rate limiting structure
 interface RateLimitEntry {
@@ -73,11 +74,13 @@ function isAuthenticated(request: NextRequest): boolean {
 
 // Next.js 16 proxy function (replaces middleware)
 export function proxy(request: NextRequest) {
+  const env = getValidatedEnv();
+
   // Get client IP
   const ip = ipAddress(request) || 'unknown';
 
   // Reduced logging - only log essential information
-  if (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DEBUG === 'true') {
+  if (env.NODE_ENV === 'development' || env.NEXT_PUBLIC_DEBUG === 'true') {
     console.log('[PROXY] Path:', request.nextUrl.pathname);
   }
 

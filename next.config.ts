@@ -2,6 +2,10 @@ import { withSentryConfig } from '@sentry/nextjs';
 import withFlowbiteReact from 'flowbite-react/plugin/nextjs';
 import type { NextConfig } from 'next';
 
+// Note: next.config.ts runs at build time and has limited access to runtime environment variables.
+// We use process.env directly for build-time config and only validated env for runtime values.
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['127.0.0.1'],
   reactStrictMode: true,
@@ -63,9 +67,9 @@ const nextConfig: NextConfig = {
 
   // Enhanced Compiler Optimizations for v16
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: NODE_ENV === 'production',
     // Remove React dev tools in production
-    reactRemoveProperties: process.env.NODE_ENV === 'production',
+    reactRemoveProperties: NODE_ENV === 'production',
     // Enable SWC minification
     styledComponents: true,
   },
@@ -96,7 +100,7 @@ const nextConfig: NextConfig = {
 
   // Enhanced runtime configuration
   env: {
-    NEXT_RUNTIME_ENV: process.env.NODE_ENV,
+    NEXT_RUNTIME_ENV: NODE_ENV,
     BUILD_ID: process.env.VERCEL_GIT_COMMIT_SHA || 'development',
   },
 
@@ -138,7 +142,7 @@ const nextConfig: NextConfig = {
             value: 'GNU Terry Pratchett',
           },
           // Content Security Policy - Only apply in production
-          ...(process.env.NODE_ENV === 'production'
+          ...(NODE_ENV === 'production'
             ? [
                 {
                   key: 'Content-Security-Policy',

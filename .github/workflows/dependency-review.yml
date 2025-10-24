@@ -23,15 +23,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
           # Fail the build if there are critical or high vulnerabilities
           fail-on-severity: critical
-          # Allow only certain license types
-          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, CC0-1.0, Unlicense
-          # Deny specific licenses (copyleft licenses)
-          deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-2.1, LGPL-3.0
+          # Allow only permissive licenses (deny-licenses is mutually exclusive with allow-licenses)
+          # Using allow-list approach for stricter security - only explicitly approved licenses
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, CC0-1.0, 0BSD, Unlicense, Python-2.0, BlueOak-1.0.0, CC-BY-3.0, CC-BY-4.0
           # Comment on PRs with vulnerability information
           comment-summary-in-pr: always
           # Include dependency name in summary

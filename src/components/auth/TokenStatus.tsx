@@ -20,7 +20,7 @@ export default function TokenStatus({ className = '' }: TokenStatusProps) {
   }, []);
 
   // Only show in development mode and after mounting
-  if (!mounted || process.env.NODE_ENV !== 'development') {
+  if (!mounted || (typeof process !== 'undefined' && process.env.NODE_ENV !== 'development')) {
     return null;
   }
 

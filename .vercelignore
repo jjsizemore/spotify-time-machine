@@ -1,0 +1,2 @@
+# Prevent deployment keys from being uploaded with Vercel builds
+.env.keys

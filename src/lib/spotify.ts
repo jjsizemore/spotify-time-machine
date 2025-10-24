@@ -2,9 +2,11 @@
 // This eliminates rate limiting issues and provides robust error handling
 
 import * as Sentry from '@sentry/nextjs';
+import { getValidatedEnv } from './envConfig';
 
 const SPOTIFY_BASE_URL = 'https://api.spotify.com/v1';
 const SPOTIFY_ACCOUNTS_URL = 'https://accounts.spotify.com/api/token';
+const env = getValidatedEnv();
 
 export interface SpotifyError {
   status: number;
@@ -475,7 +477,7 @@ export const refreshAccessToken = async (refreshToken: string) => {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             Authorization: `Basic ${Buffer.from(
-              `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
+              `${env.SPOTIFY_CLIENT_ID}:${env.SPOTIFY_CLIENT_SECRET}`
             ).toString('base64')}`,
           },
           body: new URLSearchParams({

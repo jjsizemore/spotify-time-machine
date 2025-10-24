@@ -2,19 +2,23 @@
  * Robust analytics utilities with error handling
  */
 
+import { getValidatedEnv } from './envConfig';
+
+const env = getValidatedEnv();
+
 export const initializeAnalytics = async () => {
   if (globalThis.window === undefined) {
     return;
   }
 
   // Only initialize in production or when explicitly enabled
-  if (process.env.NODE_ENV === 'development' && !process.env.FORCE_ANALYTICS) {
+  if (env.NODE_ENV === 'development' && !env.FORCE_ANALYTICS) {
     console.log('📊 Analytics disabled in development mode');
     return;
   }
 
-  const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-  const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com';
+  const posthogKey = env.NEXT_PUBLIC_POSTHOG_KEY;
+  const posthogHost = env.NEXT_PUBLIC_POSTHOG_HOST;
 
   if (!posthogKey) {
     console.warn('PostHog key not configured');
@@ -28,7 +32,7 @@ export const initializeAnalytics = async () => {
       mode: 'no-cors',
     }).catch(() => null);
 
-    if (!testResponse && process.env.NODE_ENV === 'development') {
+    if (!testResponse && env.NODE_ENV === 'development') {
       console.warn('PostHog endpoint not reachable, skipping initialization');
       return;
     }
@@ -60,7 +64,7 @@ export const initializeAnalytics = async () => {
 
     return posthog.default;
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
+    if (env.NODE_ENV === 'development') {
       console.warn('Analytics initialization failed:', error);
     }
     // Fail silently in production
@@ -77,7 +81,7 @@ export const trackEvent = (eventName: string, properties?: Record<string, any>) 
       posthog.capture(eventName, properties);
     }
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
+    if (env.NODE_ENV === 'development') {
       console.warn('Event tracking failed:', error);
     }
   }

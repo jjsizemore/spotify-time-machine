@@ -7,21 +7,25 @@
 
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import { setupServer } from 'msw/node';
-import { http, HttpResponse } from 'msw';
+import { rest } from 'msw';
 
-// Mock environment variables
+// Mock environment variables with valid values
 vi.stubEnv('SPOTIFY_CLIENT_ID', 'test-client-id');
 vi.stubEnv('SPOTIFY_CLIENT_SECRET', 'test-client-secret');
-vi.stubEnv('NEXTAUTH_SECRET', 'test-secret');
+vi.stubEnv('NEXTAUTH_SECRET', 'test-secret-that-is-at-least-32-characters-long-for-validation');
 vi.stubEnv('NEXTAUTH_URL', 'http://localhost:3000');
+vi.stubEnv('NEXT_PUBLIC_GA_ID', 'G-TEST123456');
+vi.stubEnv('NEXT_PUBLIC_POSTHOG_KEY', 'test-posthog-key');
+vi.stubEnv('NEXT_PUBLIC_POSTHOG_HOST', 'https://app.posthog.com');
+vi.stubEnv('NODE_ENV', 'test');
 
 // Mock the Spotify token endpoint
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
 
 const server = setupServer(
   // Mock successful token refresh
-  http.post(SPOTIFY_TOKEN_URL, async ({ request }) => {
-    const body = await request.text();
+  rest.post(SPOTIFY_TOKEN_URL, async (req, res, ctx) => {
+    const body = await req.text();
     const params = new URLSearchParams(body);
 
     const grantType = params.get('grant_type');
@@ -29,33 +33,36 @@ const server = setupServer(
 
     // Validate grant type
     if (grantType !== 'refresh_token') {
-      return HttpResponse.json({ error: 'unsupported_grant_type' }, { status: 400 });
+      return res(ctx.status(400), ctx.json({ error: 'unsupported_grant_type' }));
     }
 
     // Validate refresh token is present
     if (!refreshToken) {
-      return HttpResponse.json(
-        { error: 'invalid_request', error_description: 'Missing refresh_token' },
-        { status: 400 }
+      return res(
+        ctx.status(400),
+        ctx.json({ error: 'invalid_request', error_description: 'Missing refresh_token' })
       );
     }
 
     // Simulate invalid refresh token
     if (refreshToken === 'invalid-token') {
-      return HttpResponse.json(
-        { error: 'invalid_grant', error_description: 'Invalid refresh token' },
-        { status: 400 }
+      return res(
+        ctx.status(400),
+        ctx.json({ error: 'invalid_grant', error_description: 'Invalid refresh token' })
       );
     }
 
     // Return successful token refresh
-    return HttpResponse.json({
-      access_token: 'new-access-token-' + Date.now(),
-      token_type: 'Bearer',
-      expires_in: 3600,
-      refresh_token: refreshToken, // Return same or new refresh token
-      scope: 'user-read-email user-library-read',
-    });
+    return res(
+      ctx.status(200),
+      ctx.json({
+        access_token: 'new-access-token-' + Date.now(),
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: refreshToken, // Return same or new refresh token
+        scope: 'user-read-email user-library-read',
+      })
+    );
   })
 );
 
@@ -113,8 +120,8 @@ describe('Authentication Flow - Integration Tests', () => {
     it('should handle network errors during refresh', async () => {
       // Override the handler to simulate network error
       server.use(
-        http.post(SPOTIFY_TOKEN_URL, () => {
-          return HttpResponse.error();
+        rest.post(SPOTIFY_TOKEN_URL, (req, res) => {
+          return res.networkError('Network error');
         })
       );
 
@@ -126,10 +133,10 @@ describe('Authentication Flow - Integration Tests', () => {
     it('should handle server errors during refresh', async () => {
       // Override the handler to simulate server error
       server.use(
-        http.post(SPOTIFY_TOKEN_URL, () => {
-          return HttpResponse.json(
-            { error: 'server_error', error_description: 'Internal server error' },
-            { status: 500 }
+        rest.post(SPOTIFY_TOKEN_URL, (req, res, ctx) => {
+          return res(
+            ctx.status(500),
+            ctx.json({ error: 'server_error', error_description: 'Internal server error' })
           );
         })
       );
@@ -145,15 +152,18 @@ describe('Authentication Flow - Integration Tests', () => {
       let authHeader: string | null = null;
 
       server.use(
-        http.post(SPOTIFY_TOKEN_URL, async ({ request }) => {
-          authHeader = request.headers.get('Authorization');
+        rest.post(SPOTIFY_TOKEN_URL, (req, res, ctx) => {
+          authHeader = req.headers.get('Authorization');
 
-          return HttpResponse.json({
-            access_token: 'new-token',
-            token_type: 'Bearer',
-            expires_in: 3600,
-            refresh_token: 'valid-refresh-token',
-          });
+          return res(
+            ctx.status(200),
+            ctx.json({
+              access_token: 'new-token',
+              token_type: 'Bearer',
+              expires_in: 3600,
+              refresh_token: 'valid-refresh-token',
+            })
+          );
         })
       );
 
@@ -168,15 +178,18 @@ describe('Authentication Flow - Integration Tests', () => {
       let contentType: string | null = null;
 
       server.use(
-        http.post(SPOTIFY_TOKEN_URL, async ({ request }) => {
-          contentType = request.headers.get('Content-Type');
+        rest.post(SPOTIFY_TOKEN_URL, (req, res, ctx) => {
+          contentType = req.headers.get('Content-Type');
 
-          return HttpResponse.json({
-            access_token: 'new-token',
-            token_type: 'Bearer',
-            expires_in: 3600,
-            refresh_token: 'valid-refresh-token',
-          });
+          return res(
+            ctx.status(200),
+            ctx.json({
+              access_token: 'new-token',
+              token_type: 'Bearer',
+              expires_in: 3600,
+              refresh_token: 'valid-refresh-token',
+            })
+          );
         })
       );
 
@@ -218,13 +231,13 @@ describe('Authentication Flow - Integration Tests', () => {
   describe('Token Refresh Error Handling', () => {
     it('should provide detailed error on 400 response', async () => {
       server.use(
-        http.post(SPOTIFY_TOKEN_URL, () => {
-          return HttpResponse.json(
-            {
+        rest.post(SPOTIFY_TOKEN_URL, (req, res, ctx) => {
+          return res(
+            ctx.status(400),
+            ctx.json({
               error: 'invalid_client',
               error_description: 'Client authentication failed',
-            },
-            { status: 400 }
+            })
           );
         })
       );
@@ -242,15 +255,11 @@ describe('Authentication Flow - Integration Tests', () => {
 
     it('should handle rate limiting on token endpoint', async () => {
       server.use(
-        http.post(SPOTIFY_TOKEN_URL, () => {
-          return HttpResponse.json(
-            { error: 'too_many_requests' },
-            {
-              status: 429,
-              headers: {
-                'Retry-After': '60',
-              },
-            }
+        rest.post(SPOTIFY_TOKEN_URL, (req, res, ctx) => {
+          return res(
+            ctx.status(429),
+            ctx.set('Retry-After', '60'),
+            ctx.json({ error: 'too_many_requests' })
           );
         })
       );
@@ -269,13 +278,16 @@ describe('Authentication Flow - Integration Tests', () => {
   describe('Token Response Format', () => {
     it('should handle token response without new refresh token', async () => {
       server.use(
-        http.post(SPOTIFY_TOKEN_URL, () => {
-          return HttpResponse.json({
-            access_token: 'new-access-token',
-            token_type: 'Bearer',
-            expires_in: 3600,
-            // No refresh_token in response - should use original
-          });
+        rest.post(SPOTIFY_TOKEN_URL, (req, res, ctx) => {
+          return res(
+            ctx.status(200),
+            ctx.json({
+              access_token: 'new-access-token',
+              token_type: 'Bearer',
+              expires_in: 3600,
+              // No refresh_token in response - should use original
+            })
+          );
         })
       );
 
@@ -290,13 +302,16 @@ describe('Authentication Flow - Integration Tests', () => {
 
     it('should use new refresh token when provided', async () => {
       server.use(
-        http.post(SPOTIFY_TOKEN_URL, () => {
-          return HttpResponse.json({
-            access_token: 'new-access-token',
-            token_type: 'Bearer',
-            expires_in: 3600,
-            refresh_token: 'new-refresh-token',
-          });
+        rest.post(SPOTIFY_TOKEN_URL, (req, res, ctx) => {
+          return res(
+            ctx.status(200),
+            ctx.json({
+              access_token: 'new-access-token',
+              token_type: 'Bearer',
+              expires_in: 3600,
+              refresh_token: 'new-refresh-token',
+            })
+          );
         })
       );
 
@@ -312,16 +327,19 @@ describe('Authentication Flow - Integration Tests', () => {
   describe('Cache Control', () => {
     it('should use no-cache for token refresh requests', async () => {
       server.use(
-        http.post(SPOTIFY_TOKEN_URL, async () => {
+        rest.post(SPOTIFY_TOKEN_URL, (req, res, ctx) => {
           // Check if request was made with no-cache
           // This is implementation-dependent
 
-          return HttpResponse.json({
-            access_token: 'new-token',
-            token_type: 'Bearer',
-            expires_in: 3600,
-            refresh_token: 'valid-refresh-token',
-          });
+          return res(
+            ctx.status(200),
+            ctx.json({
+              access_token: 'new-token',
+              token_type: 'Bearer',
+              expires_in: 3600,
+              refresh_token: 'valid-refresh-token',
+            })
+          );
         })
       );
 

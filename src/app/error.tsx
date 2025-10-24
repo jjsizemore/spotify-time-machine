@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { getValidatedEnv } from '@/lib/envConfig';
 import ActionButton from '@/ui/ActionButton';
 
 export default function ErrorBoundary({
@@ -14,6 +15,8 @@ export default function ErrorBoundary({
     // Log the error to an error reporting service
     console.error('Application error:', error);
   }, [error]);
+
+  const env = getValidatedEnv();
 
   return (
     <div className="min-h-screen bg-spotify-black flex items-center justify-center px-4">
@@ -42,7 +45,7 @@ export default function ErrorBoundary({
           </ActionButton>
         </div>
 
-        {process.env.NODE_ENV === 'development' && (
+        {env.NODE_ENV === 'development' && (
           <details className="mt-6 text-left bg-spotify-dark-gray p-4 rounded-lg">
             <summary className="text-spotify-white cursor-pointer">
               Error Details (Development Only)

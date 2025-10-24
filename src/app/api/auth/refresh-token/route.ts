@@ -2,6 +2,9 @@ import { JWT, getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { refreshAccessToken } from '@/lib/spotify';
+import { getValidatedEnv } from '@/lib/envConfig';
+
+const env = getValidatedEnv();
 
 // Enhanced POST handler with better request handling and context
 export async function POST(request: NextRequest) {
@@ -29,7 +32,7 @@ export async function POST(request: NextRequest) {
         // Using async pattern for better performance
         const nextAuthToken: JWT | null = await getToken({
           req: request,
-          secret: process.env.NEXTAUTH_SECRET,
+          secret: env.NEXTAUTH_SECRET,
         });
 
         if (!nextAuthToken?.refreshToken) {

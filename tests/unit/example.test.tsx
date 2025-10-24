@@ -1,5 +1,25 @@
 /**
  * Example Unit Tests showcasing Vitest v4 features
+ *
+ * Environment Variables:
+ * ✅ Test values are injected via global-setup.ts
+ * ✅ Tests use MOCK credentials, not real .env values
+ * ✅ This ensures tests are isolated from production environment
+ *
+ * Injected Test Values:
+ * - baseUrl: 'http://localhost:3000' (mock - NOT from .env)
+ * - spotifyClientId: 'test-spotify-client-id' (mock - NOT from .env)
+ * - testStartTime: Current timestamp
+ *
+ * Best Practices:
+ * ✅ Use inject() to retrieve test values
+ * ✅ Tests are reproducible across all environments
+ * ✅ No production credentials in tests
+ * ✅ Tests can run without .env file
+ *
+ * @see tests/setup/global-setup.ts - Test environment setup (provides mock values)
+ * @see .env.test - Test environment configuration
+ * @see TEST_ENVIRONMENT_ISOLATION_BUG.md - Why tests need isolation from .env
  */
 
 import { describe, it, expect, vi, inject, beforeAll, afterEach } from 'vitest';
@@ -139,8 +159,44 @@ describe('Context Injection Tests', () => {
     const testStartTime = inject('testStartTime');
 
     expect(baseUrl).toBe('http://localhost:3000');
-    expect(spotifyClientId).toBe('test-client-id');
+    expect(spotifyClientId).toBe('test-spotify-client-id');
     expect(testStartTime).toBeTypeOf('number');
+  });
+});
+
+// Test environment isolation verification
+describe('Test Environment Isolation', () => {
+  it('should use test mock values, not production .env values', () => {
+    const spotifyClientId = inject('spotifyClientId');
+
+    // Verify it's the test mock value
+    expect(spotifyClientId).toBe('test-spotify-client-id');
+
+    // Ensure it's NOT an actual encrypted credential from .env
+    expect(spotifyClientId).not.toContain('encrypted:');
+
+    // Ensure it's NOT a base64-encoded encrypted string
+    expect(String(spotifyClientId)).not.toMatch(/^[A-Za-z0-9+/=]{50,}$/);
+  });
+
+  it('should use test base URL', () => {
+    const baseUrl = inject('baseUrl');
+
+    // Verify it's the test mock value
+    expect(baseUrl).toBe('http://localhost:3000');
+
+    // Should be a valid URL
+    expect(String(baseUrl)).toMatch(/^https?:\/\//);
+  });
+
+  it('should have consistent test values across test runs', () => {
+    const spotifyClientId = inject('spotifyClientId');
+    const baseUrl = inject('baseUrl');
+
+    // These should always be the same predictable test values
+    // (not dependent on .env file or environment)
+    expect(spotifyClientId).toEqual('test-spotify-client-id');
+    expect(baseUrl).toEqual('http://localhost:3000');
   });
 });
 

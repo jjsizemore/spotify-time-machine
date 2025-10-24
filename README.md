@@ -3,6 +3,7 @@
 A Next.js application that lets you explore your Spotify listening history, create playlists based on specific time periods, and visualize your music journey. Now featuring **enterprise-grade infrastructure** with advanced token management, request queuing, and comprehensive debugging tools.
 
 [![CI/CD](https://github.com/jjsizemore/spotify-time-machine/actions/workflows/ci.yml/badge.svg)](https://github.com/jjsizemore/spotify-time-machine/actions)
+[![codecov](https://codecov.io/github/jjsizemore/spotify-time-machine/branch/main/graph/badge.svg)](https://codecov.io/github/jjsizemore/spotify-time-machine)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## 🚀 Quick Start
@@ -45,7 +46,6 @@ Visit [http://127.0.0.1:3000](http://127.0.0.1:3000) to view the application.
 **For Developers:**
 
 - [LLM Context](./docs/reference/LLM_CONTEXT.md) - Comprehensive project context
-- [Claude AI Guide](./docs/reference/CLAUDE.md) - AI assistant guidelines
 - [TODO Roadmap](./docs/reference/TODO.md) - Feature implementation checklist
 - [Quick Reference](./docs/reference/QUICK_REFERENCE.md) - Common commands and workflows
 
@@ -56,7 +56,7 @@ Visit [http://127.0.0.1:3000](http://127.0.0.1:3000) to view the application.
 
 ## 🔧 Tech Stack
 
-- **Framework:** Next.js 15.3.3 (App Router)
+- **Framework:** Next.js 16 (App Router)
 - **Runtime:** React 19.1.0
 - **Language:** TypeScript 5.8.3
 - **Styling:** Tailwind CSS 4.1.10

@@ -8,37 +8,46 @@ import { createMocks } from 'node-mocks-http';
 
 // Mock MSW for API mocking
 import { setupServer } from 'msw/node';
-import { http, HttpResponse } from 'msw';
+import { rest } from 'msw';
 
 // Mock Spotify API responses
 const server = setupServer(
-  http.get('https://api.spotify.com/v1/me', () => {
-    return HttpResponse.json({
-      id: 'test-user',
-      display_name: 'Test User',
-      email: 'test@example.com',
-    });
+  rest.get('https://api.spotify.com/v1/me', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        id: 'test-user',
+        display_name: 'Test User',
+        email: 'test@example.com',
+      })
+    );
   }),
 
-  http.get('https://api.spotify.com/v1/me/top/tracks', () => {
-    return HttpResponse.json({
-      items: [
-        {
-          id: '4uLU6hMCjMI75M1A2tKUQC',
-          name: 'Test Track',
-          artists: [{ name: 'Test Artist' }],
-          duration_ms: 180000,
-        },
-      ],
-    });
+  rest.get('https://api.spotify.com/v1/me/top/tracks', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        items: [
+          {
+            id: '4uLU6hMCjMI75M1A2tKUQC',
+            name: 'Test Track',
+            artists: [{ name: 'Test Artist' }],
+            duration_ms: 180000,
+          },
+        ],
+      })
+    );
   }),
 
-  http.post('https://accounts.spotify.com/api/token', () => {
-    return HttpResponse.json({
-      access_token: 'new-access-token',
-      refresh_token: 'new-refresh-token',
-      expires_in: 3600,
-    });
+  rest.post('https://accounts.spotify.com/api/token', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        access_token: 'new-access-token',
+        refresh_token: 'new-refresh-token',
+        expires_in: 3600,
+      })
+    );
   })
 );
 
@@ -117,8 +126,8 @@ describe('API Integration Tests', () => {
     it('should handle refresh token errors', async () => {
       // Override the MSW handler for this test
       server.use(
-        http.post('https://accounts.spotify.com/api/token', () => {
-          return HttpResponse.json({ error: 'invalid_grant' }, { status: 400 });
+        rest.post('https://accounts.spotify.com/api/token', (req, res, ctx) => {
+          return res(ctx.status(400), ctx.json({ error: 'invalid_grant' }));
         })
       );
 
@@ -167,8 +176,8 @@ describe('API Integration Tests', () => {
     it('should handle network errors gracefully', async () => {
       // Test with unreachable endpoint
       server.use(
-        http.get('https://api.spotify.com/v1/me', () => {
-          return HttpResponse.error();
+        rest.get('https://api.spotify.com/v1/me', (req, res) => {
+          return res.networkError('Network error');
         })
       );
 

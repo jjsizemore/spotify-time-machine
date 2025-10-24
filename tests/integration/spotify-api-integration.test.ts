@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeAll, afterAll, afterEach, beforeEach } from 'vitest';
 import { setupServer } from 'msw/node';
-import { http, HttpResponse } from 'msw';
+import { rest } from 'msw';
 import { spotifyApi } from '../../src/lib/spotify';
 
 const SPOTIFY_BASE_URL = 'https://api.spotify.com/v1';
@@ -82,65 +82,80 @@ const mockUser = {
 };
 
 const server = setupServer(
-  http.get(`${SPOTIFY_BASE_URL}/me/top/tracks`, ({ request }) => {
-    const url = new URL(request.url);
+  rest.get(`${SPOTIFY_BASE_URL}/me/top/tracks`, (req, res, ctx) => {
+    const url = new URL(req.url);
     const timeRange = url.searchParams.get('time_range') || 'medium_term';
 
-    return HttpResponse.json({
-      ...mockTopTracks,
-      time_range: timeRange,
-    });
+    return res(
+      ctx.status(200),
+      ctx.json({
+        ...mockTopTracks,
+        time_range: timeRange,
+      })
+    );
   }),
 
-  http.get(`${SPOTIFY_BASE_URL}/me/top/artists`, ({ request }) => {
-    const url = new URL(request.url);
+  rest.get(`${SPOTIFY_BASE_URL}/me/top/artists`, (req, res, ctx) => {
+    const url = new URL(req.url);
     const timeRange = url.searchParams.get('time_range') || 'medium_term';
 
-    return HttpResponse.json({
-      ...mockTopArtists,
-      time_range: timeRange,
-    });
+    return res(
+      ctx.status(200),
+      ctx.json({
+        ...mockTopArtists,
+        time_range: timeRange,
+      })
+    );
   }),
 
-  http.get(`${SPOTIFY_BASE_URL}/me/player/recently-played`, () => {
-    return HttpResponse.json(mockRecentlyPlayed);
+  rest.get(`${SPOTIFY_BASE_URL}/me/player/recently-played`, (req, res, ctx) => {
+    return res(ctx.status(200), ctx.json(mockRecentlyPlayed));
   }),
 
-  http.get(`${SPOTIFY_BASE_URL}/me`, () => {
-    return HttpResponse.json(mockUser);
+  rest.get(`${SPOTIFY_BASE_URL}/me`, (req, res, ctx) => {
+    return res(ctx.status(200), ctx.json(mockUser));
   }),
 
-  http.get(`${SPOTIFY_BASE_URL}/artists`, ({ request }) => {
-    const url = new URL(request.url);
+  rest.get(`${SPOTIFY_BASE_URL}/artists`, (req, res, ctx) => {
+    const url = new URL(req.url);
     const ids = url.searchParams.get('ids')?.split(',') || [];
 
-    return HttpResponse.json({
-      artists: ids.map((id) => ({
-        id,
-        name: `Artist ${id}`,
-        genres: ['test-genre'],
-        popularity: 75,
-      })),
-    });
+    return res(
+      ctx.status(200),
+      ctx.json({
+        artists: ids.map((id) => ({
+          id,
+          name: `Artist ${id}`,
+          genres: ['test-genre'],
+          popularity: 75,
+        })),
+      })
+    );
   }),
 
-  http.post(`${SPOTIFY_BASE_URL}/users/:userId/playlists`, async ({ request, params }) => {
-    const body = (await request.json()) as { name: string; description?: string; public?: boolean };
+  rest.post(`${SPOTIFY_BASE_URL}/users/:userId/playlists`, async (req, res, ctx) => {
+    const body = (await req.json()) as { name: string; description?: string; public?: boolean };
 
-    return HttpResponse.json({
-      id: 'playlist123',
-      name: body.name,
-      description: body.description || '',
-      public: body.public || false,
-      owner: { id: params.userId },
-      tracks: { total: 0 },
-    });
+    return res(
+      ctx.status(200),
+      ctx.json({
+        id: 'playlist123',
+        name: body.name,
+        description: body.description || '',
+        public: body.public || false,
+        owner: { id: req.params.userId },
+        tracks: { total: 0 },
+      })
+    );
   }),
 
-  http.post(`${SPOTIFY_BASE_URL}/playlists/:playlistId/tracks`, async () => {
-    return HttpResponse.json({
-      snapshot_id: 'snapshot123',
-    });
+  rest.post(`${SPOTIFY_BASE_URL}/playlists/:playlistId/tracks`, async (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        snapshot_id: 'snapshot123',
+      })
+    );
   })
 );
 
@@ -293,8 +308,8 @@ describe('Spotify API Integration Tests', () => {
   describe('Error Handling Integration', () => {
     it('should handle 404 responses', async () => {
       server.use(
-        http.get(`${SPOTIFY_BASE_URL}/me/top/tracks`, () => {
-          return HttpResponse.json({ error: { message: 'Not found' } }, { status: 404 });
+        rest.get(`${SPOTIFY_BASE_URL}/me/top/tracks`, (req, res, ctx) => {
+          return res(ctx.status(404), ctx.json({ error: { message: 'Not found' } }));
         })
       );
 
@@ -303,11 +318,8 @@ describe('Spotify API Integration Tests', () => {
 
     it('should handle 500 server errors', async () => {
       server.use(
-        http.get(`${SPOTIFY_BASE_URL}/me/top/artists`, () => {
-          return HttpResponse.json(
-            { error: { message: 'Internal server error' } },
-            { status: 500 }
-          );
+        rest.get(`${SPOTIFY_BASE_URL}/me/top/artists`, (req, res, ctx) => {
+          return res(ctx.status(500), ctx.json({ error: { message: 'Internal server error' } }));
         })
       );
 
@@ -316,8 +328,8 @@ describe('Spotify API Integration Tests', () => {
 
     it('should handle network errors', async () => {
       server.use(
-        http.get(`${SPOTIFY_BASE_URL}/me/top/tracks`, () => {
-          return HttpResponse.error();
+        rest.get(`${SPOTIFY_BASE_URL}/me/top/tracks`, (req, res) => {
+          return res.networkError('Network error');
         })
       );
 
@@ -345,9 +357,9 @@ describe('Spotify API Integration Tests', () => {
       let callCount = 0;
 
       server.use(
-        http.get(`${SPOTIFY_BASE_URL}/me/top/tracks`, () => {
+        rest.get(`${SPOTIFY_BASE_URL}/me/top/tracks`, (req, res, ctx) => {
           callCount++;
-          return HttpResponse.json(mockTopTracks);
+          return res(ctx.status(200), ctx.json(mockTopTracks));
         })
       );
 
@@ -366,13 +378,11 @@ describe('Spotify API Integration Tests', () => {
   describe('Rate Limiting Behavior', () => {
     it('should handle rate limit responses', async () => {
       server.use(
-        http.get(`${SPOTIFY_BASE_URL}/me/top/tracks`, () => {
-          return HttpResponse.json(
-            { error: { message: 'Rate limit exceeded' } },
-            {
-              status: 429,
-              headers: { 'Retry-After': '1' },
-            }
+        rest.get(`${SPOTIFY_BASE_URL}/me/top/tracks`, (req, res, ctx) => {
+          return res(
+            ctx.status(429),
+            ctx.set('Retry-After', '1'),
+            ctx.json({ error: { message: 'Rate limit exceeded' } })
           );
         })
       );

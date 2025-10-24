@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { GoogleTagManager } from '@next/third-parties/google';
 import { ThemeModeScript } from 'flowbite-react';
 import Script from 'next/script';
+import { getValidatedEnv } from '@/lib/envConfig';
 import WebVitalsMonitor from '@/analytics/WebVitalsMonitor';
 import TokenStatus from '@/auth/TokenStatus';
 import { LayoutContent } from '@/layout/LayoutContent';
@@ -37,6 +38,7 @@ export const metadata = generateEnhancedMetadata({
 });
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const env = getValidatedEnv();
   const webAppSchema = generateWebApplicationSchema();
   const organizationSchema = generateOrganizationSchema();
 
@@ -118,7 +120,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </NextAuthProvider>
 
           {/* Service Worker Registration for PWA - Only in Production */}
-          {process.env.NODE_ENV === 'production' && (
+          {env.NODE_ENV === 'production' && (
             <Script
               id="service-worker"
               strategy="afterInteractive"

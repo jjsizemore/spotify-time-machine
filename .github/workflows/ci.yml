@@ -81,11 +81,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - run: curl -sfS https://dotenvx.sh/install.sh | sh
+
       - name: Build
         run: pnpm run build
         env:
           # Disable telemetry during build
           NEXT_TELEMETRY_DISABLED: 1
+          DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
 
       - name: Cache build output
         uses: actions/cache/save@v4

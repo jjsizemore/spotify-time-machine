@@ -35,7 +35,7 @@ export default defineConfig({
         test: {
           name: 'integration',
           include: ['tests/integration/**/*.{test,spec}.{js,jsx,ts,tsx}'],
-          environment: 'node',
+          environment: 'happy-dom', // Changed from 'node' - provides browser APIs for MSW
           setupFiles: ['./tests/setup/setup-files.ts'],
           testTimeout: 15000, // Longer timeout for integration tests
           hookTimeout: 15000,

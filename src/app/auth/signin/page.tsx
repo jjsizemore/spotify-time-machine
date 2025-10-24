@@ -218,7 +218,7 @@ function SignInContent() {
           </div>
 
           {/* Technical Details (for debugging) */}
-          {process.env.NODE_ENV === 'development' && (
+          {typeof process !== 'undefined' && process.env.NODE_ENV === 'development' && (
             <details className="mt-4 text-left">
               <summary className="text-xs text-spotify-light-gray cursor-pointer hover:text-spotify-white">
                 Technical Details (Dev Mode)
