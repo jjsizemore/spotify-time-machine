@@ -91,7 +91,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Count test files and adjust sharding
+        id: test-count
+        run: |
+          # Count test files for unit and integration projects
+          TEST_COUNT=$(pnpm vitest list --project=unit --project=integration 2>&1 | grep -E '\.test\.|\.spec\.' | wc -l || echo "0")
+          echo "Test file count: $TEST_COUNT"
+          echo "test_count=$TEST_COUNT" >> $GITHUB_OUTPUT
+
+          # Determine if we should run this shard
+          SHARD_TOTAL=${{ matrix.shardTotal }}
+          if [ "$TEST_COUNT" -lt "$SHARD_TOTAL" ]; then
+            echo "⚠️  Only $TEST_COUNT test files found, but trying to create $SHARD_TOTAL shards"
+            echo "This shard (${{ matrix.shardIndex }}/${{ matrix.shardTotal }}) may be skipped if no tests are assigned"
+            echo "should_skip=false" >> $GITHUB_OUTPUT
+          else
+            echo "should_skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run tests (sharded)
+        if: steps.test-count.outputs.should_skip != 'true'
         run: |
           # Set max threads per shard for optimal performance on GitHub Actions (4-core machines)
           # GitHub Actions runners have 4 cores: 1 main thread + 3 worker threads = 4 total
@@ -99,7 +118,16 @@ jobs:
 
           # Debug: List test files that will be run
           echo "📋 Test files for shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}:"
-          pnpm vitest list --project=unit --project=integration --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} || echo "No tests found for this shard"
+          TEST_FILES=$(pnpm vitest list --project=unit --project=integration --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} 2>&1 || true)
+          echo "$TEST_FILES"
+
+          # Check if this shard has any tests
+          if echo "$TEST_FILES" | grep -q "must be a smaller than count"; then
+            echo "⚠️  No tests assigned to this shard, creating empty report"
+            mkdir -p .vitest-reports
+            echo '{"version":"1","config":{},"files":[]}' > .vitest-reports/blob-${{ matrix.shardIndex }}-${{ matrix.shardTotal }}.json
+            exit 0
+          fi
 
           # Run the shard
           pnpm test:shard --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
