@@ -32,7 +32,6 @@ _Technical descriptions and specifications_
 
 - [README](./README.md) - Project overview and quick start
 - [LLM Context](./reference/LLM_CONTEXT.md) - Comprehensive project context for AI assistants
-- [Claude.md](./reference/CLAUDE.md) - Guidelines for Claude AI when working with this codebase
 - [TODO](./reference/TODO.md) - Feature implementation checklist and roadmap
 - [Branding Guide](./reference/BRANDING.md) - Spotify design guidelines and color tokens
 
@@ -82,11 +81,6 @@ _Tools, setup, and development workflows_
 2. Review [LLM Context](./reference/LLM_CONTEXT.md) for comprehensive project overview
 3. Check [TODO](./reference/TODO.md) for current priorities
 
-**Using AI assistants?**
-
-- Refer to [Claude.md](./reference/CLAUDE.md) for AI-specific guidance
-- Use [LLM Context](./reference/LLM_CONTEXT.md) for complete project context
-
 **Need to accomplish a specific task?**
 
 - Browse the [How-To Guides](#-how-to-guides-task-oriented)
@@ -117,7 +111,6 @@ docs/
 │   └── SHARDED_TEST_FIXES.md
 ├── reference/                       # Technical reference materials
 │   ├── BRANDING.md
-│   ├── CLAUDE.md
 │   ├── LLM_CONTEXT.md
 │   ├── TODO.md
 │   ├── QUICK_REFERENCE.md
@@ -185,9 +178,9 @@ docs/
 3. [Dev Tools](./development/DEV_TOOLS.md)
 4. [TODO](./reference/TODO.md)
 
-**AI Assistant (Claude, GitHub Copilot, etc.):**
+**AI Assistant (Kilo Code, GitHub Copilot, etc.):**
 
-1. [Claude.md](./reference/CLAUDE.md)
+1. [Kilo Code.md](.kilocode/rules/memory-bank)
 2. [LLM Context](./reference/LLM_CONTEXT.md)
 3. [Quick Reference](./reference/QUICK_REFERENCE.md)
 

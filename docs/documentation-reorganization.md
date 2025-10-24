@@ -46,7 +46,6 @@ docs/
 │   └── SHARDED_TEST_FIXES.md        # Fixing test sharding issues
 ├── reference/                       # Technical reference materials
 │   ├── BRANDING.md                  # Design guidelines and tokens
-│   ├── CLAUDE.md                    # AI assistant guidelines
 │   ├── LLM_CONTEXT.md               # Comprehensive project context
 │   ├── TODO.md                      # Feature roadmap and checklist
 │   ├── QUICK_REFERENCE.md           # Fast command lookup
@@ -96,7 +95,6 @@ Core documentation and quick lookups:
 
 - **README.md** - Project overview and feature list
 - **LLM_CONTEXT.md** - Complete project context (main reference)
-- **CLAUDE.md** - AI assistant specifications
 - **TODO.md** - Feature checklist and priorities
 - **BRANDING.md** - Design system specifications
 - **QUICK_REFERENCE.md** - Command and workflow reference
@@ -142,7 +140,7 @@ _Developer resources: "How do I set up X?"_
 ### 3. **Multiple User Personas**
 
 - **New Developers:** Start with tutorials, then reference
-- **AI Assistants:** Use CLAUDE.md and LLM_CONTEXT.md
+- **AI Assistants:** Use .kilocode/rules/memory-bank for context
 - **DevOps Engineers:** Focus on how-to and explanation
 - **Contributors:** Reference TODO.md and development guides
 
@@ -166,7 +164,6 @@ _Developer resources: "How do I set up X?"_
 
 - README.md → docs/README.md (project overview)
 - LLM_CONTEXT.md → docs/reference/
-- CLAUDE.md → docs/reference/
 - TODO.md → docs/reference/
 - BRANDING.md → docs/reference/
 - QUICK_REFERENCE.md → docs/reference/
@@ -210,12 +207,6 @@ _Developer resources: "How do I set up X?"_
 
 ```
 README.md → docs/INDEX.md → docs/README.md → docs/reference/LLM_CONTEXT.md
-```
-
-**AI Assistant:**
-
-```
-docs/reference/CLAUDE.md → docs/reference/LLM_CONTEXT.md
 ```
 
 **DevOps Engineer:**

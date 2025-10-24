@@ -12,7 +12,6 @@ spotify-time-machine/
 ├── CI_CD_OPTIMIZATION.md             ❌ Hard to find
 ├── CI_CD_QUICK_REFERENCE.md          ❌ Related docs scattered
 ├── CI_CD_SUMMARY.md
-├── CLAUDE.md
 ├── DEV_TOOLS.md
 ├── DEVOPS_IMPROVEMENTS.md
 ├── DOMAIN_MIGRATION.md
@@ -59,7 +58,6 @@ spotify-time-machine/
 │   │
 │   ├── reference/                    📖 Information-oriented
 │   │   ├── BRANDING.md
-│   │   ├── CLAUDE.md
 │   │   ├── LLM_CONTEXT.md
 │   │   ├── TODO.md
 │   │   ├── QUICK_REFERENCE.md
@@ -155,11 +153,9 @@ spotify-time-machine/
 ### For AI Assistants
 
 ```
-1. docs/reference/CLAUDE.md
+1. docs/reference/LLM_CONTEXT.md
    ↓
-2. docs/reference/LLM_CONTEXT.md
-   ↓
-3. docs/reference/QUICK_REFERENCE.md
+2. docs/reference/QUICK_REFERENCE.md
 ```
 
 ### For Troubleshooting
@@ -176,15 +172,15 @@ spotify-time-machine/
 
 ## Quick Access Matrix
 
-| Need             | Start Here                 | Then Go To          |
-| ---------------- | -------------------------- | ------------------- |
-| Project overview | `README.md`                | `docs/README.md`    |
-| Complete context | `docs/INDEX.md`            | Category folders    |
-| Solve a problem  | `docs/how-to/`             | Related reference   |
-| Understand why   | `docs/explanation/`        | Related how-to      |
-| Look up syntax   | `docs/reference/`          | Related explanation |
-| Set up tools     | `docs/development/`        | `DEV_TOOLS.md`      |
-| AI assistance    | `docs/reference/CLAUDE.md` | `LLM_CONTEXT.md`    |
+| Need             | Start Here                    | Then Go To          |
+| ---------------- | ----------------------------- | ------------------- |
+| Project overview | `README.md`                   | `docs/README.md`    |
+| Complete context | `docs/INDEX.md`               | Category folders    |
+| Solve a problem  | `docs/how-to/`                | Related reference   |
+| Understand why   | `docs/explanation/`           | Related how-to      |
+| Look up syntax   | `docs/reference/`             | Related explanation |
+| Set up tools     | `docs/development/`           | `DEV_TOOLS.md`      |
+| AI assistance    | `.kilocode/rules/memory-bank` | `LLM_CONTEXT.md`    |
 
 ## Search Strategy
 
