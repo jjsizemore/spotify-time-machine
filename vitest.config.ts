@@ -15,6 +15,11 @@ export default defineConfig({
     // Use threads pool for better performance (v4 optimization)
     pool: 'threads',
 
+    // Note: Pool-specific options like maxThreads, minThreads, useAtomics can be configured via:
+    // 1. Environment variables: VITEST_MAX_THREADS, VITEST_MIN_THREADS
+    // 2. CLI flags: --poolOptions.threads.maxThreads=4
+    // 3. They are set in GitHub Actions workflow via VITEST_MAX_THREADS=4
+
     // Projects configuration (v4 pattern - replaces workspace)
     projects: [
       // Unit tests configuration
@@ -27,6 +32,9 @@ export default defineConfig({
           ],
           environment: 'happy-dom',
           setupFiles: ['./tests/setup/setup-files.ts'],
+          // Optimize unit tests for speed
+          isolate: false, // Share context between tests for faster execution
+          maxConcurrency: 10, // Run more tests concurrently
         },
       },
 
@@ -39,6 +47,9 @@ export default defineConfig({
           setupFiles: ['./tests/setup/setup-files.ts'],
           testTimeout: 15000, // Longer timeout for integration tests
           hookTimeout: 15000,
+          // Integration tests may need isolation for MSW handlers
+          isolate: true,
+          maxConcurrency: 5, // Lower concurrency for integration tests
         },
       },
 
@@ -142,7 +153,7 @@ export default defineConfig({
 
     // Parallel execution
     fileParallelism: true,
-    maxConcurrency: 5,
+    maxConcurrency: 10, // Increased from 5 for better parallelization
 
     // Coverage configuration (v4 optimizations)
     coverage: {

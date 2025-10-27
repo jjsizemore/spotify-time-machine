@@ -7,6 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { spotifyApi, SpotifyApiError } from '../../src/lib/spotify';
+import { TEST_CONSTANTS } from '../setup/test-config';
 
 describe('Spotify API Client - Critical Regression Tests', () => {
   beforeEach(() => {
@@ -30,18 +31,17 @@ describe('Spotify API Client - Critical Regression Tests', () => {
     });
 
     it('should accept and store access token', () => {
-      const testToken = 'test-access-token-123';
-      spotifyApi.setAccessToken(testToken);
+      spotifyApi.setAccessToken(TEST_CONSTANTS.ACCESS_TOKEN);
 
       // Verify token was set (indirectly by not throwing)
-      expect(() => spotifyApi.setAccessToken(testToken)).not.toThrow();
+      expect(() => spotifyApi.setAccessToken(TEST_CONSTANTS.ACCESS_TOKEN)).not.toThrow();
     });
 
     it('should allow token refresh callback to be registered', () => {
       const mockRefreshCallback = vi.fn().mockResolvedValue({
         accessToken: 'new-token',
-        refreshToken: 'refresh-token',
-        expiresAt: Date.now() + 3600000,
+        refreshToken: TEST_CONSTANTS.REFRESH_TOKEN,
+        expiresAt: Date.now() + TEST_CONSTANTS.TOKEN_EXPIRES_IN_MS,
       });
 
       expect(() => {

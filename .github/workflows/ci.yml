@@ -80,11 +80,22 @@ jobs:
       - name: Install dotenvx
         run: curl -fsS https://dotenvx.sh/install.sh | sh
 
+      - name: Verify dotenvx private key
+        run: |
+          if [ -z "${{ secrets.DOTENV_PRIVATE_KEY }}" ]; then
+            echo "❌ ERROR: DOTENV_PRIVATE_KEY secret is not set or is empty!"
+            echo "Please add the private key from .env.keys to GitHub Secrets"
+            exit 1
+          fi
+          echo "✅ DOTENV_PRIVATE_KEY is set"
+
       - name: Build
-        run: pnpm run build
+        run: pnpm run build:ci
         env:
           # Disable telemetry during build
           NEXT_TELEMETRY_DISABLED: 1
+          # Force production environment to prevent .env.test from loading
+          NODE_ENV: production
           # dotenvx will decrypt .env file using this private key
           DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
           # Fallback values if decryption fails

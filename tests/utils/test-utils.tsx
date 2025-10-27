@@ -7,6 +7,18 @@ import { expect } from 'vitest';
 import type { RenderOptions } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
+import { MOCK_DATA } from '../setup/test-config';
+
+// Re-export factory functions from centralized config
+export {
+  createMockUser,
+  createMockTrack,
+  createMockArtist,
+  createMockPlaylist,
+  createMockSession,
+  createMockTokenResponse,
+  createMockResponse,
+} from '../setup/test-config';
 
 // Create a wrapper with all necessary providers
 function Wrapper({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -18,83 +30,13 @@ export function renderWithProviders(ui: ReactElement, options?: Omit<RenderOptio
   return render(ui, { wrapper: Wrapper, ...options });
 }
 
-// Mock data factories
-export const mockSpotifyUser = {
-  id: 'test-user-123',
-  display_name: 'Test User',
-  email: 'test@example.com',
-  images: [{ url: 'https://example.com/avatar.jpg' }],
-  followers: { total: 42 },
-  country: 'US',
-  product: 'premium' as const,
-};
-
-export const mockSpotifyTrack = {
-  id: '4uLU6hMCjMI75M1A2tKUQC',
-  name: 'Test Track',
-  artists: [{ id: 'artist123', name: 'Test Artist' }],
-  album: {
-    id: 'album123',
-    name: 'Test Album',
-    images: [{ url: 'https://example.com/album.jpg' }],
-  },
-  duration_ms: 180000,
-  explicit: false,
-  popularity: 75,
-  preview_url: 'https://example.com/preview.mp3',
-  external_urls: {
-    spotify: 'https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC',
-  },
-};
-
-export const mockSpotifyArtist = {
-  id: 'artist123',
-  name: 'Test Artist',
-  genres: ['pop', 'indie'],
-  images: [{ url: 'https://example.com/artist.jpg' }],
-  followers: { total: 1000000 },
-  popularity: 85,
-  external_urls: {
-    spotify: 'https://open.spotify.com/artist/artist123',
-  },
-};
-
-export const mockPlaylist = {
-  id: 'playlist123',
-  name: 'My Test Playlist',
-  description: 'A playlist for testing',
-  images: [{ url: 'https://example.com/playlist.jpg' }],
-  tracks: { total: 25 },
-  owner: { id: 'test-user-123', display_name: 'Test User' },
-  public: true,
-  collaborative: false,
-  external_urls: {
-    spotify: 'https://open.spotify.com/playlist/playlist123',
-  },
-};
-
-// Test helpers for time ranges
-export const timeRanges = {
-  short_term: { id: 'short_term', label: 'Last 4 Weeks', period: '4 weeks' },
-  medium_term: { id: 'medium_term', label: 'Last 6 Months', period: '6 months' },
-  long_term: { id: 'long_term', label: 'All Time', period: 'all time' },
-} as const;
-
-// Mock session data
-export const mockSession = {
-  user: mockSpotifyUser,
-  accessToken: 'mock-access-token',
-  refreshToken: 'mock-refresh-token',
-  expires: '2024-12-31T23:59:59.999Z',
-};
-
-// Utility to create mock API responses
-export function createMockResponse<T>(data: T, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
+// Re-export mock data from centralized config
+export const mockSpotifyUser = MOCK_DATA.user;
+export const mockSpotifyTrack = MOCK_DATA.track;
+export const mockSpotifyArtist = MOCK_DATA.artist;
+export const mockPlaylist = MOCK_DATA.playlist;
+export const timeRanges = MOCK_DATA.timeRanges;
+export const mockSession = MOCK_DATA.session;
 
 // Utility to wait for element removal
 export async function waitForElementToBeRemoved(
@@ -175,7 +117,7 @@ expect.extend({
 
 // Performance testing utilities
 export class PerformanceMonitor {
-  private measurements: Map<string, number[]> = new Map();
+  private readonly measurements: Map<string, number[]> = new Map();
 
   start(name: string): () => number {
     const startTime = performance.now();

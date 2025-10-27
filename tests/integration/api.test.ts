@@ -5,47 +5,48 @@
 
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { createMocks } from 'node-mocks-http';
-
-// Mock MSW for API mocking
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import { TEST_CONSTANTS, MOCK_DATA } from '../setup/test-config';
 
-// Mock Spotify API responses
+// Mock Spotify API responses using centralized configuration
 const server = setupServer(
-  rest.get('https://api.spotify.com/v1/me', (req, res, ctx) => {
+  rest.get(`${TEST_CONSTANTS.SPOTIFY_API_BASE_URL}/me`, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
-        id: 'test-user',
-        display_name: 'Test User',
-        email: 'test@example.com',
+        id: MOCK_DATA.user.id,
+        display_name: MOCK_DATA.user.display_name,
+        email: MOCK_DATA.user.email,
       })
     );
   }),
 
-  rest.get('https://api.spotify.com/v1/me/top/tracks', (req, res, ctx) => {
+  rest.get(`${TEST_CONSTANTS.SPOTIFY_API_BASE_URL}/me/top/tracks`, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
         items: [
           {
-            id: '4uLU6hMCjMI75M1A2tKUQC',
-            name: 'Test Track',
-            artists: [{ name: 'Test Artist' }],
-            duration_ms: 180000,
+            id: MOCK_DATA.track.id,
+            name: MOCK_DATA.track.name,
+            artists: MOCK_DATA.track.artists,
+            duration_ms: MOCK_DATA.track.duration_ms,
           },
         ],
       })
     );
   }),
 
-  rest.post('https://accounts.spotify.com/api/token', (req, res, ctx) => {
+  rest.post(TEST_CONSTANTS.SPOTIFY_TOKEN_URL, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
         access_token: 'new-access-token',
+        token_type: 'Bearer',
+        expires_in: TEST_CONSTANTS.TOKEN_EXPIRES_IN,
         refresh_token: 'new-refresh-token',
-        expires_in: 3600,
+        scope: MOCK_DATA.requiredScopes.join(' '),
       })
     );
   })
@@ -54,7 +55,7 @@ const server = setupServer(
 // Helper to create a mock refresh token handler
 const createRefreshTokenHandler = () => async (request: any, response: any) => {
   try {
-    const refreshResponse = await fetch('https://accounts.spotify.com/api/token', {
+    const refreshResponse = await fetch(TEST_CONSTANTS.SPOTIFY_TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'grant_type=refresh_token&refresh_token=refresh-token',
@@ -73,8 +74,8 @@ const createRefreshTokenHandler = () => async (request: any, response: any) => {
 };
 
 // Helper to fetch Spotify API endpoints
-const fetchSpotifyEndpoint = async (endpoint: string, token = 'test-token') => {
-  const response = await fetch(`https://api.spotify.com/v1${endpoint}`, {
+const fetchSpotifyEndpoint = async (endpoint: string, token = TEST_CONSTANTS.ACCESS_TOKEN) => {
+  const response = await fetch(`${TEST_CONSTANTS.SPOTIFY_API_BASE_URL}${endpoint}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -116,10 +117,10 @@ describe('API Integration Tests', () => {
 
       expect(res._getStatusCode()).toBe(200);
       const data = JSON.parse(res._getData());
-      expect(data).toEqual({
+      expect(data).toMatchObject({
         access_token: 'new-access-token',
         refresh_token: 'new-refresh-token',
-        expires_in: 3600,
+        expires_in: TEST_CONSTANTS.TOKEN_EXPIRES_IN,
       });
     });
 
@@ -148,9 +149,9 @@ describe('API Integration Tests', () => {
       const user = await response.json();
 
       expect(user).toEqual({
-        id: 'test-user',
-        display_name: 'Test User',
-        email: 'test@example.com',
+        id: MOCK_DATA.user.id,
+        display_name: MOCK_DATA.user.display_name,
+        email: MOCK_DATA.user.email,
       });
     });
 
@@ -162,10 +163,10 @@ describe('API Integration Tests', () => {
 
       expect(data.items).toHaveLength(1);
       expect(data.items[0]).toEqual({
-        id: '4uLU6hMCjMI75M1A2tKUQC',
-        name: 'Test Track',
-        artists: [{ name: 'Test Artist' }],
-        duration_ms: 180000,
+        id: MOCK_DATA.track.id,
+        name: MOCK_DATA.track.name,
+        artists: MOCK_DATA.track.artists,
+        duration_ms: MOCK_DATA.track.duration_ms,
       });
 
       expect(data.items[0].id).toBeValidSpotifyId();

@@ -8,19 +8,20 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import { TEST_CONFIG, TEST_CONSTANTS, MOCK_DATA } from '../setup/test-config';
 
-// Mock environment variables with valid values
-vi.stubEnv('SPOTIFY_CLIENT_ID', 'test-client-id');
-vi.stubEnv('SPOTIFY_CLIENT_SECRET', 'test-client-secret');
-vi.stubEnv('NEXTAUTH_SECRET', 'test-secret-that-is-at-least-32-characters-long-for-validation');
-vi.stubEnv('NEXTAUTH_URL', 'http://localhost:3000');
-vi.stubEnv('NEXT_PUBLIC_GA_ID', 'G-TEST123456');
-vi.stubEnv('NEXT_PUBLIC_POSTHOG_KEY', 'test-posthog-key');
-vi.stubEnv('NEXT_PUBLIC_POSTHOG_HOST', 'https://app.posthog.com');
-vi.stubEnv('NODE_ENV', 'test');
+// Mock environment variables with valid values from centralized config
+vi.stubEnv('SPOTIFY_CLIENT_ID', TEST_CONFIG.SPOTIFY_CLIENT_ID);
+vi.stubEnv('SPOTIFY_CLIENT_SECRET', TEST_CONFIG.SPOTIFY_CLIENT_SECRET);
+vi.stubEnv('NEXTAUTH_SECRET', TEST_CONFIG.NEXTAUTH_SECRET);
+vi.stubEnv('NEXTAUTH_URL', TEST_CONFIG.BASE_URL);
+vi.stubEnv('NEXT_PUBLIC_GA_ID', TEST_CONFIG.GA_ID);
+vi.stubEnv('NEXT_PUBLIC_POSTHOG_KEY', TEST_CONFIG.POSTHOG_KEY);
+vi.stubEnv('NEXT_PUBLIC_POSTHOG_HOST', TEST_CONFIG.POSTHOG_HOST);
+vi.stubEnv('NODE_ENV', TEST_CONFIG.NODE_ENV);
 
 // Mock the Spotify token endpoint
-const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
+const SPOTIFY_TOKEN_URL = TEST_CONSTANTS.SPOTIFY_TOKEN_URL;
 
 const server = setupServer(
   // Mock successful token refresh
@@ -45,22 +46,22 @@ const server = setupServer(
     }
 
     // Simulate invalid refresh token
-    if (refreshToken === 'invalid-token') {
+    if (refreshToken === TEST_CONSTANTS.INVALID_TOKEN) {
       return res(
         ctx.status(400),
         ctx.json({ error: 'invalid_grant', error_description: 'Invalid refresh token' })
       );
     }
 
-    // Return successful token refresh
+    // Return successful token refresh using centralized mock data
     return res(
       ctx.status(200),
       ctx.json({
         access_token: 'new-access-token-' + Date.now(),
         token_type: 'Bearer',
-        expires_in: 3600,
+        expires_in: TEST_CONSTANTS.TOKEN_EXPIRES_IN,
         refresh_token: refreshToken, // Return same or new refresh token
-        scope: 'user-read-email user-library-read',
+        scope: MOCK_DATA.requiredScopes.join(' '),
       })
     );
   })
@@ -96,7 +97,7 @@ describe('Authentication Flow - Integration Tests', () => {
     it('should handle invalid refresh token', async () => {
       const { refreshAccessToken } = await import('../../src/lib/spotify');
 
-      await expect(refreshAccessToken('invalid-token')).rejects.toThrow();
+      await expect(refreshAccessToken(TEST_CONSTANTS.INVALID_TOKEN)).rejects.toThrow();
     });
 
     it('should handle missing refresh token', async () => {
@@ -112,9 +113,9 @@ describe('Authentication Flow - Integration Tests', () => {
       const result = await refreshAccessToken('valid-refresh-token');
       const afterTime = Math.floor(Date.now() / 1000);
 
-      // Expires in 3600 seconds according to mock
-      expect(result.expiresAt).toBeGreaterThanOrEqual(beforeTime + 3600);
-      expect(result.expiresAt).toBeLessThanOrEqual(afterTime + 3600 + 1);
+      // Expires in TOKEN_EXPIRES_IN seconds according to mock
+      expect(result.expiresAt).toBeGreaterThanOrEqual(beforeTime + TEST_CONSTANTS.TOKEN_EXPIRES_IN);
+      expect(result.expiresAt).toBeLessThanOrEqual(afterTime + TEST_CONSTANTS.TOKEN_EXPIRES_IN + 1);
     });
 
     it('should handle network errors during refresh', async () => {
@@ -160,7 +161,7 @@ describe('Authentication Flow - Integration Tests', () => {
             ctx.json({
               access_token: 'new-token',
               token_type: 'Bearer',
-              expires_in: 3600,
+              expires_in: TEST_CONSTANTS.TOKEN_EXPIRES_IN,
               refresh_token: 'valid-refresh-token',
             })
           );
@@ -186,7 +187,7 @@ describe('Authentication Flow - Integration Tests', () => {
             ctx.json({
               access_token: 'new-token',
               token_type: 'Bearer',
-              expires_in: 3600,
+              expires_in: TEST_CONSTANTS.TOKEN_EXPIRES_IN,
               refresh_token: 'valid-refresh-token',
             })
           );
@@ -204,17 +205,7 @@ describe('Authentication Flow - Integration Tests', () => {
     it('should include all required scopes', async () => {
       const { scopes } = await import('../../src/lib/spotify');
 
-      const requiredScopes = [
-        'user-read-email',
-        'user-read-private',
-        'user-library-read',
-        'playlist-modify-public',
-        'playlist-modify-private',
-        'user-read-recently-played',
-        'user-top-read',
-      ];
-
-      for (const scope of requiredScopes) {
+      for (const scope of MOCK_DATA.requiredScopes) {
         expect(scopes).toContain(scope);
       }
     });
@@ -284,7 +275,7 @@ describe('Authentication Flow - Integration Tests', () => {
             ctx.json({
               access_token: 'new-access-token',
               token_type: 'Bearer',
-              expires_in: 3600,
+              expires_in: TEST_CONSTANTS.TOKEN_EXPIRES_IN,
               // No refresh_token in response - should use original
             })
           );
@@ -308,7 +299,7 @@ describe('Authentication Flow - Integration Tests', () => {
             ctx.json({
               access_token: 'new-access-token',
               token_type: 'Bearer',
-              expires_in: 3600,
+              expires_in: TEST_CONSTANTS.TOKEN_EXPIRES_IN,
               refresh_token: 'new-refresh-token',
             })
           );
@@ -336,7 +327,7 @@ describe('Authentication Flow - Integration Tests', () => {
             ctx.json({
               access_token: 'new-token',
               token_type: 'Bearer',
-              expires_in: 3600,
+              expires_in: TEST_CONSTANTS.TOKEN_EXPIRES_IN,
               refresh_token: 'valid-refresh-token',
             })
           );

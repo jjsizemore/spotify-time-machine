@@ -3,16 +3,25 @@
  * Runs once before all tests start and can provide context to tests
  * Available since Vitest v2+, enhanced in v4
  *
- * IMPORTANT: This setup provides TEST mock values, NOT production values from .env
- * Tests must be isolated from actual environment configuration to ensure:
+ * IMPORTANT: This setup reads TEST mock values from .env.test
+ * - .env.test is loaded by dotenvx via explicit `-f .env.test` flag in package.json
+ * - Test values are MOCKS only - never production credentials
+ * - Fallback hardcoded values ensure tests can run without .env.test
+ *
+ * Environment Loading Flow:
+ * 1. package.json: `dotenvx run -f .env.test -- vitest`
+ * 2. dotenvx loads ONLY .env.test into process.env (production .env is ignored)
+ * 3. global-setup.ts reads TEST_* variables from process.env
+ * 4. Values are injected into test context via project.provide()
+ *
+ * This ensures:
  * - Reproducible test behavior across environments
  * - No accidental use of production credentials in tests
- * - Tests can run without requiring actual credentials
+ * - Tests can run without requiring actual API credentials
  */
 
 import type { TestProject } from 'vitest/node';
-
-// Declare the provided context types
+import { getTestConfig } from './test-config'; // Declare the provided context types
 declare module 'vitest' {
   export interface ProvidedContext {
     testStartTime: number;
@@ -22,16 +31,13 @@ declare module 'vitest' {
 }
 
 export default function globalSetup(project: TestProject) {
-  // Provide test mock values (NOT from production .env)
-  // Use explicit test values to maintain test isolation
-  // NEVER use getEnvOrDefault() here - that reads from actual .env file!
-
-  const testBaseUrl = process.env.TEST_BASE_URL || 'http://localhost:3000';
-  const testSpotifyClientId = process.env.TEST_SPOTIFY_CLIENT_ID || 'test-spotify-client-id';
+  // Read test mock values from .env.test (loaded by dotenvx with `-f .env.test`)
+  // Uses centralized test-config.ts for DRY principle and consistency
+  const testConfig = getTestConfig();
 
   project.provide('testStartTime', Date.now());
-  project.provide('baseUrl', testBaseUrl);
-  project.provide('spotifyClientId', testSpotifyClientId);
+  project.provide('baseUrl', testConfig.baseUrl);
+  project.provide('spotifyClientId', testConfig.spotifyClientId);
 
   // Set up mock server or other global resources
   console.log('🧪 Setting up global test environment...');

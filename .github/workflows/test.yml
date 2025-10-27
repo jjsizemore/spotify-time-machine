@@ -94,9 +94,10 @@ jobs:
       - name: Run tests (sharded)
         if: steps.test-count.outputs.should_skip != 'true'
         run: |
-          # Set max threads per shard for optimal performance on GitHub Actions (4-core machines)
-          # GitHub Actions runners have 4 cores: 1 main thread + 3 worker threads = 4 total
-          export VITEST_MAX_THREADS=3
+          # GitHub Actions runners have 4 cores - use them all for better parallelization
+          # Each shard can utilize all available cores since shards run on separate machines
+          export VITEST_MAX_THREADS=4
+          export VITEST_MIN_THREADS=1
 
           # Debug: List test files that will be run
           echo "📋 Test files for shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}:"

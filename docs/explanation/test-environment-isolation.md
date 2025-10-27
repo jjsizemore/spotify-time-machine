@@ -37,7 +37,8 @@ Tests now use explicit test defaults that don't call production environment func
 
 ```typescript
 // global-setup.ts
-const testSpotifyClientId = process.env.TEST_SPOTIFY_CLIENT_ID || 'test-spotify-client-id';
+const testSpotifyClientId =
+  process.env.TEST_SPOTIFY_CLIENT_ID || 'test-spotify-client-id-abc123def456';
 
 project.provide('spotifyClientId', testSpotifyClientId);
 
@@ -140,7 +141,8 @@ import { inject, TestProject } from 'vitest';
 export default function globalSetup(project: TestProject) {
   // Define explicit test values
   const testBaseUrl = process.env.TEST_BASE_URL || 'http://localhost:3000';
-  const testSpotifyClientId = process.env.TEST_SPOTIFY_CLIENT_ID || 'test-spotify-client-id';
+  const testSpotifyClientId =
+    process.env.TEST_SPOTIFY_CLIENT_ID || 'test-spotify-client-id-abc123def456';
 
   // Provide to test context
   project.provide('testStartTime', Date.now());
@@ -176,7 +178,7 @@ describe('API Tests', () => {
     const clientId = inject<string>('spotifyClientId');
 
     // Verify it's the mock value
-    expect(clientId).toBe('test-spotify-client-id');
+    expect(clientId).toBe('test-spotify-client-id-abc123def456');
 
     // Ensure it's NOT encrypted
     expect(clientId).not.toContain('encrypted:');
@@ -261,7 +263,7 @@ describe('Test Environment Isolation', () => {
     const spotifyClientId = inject<string>('spotifyClientId');
 
     // Must be test mock
-    expect(spotifyClientId).toBe('test-spotify-client-id');
+    expect(spotifyClientId).toBe('test-spotify-client-id-abc123def456');
 
     // Must NOT be encrypted
     expect(spotifyClientId).not.toContain('encrypted:');
