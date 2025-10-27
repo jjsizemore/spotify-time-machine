@@ -41,7 +41,7 @@ const envSchema = z.object({
     .string()
     .min(32, 'NextAuth Secret must be at least 32 characters')
     .describe('Secret key for NextAuth session encryption'),
-  NEXTAUTH_URL: z.string().url().describe('Base URL for NextAuth callbacks'),
+  NEXTAUTH_URL: z.url().describe('Base URL for NextAuth callbacks'),
 
   // ============================================================================
   // ANALYTICS CONFIGURATION - GOOGLE ANALYTICS 4
@@ -59,7 +59,6 @@ const envSchema = z.object({
     .min(1, 'PostHog Key is required')
     .describe('PostHog public API key for session recording and analytics'),
   NEXT_PUBLIC_POSTHOG_HOST: z
-    .string()
     .url()
     .default('https://app.posthog.com')
     .describe('PostHog instance URL'),
@@ -68,7 +67,6 @@ const envSchema = z.object({
   // SENTRY ERROR TRACKING CONFIGURATION
   // ============================================================================
   NEXT_PUBLIC_SENTRY_DSN: z
-    .string()
     .url()
     .optional()
     .nullable()
@@ -104,7 +102,6 @@ const envSchema = z.object({
   // NEXT.JS PUBLIC BASE URL (Optional)
   // ============================================================================
   NEXT_PUBLIC_BASE_URL: z
-    .string()
     .url()
     .optional()
     .nullable()

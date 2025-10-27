@@ -1,8 +1,8 @@
 export const CACHE_VERSION = 'v1'; // Increment to invalidate prior cache schemas
 
-import { getValidatedEnv } from './envConfig';
-
-const env = getValidatedEnv();
+// IMPORTANT: Do not import server-only env validation here, this file is used by client components.
+// Use client-safe env accessors to avoid bundling private vars into the browser.
+import { getClientEnvOrDefault } from './clientEnv';
 
 interface CachedData<T> {
   timestamp: number;
@@ -22,7 +22,7 @@ interface CacheError {
 const BASE_CACHE_PREFIX = 'spotifyTimeMachineCache_';
 const CACHE_PREFIX = `${BASE_CACHE_PREFIX}${CACHE_VERSION}_`;
 
-export const debugEnabled = () => env.NEXT_PUBLIC_DEBUG === 'true';
+export const debugEnabled = () => getClientEnvOrDefault('NEXT_PUBLIC_DEBUG', 'false') === 'true';
 
 function logCacheError(error: CacheError): void {
   const logMessage = [

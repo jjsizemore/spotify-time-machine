@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dotenvx": "dotenvx",
-    "dev": "dotenvx run -- next dev --turbo --hostname 127.0.0.1",
+    "dev": "NEXTAUTH_URL=http://127.0.0.1:3000 dotenvx run -f .env -f .env.local -- next dev --turbo --hostname 127.0.0.1",
     "build": "dotenvx run -- next build",
     "start": "dotenvx run -- next start",
     "commit": "commit",
@@ -29,7 +29,7 @@
     "security:env": "dotenv-linter .env.example",
     "spellcheck": "typos",
     "audit": "mise run audit",
-    "prebuild": "turbo type-check",
+    "prebuild": "turbo type-check && node scripts/generate-build-version.js && node scripts/update-readme-badges.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",

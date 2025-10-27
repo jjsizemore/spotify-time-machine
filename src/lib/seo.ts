@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
 import { SPOTIFY_GREEN } from './branding';
-import { getEnvOrDefault } from './envConfig';
+import { PUBLIC_ENV } from './clientEnv';
 
 // 2025 SEO Configuration
 export const SEO_CONFIG = {
-  baseUrl: getEnvOrDefault('NEXT_PUBLIC_BASE_URL', 'https://tm.jermainesizemore.com'),
+  baseUrl: PUBLIC_ENV.BASE_URL,
   siteName: "Jermaine's Spotify Time Machine",
   siteDescription:
     'Your personal Spotify listening history and playlist generator. Relive your music journey, create custom playlists, and explore your listening habits over time.',

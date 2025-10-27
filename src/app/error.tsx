@@ -1,22 +1,22 @@
 'use client';
 
 import { useEffect } from 'react';
-import { getValidatedEnv } from '@/lib/envConfig';
 import ActionButton from '@/ui/ActionButton';
+import { PUBLIC_ENV } from '@/lib/clientEnv';
 
 export default function ErrorBoundary({
   error,
   reset,
-}: {
+}: Readonly<{
   error: Error & { digest?: string };
   reset: () => void;
-}) {
+}>) {
   useEffect(() => {
     // Log the error to an error reporting service
     console.error('Application error:', error);
   }, [error]);
 
-  const env = getValidatedEnv();
+  const isDev = PUBLIC_ENV.NODE_ENV === 'development';
 
   return (
     <div className="min-h-screen bg-spotify-black flex items-center justify-center px-4">
@@ -35,17 +35,12 @@ export default function ErrorBoundary({
             Try Again
           </ActionButton>
 
-          <ActionButton
-            onClick={() => {
-              window.location.href = '/';
-            }}
-            variant="secondary"
-          >
+          <ActionButton onClick={() => (globalThis.location.href = '/')} variant="secondary">
             Go Home
           </ActionButton>
         </div>
 
-        {env.NODE_ENV === 'development' && (
+        {isDev && (
           <details className="mt-6 text-left bg-spotify-dark-gray p-4 rounded-lg">
             <summary className="text-spotify-white cursor-pointer">
               Error Details (Development Only)

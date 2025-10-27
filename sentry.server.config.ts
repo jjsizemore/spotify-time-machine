@@ -1,8 +1,8 @@
 import * as Sentry from '@sentry/nextjs';
-import { getEnvVar } from '@/lib/envConfig';
+import { PUBLIC_ENV } from '@/lib/clientEnv';
 
 Sentry.init({
-  dsn: getEnvVar('NEXT_PUBLIC_SENTRY_DSN'),
+  dsn: PUBLIC_ENV.SENTRY_DSN,
 
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: 1,

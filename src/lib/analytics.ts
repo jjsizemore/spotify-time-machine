@@ -1,24 +1,24 @@
 /**
- * Robust analytics utilities with error handling
+ * Robust analytics utilities with error handling (client-safe)
  */
 
-import { getValidatedEnv } from './envConfig';
-
-const env = getValidatedEnv();
+import { PUBLIC_ENV, getClientEnvOrDefault } from './clientEnv';
 
 export const initializeAnalytics = async () => {
   if (globalThis.window === undefined) {
     return;
   }
 
-  // Only initialize in production or when explicitly enabled
-  if (env.NODE_ENV === 'development' && !env.FORCE_ANALYTICS) {
+  // Only initialize in production by default; allow opt-in for dev via NEXT_PUBLIC_FORCE_ANALYTICS
+  const isDev = PUBLIC_ENV.NODE_ENV === 'development';
+  const forceAnalytics = getClientEnvOrDefault('NEXT_PUBLIC_FORCE_ANALYTICS', 'false') === 'true';
+  if (isDev && !forceAnalytics) {
     console.log('📊 Analytics disabled in development mode');
     return;
   }
 
-  const posthogKey = env.NEXT_PUBLIC_POSTHOG_KEY;
-  const posthogHost = env.NEXT_PUBLIC_POSTHOG_HOST;
+  const posthogKey = PUBLIC_ENV.POSTHOG_KEY;
+  const posthogHost = PUBLIC_ENV.POSTHOG_HOST;
 
   if (!posthogKey) {
     console.warn('PostHog key not configured');
@@ -32,7 +32,7 @@ export const initializeAnalytics = async () => {
       mode: 'no-cors',
     }).catch(() => null);
 
-    if (!testResponse && env.NODE_ENV === 'development') {
+    if (!testResponse && isDev) {
       console.warn('PostHog endpoint not reachable, skipping initialization');
       return;
     }
@@ -64,7 +64,7 @@ export const initializeAnalytics = async () => {
 
     return posthog.default;
   } catch (error) {
-    if (env.NODE_ENV === 'development') {
+    if (isDev) {
       console.warn('Analytics initialization failed:', error);
     }
     // Fail silently in production
@@ -81,7 +81,7 @@ export const trackEvent = (eventName: string, properties?: Record<string, any>) 
       posthog.capture(eventName, properties);
     }
   } catch (error) {
-    if (env.NODE_ENV === 'development') {
+    if (PUBLIC_ENV.NODE_ENV === 'development') {
       console.warn('Event tracking failed:', error);
     }
   }

@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { getEnvOrDefault } from '@/lib/envConfig';
+import { PUBLIC_ENV } from '@/lib/clientEnv';
 import { SPOTIFY_BLACK, SPOTIFY_GREEN } from '../lib/branding';
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -54,7 +54,7 @@ export default function manifest(): MetadataRoute.Manifest {
     related_applications: [
       {
         platform: 'webapp',
-        url: getEnvOrDefault('NEXT_PUBLIC_BASE_URL', 'https://tm.jermainesizemore.com'),
+        url: PUBLIC_ENV.BASE_URL,
       },
     ],
     prefer_related_applications: false,

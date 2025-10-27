@@ -1,10 +1,36 @@
 # Jermaine's Spotify Time Machine
 
-A Next.js application that lets you explore your Spotify listening history, create playlists based on specific time periods, and visualize your music journey. Now featuring **enterprise-grade infrastructure** with advanced token management, request queuing, and comprehensive debugging tools.
+<!-- Status badges -->
 
 [![CI/CD](https://github.com/jjsizemore/spotify-time-machine/actions/workflows/ci.yml/badge.svg)](https://github.com/jjsizemore/spotify-time-machine/actions)
+[![Tests](https://github.com/jjsizemore/spotify-time-machine/actions/workflows/test.yml/badge.svg)](https://github.com/jjsizemore/spotify-time-machine/actions/workflows/test.yml)
 [![codecov](https://codecov.io/github/jjsizemore/spotify-time-machine/branch/main/graph/badge.svg)](https://codecov.io/github/jjsizemore/spotify-time-machine)
+[![CodeQL](https://github.com/jjsizemore/spotify-time-machine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jjsizemore/spotify-time-machine/actions/workflows/codeql.yml)
+[![Dependency Review](https://github.com/jjsizemore/spotify-time-machine/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/jjsizemore/spotify-time-machine/actions/workflows/dependency-review.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+<!-- Tech badges (auto-updated) -->
+
+[![Next.js](https://img.shields.io/badge/Next.js-16.0-black?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-latest-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-10.18-f69220?logo=pnpm&logoColor=white)](https://pnpm.io)
+
+<!-- Tooling & community -->
+
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://prettier.io)
+[![ESLint](https://img.shields.io/badge/ESLint-9.x-4B32C3?logo=eslint&logoColor=white)](https://eslint.org)
+[![Oxlint](https://img.shields.io/badge/lint-oxlint-00A0E4)](https://oxc-project.github.io/docs/guide/usage/linter)
+[![Tests: Vitest](https://img.shields.io/badge/tests-vitest-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev)
+[![E2E: Playwright](https://img.shields.io/badge/e2e-playwright-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fa6673.svg)](https://conventionalcommits.org)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jjsizemore/spotify-time-machine/pulls)
+[![Discussions](https://img.shields.io/badge/discussions-welcome-FF4081?logo=github)](https://github.com/jjsizemore/spotify-time-machine/issues)
+
+A Next.js application that lets you explore your Spotify listening history, create playlists based on specific time periods, and visualize your music journey. Now featuring **enterprise-grade infrastructure** with advanced token management, request queuing, and comprehensive debugging tools.
 
 ## 🚀 Quick Start
 
@@ -40,31 +66,19 @@ Visit [http://127.0.0.1:3000](http://127.0.0.1:3000) to view the application.
 **Getting Started:**
 
 - [Project Overview](./docs/README.md) - Detailed project information and features
-- [Developer Tools](./docs/development/DEV_TOOLS.md) - Available tools and commands
-- [Tool Installation](./docs/development/TOOL_INSTALLATION.md) - Setup guide
+- [Developer Tools](./docs/development/dev-tools.md) - Available tools and commands
+- [Tool Installation](./docs/development/tool-installation.md) - Setup guide
 
 **For Developers:**
 
-- [LLM Context](./docs/reference/LLM_CONTEXT.md) - Comprehensive project context
-- [TODO Roadmap](./docs/reference/TODO.md) - Feature implementation checklist
-- [Quick Reference](./docs/reference/QUICK_REFERENCE.md) - Common commands and workflows
+- [LLM Context](./docs/reference/llm-context.md) - Comprehensive project context
+- [TODO Roadmap](./docs/reference/todo.md) - Feature implementation checklist
+- [Quick Reference](./docs/reference/quick-reference.md) - Common commands and workflows
 
 **For DevOps:**
 
-- [CI/CD Optimization](./docs/how-to/CI_CD_OPTIMIZATION.md) - Pipeline optimization guide
-- [CI/CD Quick Reference](./docs/reference/CI_CD_QUICK_REFERENCE.md) - CI/CD commands
-
-## 🔧 Tech Stack
-
-- **Framework:** Next.js 16 (App Router)
-- **Runtime:** React 19.1.0
-- **Language:** TypeScript 5.8.3
-- **Styling:** Tailwind CSS 4.1.10
-- **Authentication:** NextAuth.js 4.24.11
-- **State Management:** @tanstack/react-query 5.80.7
-- **Analytics:** Google Analytics 4, Vercel Analytics, PostHog, Sentry
-- **Testing:** Vitest with Playwright
-- **Code Quality:** Biome, Oxlint, Prettier
+- [CI/CD Optimization](./docs/how-to/ci-cd-optimization.md) - Pipeline optimization guide
+- [CI/CD Quick Reference](./docs/reference/ci-cd-quick-reference.md) - CI/CD commands
 
 ## 🌟 Environment Setup
 
@@ -117,7 +131,7 @@ pnpm clean            # Clean build artifacts
 pnpm analyze          # Analyze bundle size
 ```
 
-See [Dev Tools Guide](./docs/development/DEV_TOOLS.md) for complete command reference.
+See [Dev Tools Guide](./docs/development/dev-tools.md) for complete command reference.
 
 ## 🏗️ Project Structure
 
@@ -142,9 +156,9 @@ spotify-time-machine/
 
 ## 🤝 Contributing
 
-1. Check the [TODO roadmap](./docs/reference/TODO.md) for current priorities
-2. Review [Developer Tools](./docs/development/DEV_TOOLS.md) setup
-3. Follow [code quality guidelines](./docs/reference/LLM_CONTEXT.md)
+1. Check the [TODO roadmap](./docs/reference/todo.md) for current priorities
+2. Review [Developer Tools](./docs/development/dev-tools.md) setup
+3. Follow [code quality guidelines](./docs/reference/llm-context.md)
 4. Run `pnpm check:all` before committing
 5. Ensure all tests pass with `pnpm test`
 
@@ -157,7 +171,7 @@ This project features an optimized CI/CD pipeline:
 - ✅ **Automated security scanning** (CodeQL, dependency review)
 - ✅ **Sharded test execution** for parallel processing
 
-See [CI/CD Optimization Guide](./docs/how-to/CI_CD_OPTIMIZATION.md) for details.
+See [CI/CD Optimization Guide](./docs/how-to/ci-cd-optimization.md) for details.
 
 ## 📈 Development Status
 
@@ -207,4 +221,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 **🐛 Found a bug?** [Open an issue](https://github.com/jjsizemore/spotify-time-machine/issues)
 
-**💡 Have a suggestion?** [Start a discussion](https://github.com/jjsizemore/spotify-time-machine/discussions)
+**💡 Have a suggestion?** [Open a discussion topic](https://github.com/jjsizemore/spotify-time-machine/issues)
