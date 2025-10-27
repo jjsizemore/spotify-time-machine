@@ -29,7 +29,7 @@
     "security:env": "dotenv-linter .env.example",
     "spellcheck": "typos",
     "audit": "mise run audit",
-    "prebuild": "turbo type-check && node scripts/generate-build-version.js && node scripts/update-readme-badges.ts",
+    "prebuild": "turbo type-check && node scripts/generate-build-version.js && tsx scripts/update-readme-badges.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
@@ -108,6 +108,7 @@
     "prettier": "^3.6.2",
     "sharp": "^0.34.4",
     "tailwindcss": "^4.1.16",
+    "tsx": "^4.20.6",
     "turbo": "^2.5.8",
     "typescript": "^5.9.3",
     "vitest": "^4.0.2"
