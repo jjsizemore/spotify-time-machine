@@ -51,11 +51,20 @@ pre-commit:
       glob: '*.{ts,tsx}'
 
 pre-push:
-  parallel: false
+  parallel: true
   commands:
-    # Run full quality checks to match CI
-    check-all:
-      run: pnpm check:all
+    # Run quality checks in parallel (leverages Turborepo)
+    lint:
+      run: turbo lint
+
+    format-check:
+      run: turbo fmt:check
+
+    type-check:
+      run: turbo type-check
+
+    tests:
+      run: turbo test
 
     # Security scanning
     security:

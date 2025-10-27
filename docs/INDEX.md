@@ -24,6 +24,7 @@ _Practical guides for accomplishing specific tasks_
 
 - [CI/CD Optimization Guide](./how-to/ci-cd-optimization.md) - Complete guide to optimizing CI/CD pipeline
 - [CI/CD Summary](./how-to/ci-cd-summary.md) - Quick overview of CI/CD improvements
+- [Turborepo Remote Cache Setup](./how-to/turborepo-remote-cache-setup.md) - Enable shared caching with Vercel
 - [Sharded Test Fixes](./how-to/sharded-test-fixes.md) - Fixing and debugging sharded tests
 - [Codecov Setup](./how-to/codecov-setup.md) - Set up code coverage tracking
 
@@ -73,6 +74,7 @@ _Background and context to deepen understanding_
 - [DevOps Improvements](./explanation/devops-improvements.md) - Infrastructure and DevOps enhancements
 - [Token Management](./explanation/token-management.md) - Authentication and token handling
 - [Turborepo Optimization](./explanation/turborepo-optimization.md) - Task caching and parallelization
+- [Turborepo Remote Cache Implementation](./explanation/turborepo-remote-cache-implementation.md) - Remote caching setup
 - [Sharding Fix Applied](./explanation/sharding-fix-applied.md) - Test sharding implementation details
 - [Codecov Integration](./explanation/codecov-integration.md) - Code coverage integration architecture
 - [Test Environment Isolation](./explanation/test-environment-isolation.md) - Test isolation strategy

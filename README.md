@@ -141,9 +141,13 @@ This project uses [Turborepo](https://turbo.build/repo) for intelligent task cac
 
 - **Parallel Execution**: Independent tasks run simultaneously for faster feedback
 - **Smart Caching**: Only re-runs tasks when relevant files change
+- **Remote Caching**: Shared cache across team and CI with Vercel (see setup guide)
 - **Optimized Inputs**: Precise file patterns minimize cache misses
 
-Learn more in the [Turborepo Optimization Guide](./docs/explanation/turborepo-optimization.md).
+Learn more:
+
+- [Turborepo Optimization Guide](./docs/explanation/turborepo-optimization.md)
+- [Remote Cache Setup](./docs/how-to/turborepo-remote-cache-setup.md)
 
 ## 🏗️ Project Structure
 

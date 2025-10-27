@@ -208,7 +208,25 @@ Turborepo's caching works seamlessly in CI:
 
 1. **Local development**: Fast feedback with local cache
 2. **CI environment**: Fresh builds with deterministic results
-3. **Remote caching** (optional): Share cache across team/CI with Vercel
+3. **Remote caching**: Share cache across team/CI with Vercel (enabled!)
+
+### Remote Caching Setup
+
+This project has remote caching enabled for GitHub Actions. This means:
+
+- **Shared cache across CI runs**: If another workflow already ran the same tasks, cache hits!
+- **Team collaboration**: Developers can pull from shared cache
+- **Faster CI**: 90-95% time savings on cache hits
+
+**Configuration:**
+
+```yaml
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+```
+
+See the [Remote Cache Setup Guide](../how-to/turborepo-remote-cache-setup.md) for complete configuration instructions.
 
 ## Monitoring Cache Effectiveness
 
