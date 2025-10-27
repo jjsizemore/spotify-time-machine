@@ -199,7 +199,7 @@ test-simple:
   runs-on: ubuntu-latest
   steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
     - uses: pnpm/action-setup@v4
     - run: pnpm install --frozen-lockfile
     - run: pnpm test:unit

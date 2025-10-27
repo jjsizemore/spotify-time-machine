@@ -19,10 +19,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '10.18.1'
-
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
@@ -47,9 +43,9 @@ jobs:
 
       - name: Setup Node.js
         if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: latest
           cache: 'pnpm'
 
       - name: Install dependencies

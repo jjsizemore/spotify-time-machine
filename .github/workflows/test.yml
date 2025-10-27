@@ -16,10 +16,6 @@ permissions:
   pull-requests: write
   actions: write
 
-env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '10.18.1'
-
 jobs:
   # Fast checks
   lint-and-typecheck:
@@ -33,9 +29,9 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: latest
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -69,9 +65,9 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: latest
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -150,9 +146,9 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: latest
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -203,9 +199,9 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: latest
           cache: 'pnpm'
 
       - name: Install dependencies

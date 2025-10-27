@@ -42,11 +42,11 @@ Monthly GitHub Actions Cost Reduction:
 ```yaml
 - uses: pnpm/action-setup@v4
   with:
-    version: ${{ env.PNPM_VERSION }}
+    version: latest
 
-- uses: actions/setup-node@v4
+- uses: actions/setup-node@v6
   with:
-    node-version: ${{ env.NODE_VERSION }}
+    node-version: latest
     cache: 'pnpm' # ✨ Built-in caching
 ```
 

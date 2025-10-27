@@ -16,7 +16,7 @@ This document describes the optimizations applied to the CI/CD system for maximu
 
 #### After
 
-- **Built-in pnpm caching** via `actions/setup-node@v4` with `cache: 'pnpm'`
+- **Built-in pnpm caching** via `actions/setup-node@v6` with `cache: 'pnpm'`
 - Automatic cache key generation based on `pnpm-lock.yaml`
 - Reduced configuration complexity by ~15 lines per job
 
@@ -30,11 +30,11 @@ This document describes the optimizations applied to the CI/CD system for maximu
 # Optimized setup
 - uses: pnpm/action-setup@v4
   with:
-    version: ${{ env.PNPM_VERSION }}
+    version: latest
 
-- uses: actions/setup-node@v4
+- uses: actions/setup-node@v6
   with:
-    node-version: ${{ env.NODE_VERSION }}
+    node-version: latest
     cache: 'pnpm' # ✨ Magic happens here
 ```
 

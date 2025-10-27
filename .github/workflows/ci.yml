@@ -17,10 +17,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
-env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '10.18.1'
-
 jobs:
   # Quality checks
   quality:
@@ -36,9 +32,9 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: latest
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -73,22 +69,28 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: latest
           cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - run: curl -sfS https://dotenvx.sh/install.sh | sh
+      - name: Install dotenvx
+        run: curl -fsS https://dotenvx.sh/install.sh | sh
 
       - name: Build
         run: pnpm run build
         env:
           # Disable telemetry during build
           NEXT_TELEMETRY_DISABLED: 1
-          DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
+          # dotenvx will decrypt .env file using this private key
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
+          # Fallback values if decryption fails
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || 'G-DISABLED' }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY || 'disabled' }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com' }}
 
       - name: Cache build output
         uses: actions/cache/save@v4
@@ -112,9 +114,9 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 'latest'
           cache: 'pnpm'
 
       - name: Install dependencies

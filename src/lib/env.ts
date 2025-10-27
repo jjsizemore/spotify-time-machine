@@ -48,7 +48,7 @@ const envSchema = z.object({
   // ============================================================================
   NEXT_PUBLIC_GA_ID: z
     .string()
-    .regex(/^G-[A-Z0-9]+$/, 'GA ID must be in format G-XXXXXXXXXX')
+    .regex(/^(G-[A-Z0-9]+|G-DISABLED)$/, 'GA ID must be in format G-XXXXXXXXXX or G-DISABLED')
     .describe('Google Analytics 4 Measurement ID'),
 
   // ============================================================================
@@ -59,6 +59,7 @@ const envSchema = z.object({
     .min(1, 'PostHog Key is required')
     .describe('PostHog public API key for session recording and analytics'),
   NEXT_PUBLIC_POSTHOG_HOST: z
+    .string()
     .url()
     .default('https://app.posthog.com')
     .describe('PostHog instance URL'),

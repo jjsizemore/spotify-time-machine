@@ -42,6 +42,23 @@ mise run security-semgrep     # SAST analysis
 mise run security-dotenv      # Lint .env files
 ```
 
+## 🚀 CI/CD & GitHub Actions
+
+```bash
+# Your .env file is already encrypted!
+# Just get the private key and add to GitHub Secrets
+cat .env.keys                                 # View DOTENV_PRIVATE_KEY
+
+# Test CI build locally
+dotenvx run -- pnpm run build                 # Test with encrypted .env
+
+# GitHub Secrets required:
+# - DOTENV_PRIVATE_KEY (from .env.keys)
+# - Optional fallbacks: NEXT_PUBLIC_GA_ID, NEXT_PUBLIC_POSTHOG_KEY
+```
+
+See [GitHub Actions dotenvx Setup](../how-to/github-actions-dotenvx-setup.md) for complete instructions.
+
 ## 🧹 Maintenance
 
 ```bash
