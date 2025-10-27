@@ -48,7 +48,7 @@ jobs:
     steps:
       - name: Run tests
         run: pnpm run test --reporter=blob --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: blob-report-${{ matrix.shardIndex }}
           path: .vitest-reports/*
@@ -67,7 +67,7 @@ jobs:
     steps:
       - name: Run tests (sharded)
         run: pnpm test:shard --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: test-report-shard-${{ matrix.shardIndex }}
           path: .vitest-reports/*

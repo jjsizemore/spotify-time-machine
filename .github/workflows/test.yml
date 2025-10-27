@@ -124,7 +124,7 @@ jobs:
 
       - name: Upload shard report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-report-shard-${{ matrix.shardIndex }}
           path: .vitest-reports/*
@@ -174,7 +174,7 @@ jobs:
 
       - name: Upload browser test artifacts
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: browser-test-artifacts
           path: |
@@ -239,7 +239,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload coverage reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage-reports
           path: |

@@ -147,7 +147,7 @@ If artifacts aren't uploading/downloading correctly:
 
 ```yaml
 # Check artifact name is unique per shard
-- uses: actions/upload-artifact@v4
+- uses: actions/upload-artifact@v5
   with:
     name: test-report-shard-${{ matrix.shardIndex }} # Must be unique!
     path: .vitest-reports/*
