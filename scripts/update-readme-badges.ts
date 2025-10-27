@@ -89,11 +89,9 @@ function getNodeVersion(pkg: PackageJson): string {
 }
 
 function main() {
-   
   console.log('📦 Reading package.json...');
   const packageJson: PackageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 
-   
   console.log('📖 Reading README.md...');
   let readmeContent = readFileSync(readmePath, 'utf8');
 
@@ -107,7 +105,6 @@ function main() {
     node: getNodeVersion(packageJson),
   };
 
-   
   console.log('🔍 Found versions:', versions);
 
   // Update badge patterns
@@ -149,11 +146,10 @@ function main() {
   for (const update of badgeUpdates) {
     if (update.pattern.test(readmeContent)) {
       readmeContent = readmeContent.replace(update.pattern, update.replacement);
-       
+
       console.log(`✅ Updated ${update.name} badge`);
       updatedCount++;
     } else {
-       
       console.log(`⚠️  Could not find ${update.name} badge pattern`);
     }
   }
@@ -161,10 +157,9 @@ function main() {
   // Write back to README
   if (updatedCount > 0) {
     writeFileSync(readmePath, readmeContent, 'utf8');
-     
+
     console.log(`\n✨ Successfully updated ${updatedCount} badge(s) in README.md`);
   } else {
-     
     console.log('\n⚠️  No badges were updated');
   }
 
@@ -188,7 +183,7 @@ function main() {
       `- **Tailwind CSS ${versions.tailwind}**`
     );
     writeFileSync(readmePath, readmeContent, 'utf8');
-     
+
     console.log('✅ Updated Core Technologies section');
   }
 }

@@ -53,6 +53,11 @@ pre-commit:
 pre-push:
   parallel: false
   commands:
+    # Run full quality checks to match CI
+    check-all:
+      run: pnpm check:all
+
+    # Security scanning
     security:
       run: TERM=dumb mise run security
 
