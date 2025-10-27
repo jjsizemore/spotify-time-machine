@@ -97,11 +97,30 @@ const { tracks, isLoading, error } = useLikedTracks();
 pnpm dev              # Dev server (uses dotenvx for env vars)
 pnpm build            # Production build (runs type-check first via Turborepo)
 pnpm test             # Run all tests (Vitest with projects: unit, integration, browser)
+pnpm check:parallel   # Run lint, format, type-check in parallel ⚡
 pnpm lint             # Oxlint (fast) + ESLint
 pnpm fmt:fix          # Prettier format
-pnpm check:all        # Lint + format + type-check + test
+pnpm check:all        # All quality checks + tests (via Turborepo)
 pnpm security         # Run all security scans (secrets, deps, SAST)
 ```
+
+### Turborepo Task Optimization
+
+**This project uses Turborepo for intelligent task caching and parallelization:**
+
+- Tasks cache based on inputs - only re-run when relevant files change
+- Independent tasks (lint, fmt:check, type-check) run in parallel
+- Precise input patterns minimize cache misses
+- Cache hits show as `>>> FULL TURBO` in terminal output
+
+**Key optimizations:**
+
+- `check:parallel` runs validation tasks concurrently
+- Test tasks cache based on specific test file changes
+- Build depends on type-check to ensure type safety
+- Environment files included in build cache inputs
+
+See [Turborepo Optimization Guide](../docs/explanation/turborepo-optimization.md) for details.
 
 ### Testing Strategy
 

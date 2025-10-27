@@ -4,24 +4,23 @@
 
 ```bash
 # Development
-mise run dev              # Start dev server
-mise run build            # Build for production
-mise run start            # Start production server
+pnpm dev                  # Start dev server
+pnpm build                # Build for production
+pnpm start                # Start production server
 
-# Code Quality
-mise run check-all        # Lint + format + type-check
-mise run lint             # Run linter only
-mise run fmt              # Format code
-mise run type-check       # TypeScript check
+# Code Quality (Turborepo Optimized ⚡)
+pnpm check:parallel       # Lint + format + type-check in parallel
+pnpm check:all            # All quality checks + tests
+pnpm lint                 # Run linter only
+pnpm fmt:check            # Check formatting
+pnpm type-check           # TypeScript check
 
-# Security (⚡ NEW!)
-mise run security         # All security scans
-mise run audit            # Full audit (security + quality)
+# Security
+pnpm security             # All security scans
+pnpm audit                # Full audit (security + quality)
 
-# Quality (⚡ NEW!)
-mise run spellcheck       # Check for typos (FAST!)
-mise run shellcheck       # Lint shell scripts
-mise run actionlint       # Lint GitHub workflows
+# Quality
+pnpm spellcheck           # Check for typos (FAST!)
 ```
 
 ## 📦 Tool Installation
@@ -73,10 +72,11 @@ mise run analyze          # Bundle size analysis
 
 ## ⚡ Performance Tips
 
+- **Turborepo** caches tasks intelligently and runs tasks in parallel
 - **typos** checks entire codebase in < 100ms
 - **oxlint** is 50-100x faster than ESLint
-- **turbo** caches tasks intelligently
-- **mise** runs tasks in parallel
+- Use `pnpm check:parallel` for fastest local feedback
+- Cache hits show as `>>> FULL TURBO` in output
 
 ## 🔄 Pre-commit Flow
 

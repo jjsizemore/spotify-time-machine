@@ -107,13 +107,14 @@ pnpm dev              # Start development server
 pnpm build            # Build for production
 pnpm start            # Start production server
 
-# Code Quality
-pnpm lint             # Run linter (Oxlint)
+# Code Quality (Optimized with Turborepo)
+pnpm check:parallel   # Run lint, format, type-check in parallel ⚡
+pnpm lint             # Run linter (Oxlint + ESLint)
 pnpm fmt              # Format code (Prettier)
 pnpm fmt:check        # Check formatting
 pnpm type-check       # TypeScript type checking
 pnpm check            # Run lint + type-check
-pnpm check:all        # Run lint + format + type-check
+pnpm check:all        # Run all quality checks + tests
 
 # Testing
 pnpm test             # Run tests
@@ -128,10 +129,21 @@ pnpm security:sast    # Static analysis
 
 # Utilities
 pnpm clean            # Clean build artifacts
+pnpm clean:cache      # Clear Turborepo cache
 pnpm analyze          # Analyze bundle size
 ```
 
 See [Dev Tools Guide](./docs/development/dev-tools.md) for complete command reference.
+
+### ⚡ Turborepo Optimization
+
+This project uses [Turborepo](https://turbo.build/repo) for intelligent task caching and parallelization:
+
+- **Parallel Execution**: Independent tasks run simultaneously for faster feedback
+- **Smart Caching**: Only re-runs tasks when relevant files change
+- **Optimized Inputs**: Precise file patterns minimize cache misses
+
+Learn more in the [Turborepo Optimization Guide](./docs/explanation/turborepo-optimization.md).
 
 ## 🏗️ Project Structure
 
