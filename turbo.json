@@ -7,28 +7,153 @@
     },
     "build": {
       "dependsOn": ["type-check"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "build:ci": {
+      "dependsOn": ["type-check"],
+      "inputs": ["$TURBO_DEFAULT$", ".env"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "start": {
       "cache": false
     },
     "lint": {
-      "inputs": ["**/*.{js,jsx,ts,tsx}", ".eslintrc.*", "eslint.config.*"]
+      "inputs": [
+        "**/*.{js,jsx,ts,tsx}",
+        "eslint.config.*",
+        "!**/*.test.{ts,tsx}",
+        "!**/*.spec.{ts,tsx}"
+      ]
+    },
+    "lint:fix": {
+      "inputs": ["**/*.{js,jsx,ts,tsx}", "eslint.config.*"],
+      "cache": false
     },
     "fmt": {
-      "inputs": ["**/*.{js,jsx,ts,tsx,json,md}", ".prettierrc.*", "prettier.config.*"]
+      "inputs": [
+        "**/*.{js,jsx,ts,tsx,json,md,yml,yaml}",
+        ".prettierrc.*",
+        "prettier.config.*",
+        "!coverage/**",
+        "!test-results/**"
+      ]
     },
     "fmt:check": {
-      "inputs": ["**/*.{js,jsx,ts,tsx,json,md}", ".prettierrc.*", "prettier.config.*"]
+      "inputs": [
+        "**/*.{js,jsx,ts,tsx,json,md,yml,yaml}",
+        ".prettierrc.*",
+        "prettier.config.*",
+        "!coverage/**",
+        "!test-results/**"
+      ]
+    },
+    "fmt:fix": {
+      "inputs": ["**/*.{js,jsx,ts,tsx,json,md,yml,yaml}", ".prettierrc.*", "prettier.config.*"],
+      "cache": false
     },
     "type-check": {
-      "inputs": ["**/*.{ts,tsx}", "tsconfig.json"]
+      "inputs": [
+        "**/*.{ts,tsx}",
+        "tsconfig.json",
+        "next-env.d.ts",
+        "!**/*.test.{ts,tsx}",
+        "!tests/**"
+      ]
     },
     "check": {
       "dependsOn": ["lint", "type-check"]
     },
     "check:all": {
-      "dependsOn": ["lint", "fmt", "type-check"]
+      "dependsOn": ["lint", "fmt:check", "type-check", "test"]
+    },
+    "check:branding": {
+      "inputs": ["src/**/*.{ts,tsx,css}", "!src/app/output.css"],
+      "cache": false
+    },
+    "prebuild": {
+      "dependsOn": ["type-check"],
+      "inputs": [
+        "scripts/generate-build-version.js",
+        "scripts/update-readme-badges.ts",
+        "package.json"
+      ],
+      "cache": false
+    },
+    "test": {
+      "inputs": ["src/**/*.{ts,tsx}", "tests/**", "vitest.config.ts", "!**/*.d.ts"],
+      "outputs": ["coverage/**", "test-results/**"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "test:ui": {
+      "cache": false,
+      "persistent": true
+    },
+    "test:unit": {
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "tests/unit/**",
+        "tests/setup/**",
+        "tests/utils/**",
+        "vitest.config.ts"
+      ],
+      "outputs": ["coverage/**"]
+    },
+    "test:integration": {
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "tests/integration/**",
+        "tests/setup/**",
+        "tests/utils/**",
+        "vitest.config.ts"
+      ],
+      "outputs": ["test-results/**"]
+    },
+    "test:browser": {
+      "inputs": ["src/**/*.{ts,tsx}", "tests/browser/**", "tests/setup/**", "vitest.config.ts"],
+      "outputs": ["test-results/**", "playwright-report/**"]
+    },
+    "test:browser:ui": {
+      "cache": false,
+      "persistent": true
+    },
+    "test:coverage": {
+      "dependsOn": ["test"],
+      "outputs": ["coverage/**"]
+    },
+    "test:debug": {
+      "cache": false
+    },
+    "test:benchmark": {
+      "inputs": ["src/**/*.bench.{ts,tsx}", "tests/**/*.bench.{ts,tsx}"],
+      "cache": false
+    },
+    "test:typecheck": {
+      "inputs": ["**/*.{ts,tsx}", "tsconfig.json", "vitest.config.ts"]
+    },
+    "test:reporter": {
+      "dependsOn": ["test"],
+      "outputs": ["test-results/**"]
+    },
+    "test:shard": {
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "tests/unit/**",
+        "tests/integration/**",
+        "tests/setup/**",
+        "vitest.config.ts"
+      ],
+      "outputs": ["coverage/**", "test-results/**", ".vitest-reports/**"]
+    },
+    "test:merge-reports": {
+      "inputs": [".vitest-reports/**"],
+      "outputs": ["coverage/**", "test-results/**"]
+    },
+    "test:related": {
+      "cache": false
     },
     "analyze": {
       "dependsOn": ["build"],
@@ -48,28 +173,40 @@
     },
     "security": {
       "cache": false,
-      "inputs": ["src/**", "semgrep.yml", ".env.example", "**/*.sh"]
+      "inputs": ["src/**", "semgrep.yml", ".env.example", "scripts/**/*.sh"]
     },
     "security:secrets": {
-      "cache": false
+      "cache": false,
+      "inputs": ["**/*", "!node_modules/**", "!.next/**", "!coverage/**", "!test-results/**"]
     },
     "security:deps": {
-      "cache": false
+      "cache": false,
+      "inputs": ["package.json", "pnpm-lock.yaml"]
     },
     "security:sast": {
       "cache": false,
-      "inputs": ["src/**", "semgrep.yml"]
+      "inputs": ["src/**/*.{ts,tsx,js,jsx}", "semgrep.yml"]
     },
     "security:env": {
       "cache": false,
       "inputs": [".env.example"]
     },
     "spellcheck": {
-      "inputs": ["**/*.{ts,tsx,js,jsx,md,json}", "!node_modules/**", "!.next/**"]
+      "inputs": [
+        "**/*.{ts,tsx,js,jsx,md,mdx,json,yml,yaml}",
+        "_typos.toml",
+        "!node_modules/**",
+        "!.next/**",
+        "!coverage/**",
+        "!test-results/**"
+      ]
     },
     "audit": {
       "cache": false,
       "dependsOn": ["security", "spellcheck", "check:all"]
+    },
+    "playwright:install": {
+      "cache": false
     }
   }
 }

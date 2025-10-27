@@ -1,19 +1,19 @@
 import eslint from '@eslint/js';
 import tsParser from '@typescript-eslint/parser';
-import type { Linter } from 'eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import importXPlugin from 'eslint-plugin-import-x';
+// @ts-expect-error - no types available for eslint-plugin-oxlint
 import oxlint from 'eslint-plugin-oxlint';
 import reactRefresh from 'eslint-plugin-react-refresh';
-import { flatConfig as nextEslintConfig } from '@next/eslint-plugin-next';
+// @ts-expect-error - no types available for eslint-config-next
+import nextVitals from 'eslint-config-next/core-web-vitals';
 import globals from 'globals';
+import { defineConfig, globalIgnores } from 'eslint/config';
 
 const currentDir = new URL('.', import.meta.url).pathname;
 
-export default [
-  {
-    ignores: ['dist/', '.next/', 'node_modules/', '**/.*'],
-  },
+export default defineConfig([
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'test-results/**']),
   {
     files: ['**/*.{ts,tsx,js,jsx}'],
     languageOptions: {
@@ -37,9 +37,7 @@ export default [
     },
   },
   eslint.configs.recommended,
-  eslintConfigPrettier,
-  nextEslintConfig.recommended,
-  nextEslintConfig.coreWebVitals,
+  nextVitals,
   {
     ...reactRefresh.configs.recommended,
     rules: {
@@ -63,7 +61,6 @@ export default [
     plugins: { 'import-x': importXPlugin },
     rules: { 'import-x/order': ['error', { groups: ['builtin', 'external', 'internal'] }] },
   },
-  ...oxlint.configs['flat/recommended'],
   {
     files: ['public/sw.js'],
     languageOptions: {
@@ -72,4 +69,13 @@ export default [
       },
     },
   },
-] as Linter.Config[];
+  {
+    files: ['tests/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+      'import-x/no-unassigned-import': 'off',
+    },
+  },
+  eslintConfigPrettier,
+  ...oxlint.configs['flat/recommended'],
+]);

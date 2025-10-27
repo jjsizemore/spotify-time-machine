@@ -1,0 +1,166 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  # Quality checks
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: latest
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+        continue-on-error: false
+
+      - name: Format check
+        run: pnpm run fmt
+        continue-on-error: false
+
+      - name: Type check
+        run: pnpm run type-check
+        continue-on-error: false
+
+      - name: Spell check
+        run: pnpm run spellcheck
+        continue-on-error: true
+
+  # Build verification
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [quality]
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: latest
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install dotenvx
+        run: curl -fsS https://dotenvx.sh/install.sh | sh
+
+      - name: Verify dotenvx private key
+        run: |
+          if [ -z "${{ secrets.DOTENV_PRIVATE_KEY }}" ]; then
+            echo "❌ ERROR: DOTENV_PRIVATE_KEY secret is not set or is empty!"
+            echo "Please add the private key from .env.keys to GitHub Secrets"
+            exit 1
+          fi
+          echo "✅ DOTENV_PRIVATE_KEY is set"
+
+      - name: Build
+        run: pnpm run build:ci
+        env:
+          # Disable telemetry during build
+          NEXT_TELEMETRY_DISABLED: 1
+          # Force production environment to prevent .env.test from loading
+          NODE_ENV: production
+          # dotenvx will decrypt .env file using this private key
+          DOTENV_PRIVATE_KEY: ${{ secrets.DOTENV_PRIVATE_KEY }}
+          # Fallback values if decryption fails
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || 'G-DISABLED' }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY || 'disabled' }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com' }}
+
+      - name: Cache build output
+        uses: actions/cache/save@v4
+        with:
+          path: .next
+          key: ${{ runner.os }}-next-build-${{ github.sha }}
+
+  # Security checks
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: [quality]
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 'latest'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run security checks
+        run: pnpm run security
+        continue-on-error: true
+
+  # Status check
+  ci-status:
+    name: CI Status
+    if: ${{ !cancelled() }}
+    needs: [quality, build, security]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check status
+        run: |
+          echo "Quality: ${{ needs.quality.result }}"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Security: ${{ needs.security.result }}"
+
+          if [[ "${{ needs.quality.result }}" == "success" && 
+                "${{ needs.build.result }}" == "success" ]]; then
+            echo "✅ All required checks passed!"
+            exit 0
+          else
+            echo "❌ Some required checks failed"
+            exit 1
+          fi

@@ -1,0 +1,53 @@
+codecov:
+  require_ci_to_pass: true
+  precision: 2
+  max_report_age: off
+
+coverage:
+  precision: 2
+  round: down
+  status:
+    project:
+      default:
+        target: 70
+        threshold: '5'
+        branches:
+          - main
+          - develop
+        paths:
+          - 'src'
+        exclude:
+          - 'tests'
+          - '**/*.d.ts'
+          - '**/node_modules/**'
+    patch:
+      default:
+        target: 70
+        threshold: '5'
+
+ignore:
+  - 'node_modules'
+  - 'tests'
+  - 'coverage'
+  - '.next'
+  - '**/*.config.*'
+  - 'src/app/**/page.tsx'
+  - 'src/app/**/layout.tsx'
+  - 'src/app/**/loading.tsx'
+  - 'src/app/**/error.tsx'
+  - 'src/proxy.ts'
+
+comment:
+  layout: 'reach, diff, flags, tree'
+  behavior: 'default'
+  require_changes: false
+  require_base: false
+
+github:
+  checks:
+    annotations: true
+  statuses:
+    - type: 'project'
+      flags: 'unittests'
+    - type: 'patch'
+      flags: 'unittests'

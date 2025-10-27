@@ -1,20 +1,51 @@
-// Validates environment configuration via zod
-import { z } from 'zod';
+/**
+ * Configuration Validation Module
+ *
+ * This module provides environment configuration validation using a comprehensive
+ * Zod schema that checks for all required environment variables.
+ *
+ * The validation includes:
+ * - Spotify API credentials
+ * - NextAuth configuration
+ * - Analytics services (GA4, PostHog)
+ * - Sentry error tracking (optional but recommended)
+ * - Runtime environment specification
+ *
+ * @see src/lib/env.ts - Main environment schema definition
+ * @see src/lib/envConfig.ts - Configuration getter functions
+ */
 
-const nodeEnvSchema = z.enum(['development', 'production']);
+import { getValidatedEnv } from './envConfig';
 
-const envSchema = z.object({
-  NODE_ENV: nodeEnvSchema,
-  SPOTIFY_CLIENT_ID: z.string().min(1, 'SPOTIFY_CLIENT_ID is required'),
-  SPOTIFY_CLIENT_SECRET: z.string().min(1, 'SPOTIFY_CLIENT_SECRET is required'),
-  NEXTAUTH_SECRET: z.string().min(1, 'NEXTAUTH_SECRET is required'),
-  NEXTAUTH_URL: z.string().url('NEXTAUTH_URL must be a valid URL'),
-});
-
-export const validateConfig = () => {
-  const result = envSchema.safeParse(process.env);
-  if (!result.success) {
-    const missingConfigs = result.error.issues.map((err) => err.path.join('.'));
-    throw new Error(`Missing or invalid environment variables: ${missingConfigs.join(', ')}`);
+/**
+ * Validates environment configuration on application startup
+ *
+ * This function is called during application initialization to ensure all required
+ * environment variables are present and valid before the app starts processing requests.
+ *
+ * Error handling:
+ * - If validation fails, a detailed error message is logged
+ * - The process exits with code 1 to indicate configuration failure
+ * - This prevents the app from running with missing critical configuration
+ *
+ * @throws {Error} If environment validation fails
+ *
+ * @example
+ * ```ts
+ * // Called automatically in src/lib/init.ts
+ * validateConfig();
+ * ```
+ */
+export const validateConfig = (): void => {
+  try {
+    const env = getValidatedEnv();
+    console.log(`✓ Environment configuration validated for ${env.NODE_ENV} environment`);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('✗ Environment configuration validation failed:');
+    console.error(errorMessage);
+    process.exit(1);
   }
 };
+
+export default validateConfig;

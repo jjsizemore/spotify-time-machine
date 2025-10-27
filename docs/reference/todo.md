@@ -7,7 +7,7 @@
 - [x] Implement Spotify OAuth 2.0 flow
 - [ ] Implement PKCE (Proof Key for Code Exchange) for Spotify OAuth
   - [ ] Generate `code_verifier` (e.g., using `crypto.randomBytes`) and `code_challenge` (e.g., using `crypto.createHash('sha256')`) upon initiating authentication.
-  - [ ] Store `code_verifier` securely (e.g., HttpOnly, SameSite=Lax, Secure cookie; investigate best practices for Next.js middleware/API routes).
+  - [ ] Store `code_verifier` securely (e.g., HttpOnly, SameSite=Lax, Secure cookie; investigate best practices for Next.js proxy/API routes).
   - [ ] Add `code_challenge` and `code_challenge_method='S256'` to the Spotify authorization request.
   - [ ] Retrieve `code_verifier` and include it in the body of the token exchange request to Spotify.
   - [ ] Update NextAuth.js configuration (`src/app/api/auth/[...nextauth]/route.ts`) and any relevant auth utility functions.
@@ -75,7 +75,7 @@
 - [x] Create API routes for Spotify interaction
 - [x] Implement caching to minimize API calls
 - [ ] Add rate limiting protection
-  - [ ] Implement rate limiting for API routes in `src/middleware.ts` or dedicated API middleware (e.g., using `next-connect` or similar pattern if not using built-in Next.js API features directly).
+  - [x] Implement rate limiting for API routes in `src/proxy.ts` (Next.js 16 proxy pattern, replaces deprecated middleware).
   - [ ] Consider strategies like token bucket or fixed window counters.
   - [ ] Provide appropriate HTTP 429 responses.
 - [x] Set up error handling middleware

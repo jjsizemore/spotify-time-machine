@@ -470,13 +470,18 @@ export const refreshAccessToken = async (refreshToken: string) => {
       try {
         console.log('🔄 Attempting to refresh Spotify access token...');
 
+        const clientId = process.env.SPOTIFY_CLIENT_ID;
+        const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+        if (!clientId || !clientSecret) {
+          throw new Error('Missing Spotify client credentials in environment');
+        }
+
         const response = await fetch(SPOTIFY_ACCOUNTS_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: `Basic ${Buffer.from(
-              `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
-            ).toString('base64')}`,
+            Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
           },
           body: new URLSearchParams({
             grant_type: 'refresh_token',

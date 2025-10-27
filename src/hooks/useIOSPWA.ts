@@ -33,11 +33,14 @@ export function useIOSPWA(): IOSPWAState {
     const installMethod: 'native' | 'instructions' | 'none' =
       isIOS && !isStandalone ? 'instructions' : 'none';
 
-    setState({
-      isIOS,
-      isStandalone,
-      canInstall,
-      installMethod,
+    // Use requestAnimationFrame to avoid cascading renders
+    requestAnimationFrame(() => {
+      setState({
+        isIOS,
+        isStandalone,
+        canInstall,
+        installMethod,
+      });
     });
 
     // Listen for display mode changes (when app gets installed)

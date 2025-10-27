@@ -70,7 +70,7 @@ export default function VisualizationContainer({
   useEffect(() => {
     let loadingTimer: NodeJS.Timeout;
     if (isLoading || isInitialMount) {
-      setShowLoading(true);
+      loadingTimer = setTimeout(() => setShowLoading(true), 0);
     } else {
       loadingTimer = setTimeout(() => {
         setShowLoading(false);
@@ -83,7 +83,7 @@ export default function VisualizationContainer({
   useEffect(() => {
     let processingTimer: NodeJS.Timeout;
     if (isProcessing) {
-      setShowProcessing(true);
+      processingTimer = setTimeout(() => setShowProcessing(true), 0);
     } else {
       processingTimer = setTimeout(() => {
         setShowProcessing(false);

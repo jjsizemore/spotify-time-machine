@@ -387,10 +387,13 @@ export default function PlaylistGeneratorPage() {
                     A track will be included if any of its artists match any of the selected genres
                   </li>
                   <li>
-                    Some tracks may be included even if they don't perfectly match your genre
+                    Some tracks may be included even if they don&apos;t perfectly match your genre
                     preferences
                   </li>
-                  <li>Some tracks may be excluded if their artists' genres don't match exactly</li>
+                  <li>
+                    Some tracks may be excluded if their artists&apos; genres don&apos;t match
+                    exactly
+                  </li>
                 </ul>
               </div>
 

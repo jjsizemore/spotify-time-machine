@@ -53,8 +53,8 @@ export default function HomePageClient() {
                 <div className="space-y-4 text-sm text-spotify-light-gray">
                   <div className="bg-red-900/30 p-4 rounded-md">
                     <p className="text-red-300 font-semibold mb-2">
-                      🚨 This app is currently stuck in development mode due to Spotify's new API
-                      restrictions.
+                      🚨 This app is currently stuck in development mode due to Spotify&apos;s new
+                      API restrictions.
                     </p>
                     <ul className="list-disc list-inside space-y-1 text-red-200">
                       <li>
@@ -111,7 +111,7 @@ export default function HomePageClient() {
                         rel="noopener noreferrer"
                         className="text-spotify-green hover:text-spotify-green/80 underline"
                       >
-                        Spotify's API Change Announcement
+                        Spotify&apos;s API Change Announcement
                       </a>
                       {' | '}
                       <a
@@ -165,7 +165,7 @@ export default function HomePageClient() {
                 </ul>
               </div>
               <div>
-                <strong className="text-spotify-white">What we don't access:</strong>
+                <strong className="text-spotify-white">What we don&apos;t access:</strong>
                 <ul className="list-disc list-inside mt-1 space-y-1">
                   <li>Your personal information (email, name, etc.)</li>
                   <li>Your playlists (unless you create them through our app)</li>
@@ -191,6 +191,7 @@ export default function HomePageClient() {
             width={120}
             height={120}
             className="inline-block mx-4 mb-2 drop-shadow-lg"
+            style={{ width: 'auto', height: 'auto' }}
             priority
           />
           <br />

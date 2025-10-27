@@ -19,13 +19,15 @@ Users authenticate with Spotify OAuth, then can:
 2. Browse monthly timeline of liked tracks with full details
 3. Generate playlists from specific time periods
 4. Visualize listening trends and genre evolution
+5. Provide feedback and report issues through the feedback system
+6. Monitor application storage and performance (development mode)
 
 ## User Experience Goals
 
 - Intuitive, mobile-first interface matching Spotify's design language
 - Fast, responsive interactions with progressive loading
 - Offline-capable PWA experience
-- Privacy-focused with GDPR-compliant analytics
+- Privacy-focused with comprehensive analytics
 
 ## Target Audience
 

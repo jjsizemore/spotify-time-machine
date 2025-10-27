@@ -36,7 +36,9 @@ pre-commit:
     # Security scanning
     semgrep:
       glob: '*.{ts,tsx,js,jsx,cjs,mjs}'
-      run: pnpm exec semgrep --config semgrep.yml {staged_files}
+      run: |
+        export PATH="${HOME}/.local/share/mise/shims:${PATH}"
+        pnpm exec semgrep --config semgrep.yml {staged_files}
 
     # Shell script linting
     shellcheck:
@@ -49,10 +51,24 @@ pre-commit:
       glob: '*.{ts,tsx}'
 
 pre-push:
-  parallel: false
+  parallel: true
   commands:
+    # Run quality checks in parallel (leverages Turborepo)
+    lint:
+      run: turbo lint
+
+    format-check:
+      run: turbo fmt:check
+
+    type-check:
+      run: turbo type-check
+
+    tests:
+      run: turbo test
+
+    # Security scanning
     security:
-      run: mise run security
+      run: TERM=dumb mise run security
 
 commit-msg:
   commands:

@@ -11,17 +11,20 @@ export default function IOSInstallPrompt() {
   useEffect(() => {
     // Detect iOS
     const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    setIsIOS(iOS);
+    requestAnimationFrame(() => setIsIOS(iOS));
+    if (!iOS) {
+      return;
+    }
 
     // Check if already installed (standalone mode)
-    const standalone = window.matchMedia('(display-mode: standalone)').matches;
-    setIsStandalone(standalone);
+    const standalone = globalThis.matchMedia('(display-mode: standalone)').matches;
+    requestAnimationFrame(() => setIsStandalone(standalone));
 
     // Show prompt for iOS users who haven't installed yet
     if (iOS && !standalone) {
       // Check if user has dismissed this before
       const dismissed = localStorage.getItem('ios-install-dismissed');
-      const lastDismissed = dismissed ? parseInt(dismissed) : 0;
+      const lastDismissed = dismissed ? Number.parseInt(dismissed) : 0;
       const daysSinceDismissal = (Date.now() - lastDismissed) / (1000 * 60 * 60 * 24);
 
       // Show if never dismissed or it's been more than 7 days
@@ -46,7 +49,7 @@ export default function IOSInstallPrompt() {
   return (
     <div className="fixed bottom-4 left-4 right-4 bg-spotify-dark-gray border border-spotify-medium-gray rounded-lg shadow-2xl p-4 z-50 animate-slide-up">
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <button
             onClick={handleDismiss}
             className="text-spotify-light-gray hover:text-spotify-white p-1 rounded transition-colors duration-200"
@@ -66,7 +69,7 @@ export default function IOSInstallPrompt() {
 
           <div className="space-y-3">
             <div className="flex items-center gap-3 text-xs">
-              <div className="flex-shrink-0 w-6 h-6 bg-spotify-green rounded-full flex items-center justify-center text-spotify-black font-bold">
+              <div className="shrink-0 w-6 h-6 bg-spotify-green rounded-full flex items-center justify-center text-spotify-black font-bold">
                 1
               </div>
               <div className="flex items-center gap-2 text-spotify-light-gray">
@@ -80,7 +83,7 @@ export default function IOSInstallPrompt() {
             </div>
 
             <div className="flex items-center gap-3 text-xs">
-              <div className="flex-shrink-0 w-6 h-6 bg-spotify-green rounded-full flex items-center justify-center text-spotify-black font-bold">
+              <div className="shrink-0 w-6 h-6 bg-spotify-green rounded-full flex items-center justify-center text-spotify-black font-bold">
                 2
               </div>
               <div className="flex items-center gap-2 text-spotify-light-gray">
@@ -93,10 +96,10 @@ export default function IOSInstallPrompt() {
             </div>
 
             <div className="flex items-center gap-3 text-xs">
-              <div className="flex-shrink-0 w-6 h-6 bg-spotify-green rounded-full flex items-center justify-center text-spotify-black font-bold">
+              <div className="shrink-0 w-6 h-6 bg-spotify-green rounded-full flex items-center justify-center text-spotify-black font-bold">
                 3
               </div>
-              <span className="text-spotify-light-gray">Tap "Add" to install</span>
+              <span className="text-spotify-light-gray">Tap &ldquo;Add&rdquo; to install</span>
             </div>
           </div>
 
@@ -105,7 +108,7 @@ export default function IOSInstallPrompt() {
               onClick={handleDismiss}
               className="text-spotify-light-gray hover:text-spotify-white text-xs font-medium transition-colors duration-200"
             >
-              Don't show this again
+              Don&apos;t show this again
             </button>
           </div>
         </div>

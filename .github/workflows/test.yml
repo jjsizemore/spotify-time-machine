@@ -1,0 +1,333 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  # Fast checks
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: latest
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+        continue-on-error: false
+
+      - name: Type check
+        run: pnpm run type-check
+        continue-on-error: false
+
+  # Unit and integration tests with sharding (Vitest v4 feature)
+  test-sharded:
+    name: Test (Shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }})
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck]
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+    strategy:
+      fail-fast: false # Continue running other shards even if one fails
+      matrix:
+        shardIndex: [1, 2, 3, 4]
+        shardTotal: [4]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: latest
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Count test files and adjust sharding
+        id: test-count
+        run: |
+          # Count test files for unit and integration projects
+          TEST_COUNT=$(pnpm vitest list --project=unit --project=integration 2>&1 | grep -E '\.test\.|\.spec\.' | wc -l || echo "0")
+          echo "Test file count: $TEST_COUNT"
+          echo "test_count=$TEST_COUNT" >> $GITHUB_OUTPUT
+
+          # Determine if we should run this shard
+          SHARD_TOTAL=${{ matrix.shardTotal }}
+          if [ "$TEST_COUNT" -lt "$SHARD_TOTAL" ]; then
+            echo "⚠️  Only $TEST_COUNT test files found, but trying to create $SHARD_TOTAL shards"
+            echo "This shard (${{ matrix.shardIndex }}/${{ matrix.shardTotal }}) may be skipped if no tests are assigned"
+            echo "should_skip=false" >> $GITHUB_OUTPUT
+          else
+            echo "should_skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run tests (sharded)
+        if: steps.test-count.outputs.should_skip != 'true'
+        run: |
+          # GitHub Actions runners have 4 cores - use them all for better parallelization
+          # Each shard can utilize all available cores since shards run on separate machines
+          export VITEST_MAX_THREADS=4
+          export VITEST_MIN_THREADS=1
+
+          # Debug: List test files that will be run
+          echo "📋 Test files for shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}:"
+          TEST_FILES=$(pnpm vitest list --project=unit --project=integration --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} 2>&1 || true)
+          echo "$TEST_FILES"
+
+          # Check if this shard has any tests
+          if echo "$TEST_FILES" | grep -q "must be a smaller than count"; then
+            echo "⚠️  No tests assigned to this shard, creating empty report"
+            mkdir -p .vitest-reports
+            echo '{"version":"1","config":{},"files":[]}' > .vitest-reports/blob-${{ matrix.shardIndex }}-${{ matrix.shardTotal }}.json
+            exit 0
+          fi
+
+          # Run the shard
+          pnpm test:shard --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        env:
+          NODE_ENV: test
+
+      - name: Debug - List report files
+        if: ${{ !cancelled() }}
+        run: |
+          echo "📁 Contents of .vitest-reports/:"
+          ls -lah .vitest-reports/ || echo "Directory does not exist"
+
+      - name: Upload shard report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-report-shard-${{ matrix.shardIndex }}
+          path: .vitest-reports/*
+          include-hidden-files: true
+          retention-days: 1
+
+  # Browser tests
+  test-browser:
+    name: Browser Tests
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck]
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: latest
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm playwright:install
+
+      - name: Run browser tests
+        run: pnpm test:browser
+        env:
+          NODE_ENV: test
+
+      - name: Upload browser test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: browser-test-artifacts
+          path: |
+            test-results/
+            tests/browser/__screenshots__/
+          retention-days: 3
+          if-no-files-found: ignore
+
+  # Merge test reports and generate coverage
+  merge-reports:
+    name: Merge Reports & Coverage
+    if: ${{ !cancelled() }}
+    needs: [test-sharded]
+    runs-on: ubuntu-latest
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: latest
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download all shard reports
+        uses: actions/download-artifact@v4
+        with:
+          path: .vitest-reports
+          pattern: test-report-shard-*
+          merge-multiple: true
+
+      - name: Debug - List downloaded reports
+        run: |
+          echo "📁 Downloaded reports:"
+          find .vitest-reports -type f -ls || echo "No reports found"
+          echo "📊 Total files: $(find .vitest-reports -type f | wc -l)"
+
+      - name: Merge test reports and coverage
+        run: |
+          echo "🔄 Merging reports from $(find .vitest-reports -name '*.json' | wc -l) blob files..."
+          pnpm test:merge-reports --coverage.enabled=true --coverage.reporter=text --coverage.reporter=json --coverage.reporter=html --coverage.reporter=lcov --coverage.reporter=json-summary
+        env:
+          NODE_ENV: test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+        continue-on-error: true
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-reports
+          path: |
+            coverage/
+            test-results/
+          retention-days: 14
+          compression-level: 9
+          if-no-files-found: warn
+
+      - name: Comment PR with coverage
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        continue-on-error: true
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const coveragePath = 'coverage/coverage-summary.md';
+
+            if (!fs.existsSync(coveragePath)) {
+              console.log('Coverage summary not found, skipping comment');
+              return;
+            }
+
+            const coverageReport = fs.readFileSync(coveragePath, 'utf8');
+            const commentBody = `## 📊 Coverage Report\n\n${coverageReport}\n\n---\n*Updated: ${new Date().toUTCString()}*`;
+
+            // Find existing coverage comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('📊 Coverage Report')
+            );
+
+            // Update existing comment or create new one
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody,
+              });
+            }
+
+  # Final status check
+  test-status:
+    name: Test Status
+    if: ${{ !cancelled() }}
+    needs: [test-sharded, test-browser, merge-reports]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check test results
+        run: |
+          echo "Shard Tests: ${{ needs.test-sharded.result }}"
+          echo "Browser Tests: ${{ needs.test-browser.result }}"
+          echo "Merge Reports: ${{ needs.merge-reports.result }}"
+
+          if [[ "${{ needs.test-sharded.result }}" == "success" && 
+                "${{ needs.test-browser.result }}" == "success" && 
+                "${{ needs.merge-reports.result }}" == "success" ]]; then
+            echo "✅ All tests passed!"
+            exit 0
+          else
+            echo "❌ Some tests failed"
+            exit 1
+          fi

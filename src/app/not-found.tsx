@@ -9,8 +9,8 @@ export default function NotFound() {
           <h1 className="text-4xl font-bold text-spotify-white mb-4">404</h1>
           <h2 className="text-2xl font-bold text-spotify-green mb-4">Page Not Found</h2>
           <p className="text-spotify-light-gray mb-6">
-            The page you're looking for doesn't exist or has been moved. Let's get you back to your
-            music journey!
+            The page you&apos;re looking for doesn&apos;t exist or has been moved. Let&apos;s get
+            you back to your music journey!
           </p>
         </div>
 

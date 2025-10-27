@@ -13,11 +13,14 @@ export default function TokenStatus({ className = '' }: TokenStatusProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    requestAnimationFrame(() => setMounted(true));
+    return () => {
+      requestAnimationFrame(() => setMounted(false));
+    };
   }, []);
 
   // Only show in development mode and after mounting
-  if (!mounted || process.env.NODE_ENV !== 'development') {
+  if (!mounted || (typeof process !== 'undefined' && process.env.NODE_ENV !== 'development')) {
     return null;
   }
 

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { FiGithub, FiHome, FiLinkedin, FiMail } from 'react-icons/fi';
 import Link from 'next/link';
+import { Suspense, useState } from 'react';
 import { getIconStyle } from '@/lib/styleUtils';
 
 type IconComponent = typeof FiHome;
@@ -12,6 +12,17 @@ type SocialIcon = {
   href: string;
   label: string;
 };
+
+function DatedCopyright() {
+  // Calculate year on client side only to avoid prerender issues
+  const [currentYear] = useState<number>(() => new Date().getFullYear());
+
+  return (
+    <p className="text-spotify-light-gray text-center text-sm mb-4">
+      &copy; {currentYear} Jermaine Sizemore. All rights reserved.
+    </p>
+  );
+}
 
 export default function Footer() {
   const socialIcons: SocialIcon[] = [
@@ -62,9 +73,9 @@ export default function Footer() {
               </Link>
             ))}
           </div>
-          <p className="text-spotify-light-gray text-center text-sm mb-4">
-            &copy; {new Date().getFullYear()} Jermaine Sizemore. All rights reserved.
-          </p>
+          <Suspense fallback={<div>Loading...</div>}>
+            <DatedCopyright />
+          </Suspense>
         </div>
       </div>
     </footer>

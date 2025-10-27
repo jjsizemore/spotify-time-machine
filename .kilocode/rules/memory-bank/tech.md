@@ -2,12 +2,12 @@
 
 ## Core Technologies and Frameworks
 
-- **Next.js 15.5.4**: React framework for production with App Router, server components, and API routes
+- **Next.js 16**: React framework for production with App Router, server components, and API routes
 - **React 19.2.0**: Latest React version with concurrent features and improved performance
 - **TypeScript**: Static type checking throughout the application
 - **NextAuth.js 4.24.11**: Authentication library for Spotify OAuth integration
-- **TanStack Query 5.90.2**: Advanced data fetching and caching library
-- **Tailwind CSS 4.1.14**: Utility-first styling with custom Spotify-themed design system
+- **TanStack Query 5.90.5**: Advanced data fetching and caching library
+- **Tailwind CSS 4.1.16**: Utility-first styling with custom Spotify-themed design system
 - **Flowbite React 0.12.9**: UI component library built on Tailwind CSS
 
 ## Development Environment Setup
@@ -28,6 +28,7 @@
 
 ## Key Dependencies and Their Purposes
 
+- **@dotenvx/dotenvx**: Encrypted environment variable management
 - **@next/third-parties**: Third-party integrations for analytics and performance monitoring
 - **@vercel/analytics**: Web analytics and performance tracking
 - **@vercel/speed-insights**: Real-time performance metrics and insights
@@ -48,3 +49,5 @@
 - **Build Optimization**: Turbo for efficient builds and caching
 - **Development Debugging**: Enhanced console logging and real-time monitoring tools
 - **Analytics & Monitoring**: Multi-platform analytics with Sentry error tracking, PostHog product analytics, and Vercel Speed Insights
+- **Environment Management**: dotenvx for encrypted environment variables and validation
+- **Testing**: Comprehensive test coverage with Vitest, Playwright, and MSW integration

@@ -9,10 +9,11 @@ export default function OfflineIndicator() {
 
   useEffect(() => {
     // Set initial state
-    setIsOnline(navigator.onLine);
+    requestAnimationFrame(() => setIsOnline(navigator.onLine));
+    let isMounted = true;
 
     const handleOnline = () => {
-      setIsOnline(true);
+      if (isMounted) setIsOnline(true);
       setShowOfflineToast(false);
     };
 
@@ -55,7 +56,7 @@ export default function OfflineIndicator() {
         ) : (
           <>
             <FiWifiOff size={16} />
-            <span className="text-sm font-medium">You're offline</span>
+            <span className="text-sm font-medium">You&apos;re offline</span>
           </>
         )}
       </div>

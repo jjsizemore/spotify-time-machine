@@ -1,8 +1,8 @@
 // Service Worker for Spotify Time Machine PWA
 // 2025 Standards Implementation with iOS Optimizations
 
-const STATIC_CACHE_NAME = 'spotify-time-machine-static-v2';
-const DYNAMIC_CACHE_NAME = 'spotify-time-machine-dynamic-v2';
+const STATIC_CACHE_NAME = 'spotify-time-machine-static-v3';
+const DYNAMIC_CACHE_NAME = 'spotify-time-machine-dynamic-v3';
 
 // Domain migration handling
 const OLD_DOMAIN = 'stm.jermainesizemore.com';
@@ -86,18 +86,51 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
+  // Skip non-GET requests - but must return a response
   if (request.method !== 'GET') {
+    event.respondWith(fetch(request).catch(() => new Response('', { status: 500 })));
     return;
   }
 
-  // Skip Spotify API requests (they need fresh data)
+  // Skip Spotify API requests (they need fresh data) - but must return a response
   if (url.hostname === 'api.spotify.com' || url.hostname === 'accounts.spotify.com') {
+    event.respondWith(fetch(request).catch(() => new Response('', { status: 503 })));
     return;
   }
 
-  // Skip NextAuth API routes
+  // Skip NextAuth API routes - but must return a response
   if (url.pathname.startsWith('/api/auth/')) {
+    event.respondWith(fetch(request).catch(() => new Response('', { status: 503 })));
+    return;
+  }
+
+  // Skip external analytics and tracking services - but must return a response
+  const externalDomains = [
+    'www.googletagmanager.com',
+    'va.vercel-scripts.com',
+    'vitals.vercel-analytics.com',
+    'app.posthog.com',
+    'us.i.posthog.com',
+    'us-assets.i.posthog.com',
+    'fonts.googleapis.com',
+    'fonts.gstatic.com',
+    'r2cdn.perplexity.ai',
+  ];
+
+  // Also skip Vercel scripts by pathname
+  if (url.pathname.startsWith('/_vercel/')) {
+    event.respondWith(fetch(request).catch(() => new Response('', { status: 200 })));
+    return;
+  }
+
+  if (externalDomains.includes(url.hostname)) {
+    event.respondWith(fetch(request).catch(() => new Response('', { status: 200 })));
+    return;
+  }
+
+  // Skip cross-origin requests that aren't same-origin - but must return a response
+  if (url.origin !== self.location.origin) {
+    event.respondWith(fetch(request).catch(() => new Response('', { status: 200 })));
     return;
   }
 
@@ -108,7 +141,7 @@ self.addEventListener('fetch', (event) => {
   } else if (url.pathname.startsWith('/api/')) {
     // API routes - network first
     event.respondWith(networkFirst(request, DYNAMIC_CACHE_NAME));
-  } else if (url.pathname.match(/\.(jpg|jpeg|png|gif|webp|avif|svg|ico)$/)) {
+  } else if (/\.(jpg|jpeg|png|gif|webp|avif|svg|ico)$/.exec(url.pathname)) {
     // Images - cache first with fallback
     event.respondWith(cacheFirst(request, DYNAMIC_CACHE_NAME));
   } else {
@@ -129,12 +162,15 @@ async function cacheFirst(request, cacheName) {
 
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
+      cache.put(request, networkResponse.clone()).catch(() => {
+        // Silently handle cache storage errors
+      });
     }
     return networkResponse;
   } catch (error) {
     console.error('Cache first strategy failed:', error);
-    return new Response('Offline', { status: 503 });
+    // Return a proper response instead of throwing
+    return fetch(request).catch(() => new Response('Offline', { status: 503 }));
   }
 }
 
@@ -144,32 +180,60 @@ async function networkFirst(request, cacheName) {
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
       const cache = await caches.open(cacheName);
-      cache.put(request, networkResponse.clone());
+      cache.put(request, networkResponse.clone()).catch(() => {
+        // Silently handle cache storage errors
+      });
     }
     return networkResponse;
   } catch (error) {
     console.log('Network failed, trying cache:', error);
-    const cache = await caches.open(cacheName);
-    const cachedResponse = await cache.match(request);
-    return cachedResponse || new Response('Offline', { status: 503 });
+    try {
+      const cache = await caches.open(cacheName);
+      const cachedResponse = await cache.match(request);
+      return cachedResponse || new Response('Offline', { status: 503 });
+    } catch {
+      return new Response('Offline', { status: 503 });
+    }
   }
 }
 
 // Stale while revalidate strategy
 async function staleWhileRevalidate(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  const cachedResponse = await cache.match(request);
+  try {
+    const cache = await caches.open(cacheName);
+    const cachedResponse = await cache.match(request);
 
-  const fetchPromise = fetch(request)
-    .then((networkResponse) => {
-      if (networkResponse.ok) {
-        cache.put(request, networkResponse.clone());
-      }
-      return networkResponse;
-    })
-    .catch(() => cachedResponse);
+    const fetchPromise = fetch(request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.ok) {
+          cache.put(request, networkResponse.clone()).catch(() => {
+            // Silently handle cache storage errors
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // If fetch fails and we have a cached response, return it
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        // Otherwise return a valid empty response
+        return new Response('', { status: 200 });
+      });
 
-  return cachedResponse || fetchPromise;
+    // If we have a cached response, return it immediately
+    // Otherwise wait for the network
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    // Wait for network response, with fallback
+    const response = await fetchPromise;
+    return response || new Response('', { status: 200 });
+  } catch (error) {
+    console.error('Stale while revalidate failed:', error);
+    return fetch(request).catch(() => new Response('', { status: 200 }));
+  }
 }
 
 // Background sync for offline actions
@@ -212,7 +276,7 @@ self.addEventListener('push', (event) => {
       ],
     };
 
-    event.waitUntil(self.registration.showNotification(data.title, options));
+    event.waitUntil(globalThis.registration.showNotification(data.title, options));
   }
 });
 
@@ -221,7 +285,7 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   if (event.action === 'explore') {
-    event.waitUntil(self.clients.openWindow('/dashboard'));
+    event.waitUntil(globalThis.clients.openWindow('/dashboard'));
   }
 });
 

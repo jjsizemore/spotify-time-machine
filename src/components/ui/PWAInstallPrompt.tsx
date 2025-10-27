@@ -16,8 +16,8 @@ export default function PWAInstallPrompt() {
   useEffect(() => {
     // Check if app is already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
-      return;
+      requestAnimationFrame(() => setIsInstalled(true));
+      return () => {};
     }
 
     // Check if device is mobile (show custom prompt only on mobile)

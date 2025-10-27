@@ -2,12 +2,15 @@ import NextAuth from 'next-auth';
 import SpotifyProvider from 'next-auth/providers/spotify';
 import * as Sentry from '@sentry/nextjs';
 import { refreshAccessToken, scopes } from '@/lib/spotify';
+import { getValidatedEnv } from '@/lib/envConfig';
+
+const env = getValidatedEnv();
 
 const handler = NextAuth({
   providers: [
     SpotifyProvider({
-      clientId: process.env.SPOTIFY_CLIENT_ID!,
-      clientSecret: process.env.SPOTIFY_CLIENT_SECRET!,
+      clientId: env.SPOTIFY_CLIENT_ID,
+      clientSecret: env.SPOTIFY_CLIENT_SECRET,
       checks: ['pkce'],
       authorization: {
         params: {
@@ -77,7 +80,7 @@ const handler = NextAuth({
       session.error = token.error as string | undefined;
 
       // Add debugging info in development
-      if (process.env.NODE_ENV === 'development') {
+      if (env.NODE_ENV === 'development') {
         const timeToExpiry = token.expiresAt
           ? Math.floor(((token.expiresAt as number) * 1000 - Date.now()) / 1000 / 60)
           : 0;
@@ -90,7 +93,7 @@ const handler = NextAuth({
   pages: {
     signIn: '/auth/signin',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: env.NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt',
     // Reduce session max age to ensure token refresh happens regularly
@@ -103,7 +106,7 @@ const handler = NextAuth({
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: env.NODE_ENV === 'production',
       },
     },
     callbackUrl: {
@@ -112,7 +115,7 @@ const handler = NextAuth({
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: env.NODE_ENV === 'production',
       },
     },
     csrfToken: {
@@ -121,7 +124,7 @@ const handler = NextAuth({
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: env.NODE_ENV === 'production',
       },
     },
     // Critical: Add PKCE-specific cookies
@@ -131,7 +134,7 @@ const handler = NextAuth({
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: env.NODE_ENV === 'production',
         maxAge: 60 * 15, // 15 minutes
       },
     },
@@ -141,7 +144,7 @@ const handler = NextAuth({
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: env.NODE_ENV === 'production',
         maxAge: 60 * 15, // 15 minutes
       },
     },
@@ -151,13 +154,13 @@ const handler = NextAuth({
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: env.NODE_ENV === 'production',
         maxAge: 60 * 15, // 15 minutes
       },
     },
   },
   // Enhanced debugging for development
-  debug: process.env.NODE_ENV === 'development',
+  debug: env.NODE_ENV === 'development',
 });
 
 export { handler as GET, handler as POST };
