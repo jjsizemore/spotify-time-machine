@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 import { GoogleTagManager } from '@next/third-parties/google';
 import { ThemeModeScript } from 'flowbite-react';
 import Script from 'next/script';
-import WebVitalsMonitor from '@/analytics/WebVitalsMonitor';
+import WebVitalsMonitor from '@/components/analytics/WebVitalsMonitor';
 import TokenStatus from '@/auth/TokenStatus';
 import { LayoutContent } from '@/layout/LayoutContent';
 import { DomainMigrationHandler } from '@/providers/DomainMigrationHandler';

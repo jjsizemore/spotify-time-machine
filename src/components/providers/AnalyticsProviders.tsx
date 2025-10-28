@@ -3,38 +3,8 @@
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import Script from 'next/script';
-import { useEffect } from 'react';
-
-declare global {
-  interface Window {
-    posthog?: any;
-  }
-}
 
 export function AnalyticsProviders() {
-  useEffect(() => {
-    // Initialize PostHog
-    if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-      import('posthog-js')
-        .then((posthog) => {
-          posthog.default.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-            api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
-            loaded: (ph) => {
-              if (process.env.NODE_ENV === 'development') {
-                console.log('📊 PostHog initialized');
-                ph.debug();
-              }
-            },
-            capture_pageview: true,
-            capture_pageleave: true,
-          });
-        })
-        .catch((error) => {
-          console.error('Failed to load PostHog:', error);
-        });
-    }
-  }, []);
-
   return (
     <>
       {/* Google Analytics 4 for Core Web Vitals */}

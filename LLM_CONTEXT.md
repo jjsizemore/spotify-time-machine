@@ -6,6 +6,19 @@
 - The TODO.md file contains the current implementation status and priorities
 - **Refer to "Key Architectural Patterns & Components" below for current development best practices and available tools within this project.**
 
+## 📚 Documentation Resources
+
+This project uses the [Diátaxis framework](https://diataxis.fr/) for organized documentation:
+
+- **[Documentation Index](./docs/index.md)** - Complete documentation navigation
+- **[Quick Command Reference](./docs/reference/command-reference.md)** - Fast command lookup
+- **[Developer Tools Guide](./docs/reference/developer-tools.md)** - Comprehensive tooling documentation
+- **[Architecture Guides](./docs/explanation/)** - Deep technical explanations
+  - [Token Management Architecture](./docs/explanation/token-management-architecture.md)
+  - [Analytics Architecture](./docs/explanation/analytics-architecture.md)
+  - [Implementation Summary](./docs/explanation/implementation-summary.md)
+- **[How-To Guides](./docs/how-to-guides/)** - Problem-solving instructions
+
 ## Recent Updates ✨
 
 ### ✅ Turborepo Integration for Single-Package Workspace (Latest)
@@ -106,22 +119,22 @@
 
 ### ✅ Analytics Implementation
 
-- **📊 Multi-Platform Analytics**: Integrated comprehensive analytics and monitoring
+- **📊 Platform-Native Analytics**: Integrated comprehensive analytics and monitoring focused on Vercel/Next.js ecosystem
   - ✅ **Google Analytics 4**: Core Web Vitals tracking and page analytics
-  - ✅ **Vercel Analytics**: Performance monitoring and user analytics
-  - ✅ **Vercel Speed Insights**: Real-time performance metrics
-  - ✅ **PostHog**: Product analytics and session replay
-  - ✅ **Sentry**: Error tracking and performance monitoring
+  - ✅ **Vercel Analytics**: Performance monitoring and user analytics with built-in audience insights
+  - ✅ **Vercel Speed Insights**: Real-time performance metrics and Core Web Vitals
+  - ✅ **Sentry**: Comprehensive error tracking, performance monitoring, and APM
+  - ✅ **Next.js Built-in Analytics**: Build-time and runtime performance insights
   - ✅ **Unified Web Vitals**: All platforms receive Core Web Vitals data (CLS, INP, LCP, FCP, TTFB)
   - 🔧 **Technical Features**:
     - Client-side initialization via `AnalyticsProviders` component
     - Sentry integration across client, server, and edge runtimes
     - Automatic Vercel Cron Monitors with Sentry
     - Development logging for debugging analytics events
+    - Removed third-party product analytics (PostHog) in favor of platform-native solutions
   - 🛠️ **Development Indicators** (Development Mode Only):
     - **Console Logging**: Comprehensive debug logging with emoji prefixes
       - `📊` Analytics initialization and events
-      - `🔍` PostHog initialization and configuration
     - **Event Tracking**: Logs analytics events as they occur
     - **Script Loading**: Tracks script loading and initialization
 
@@ -161,8 +174,9 @@
     - `ts-node` - Next.js handles TypeScript compilation natively
     - `tsx` - Next.js handles .tsx files natively
   - ✅ **Backend/Server Dependencies**: Removed unused server packages
-    - `posthog-node` - Only client-side PostHog tracking is used
     - `puppeteer` - No browser automation or testing usage found
+  - ✅ **Analytics Dependencies**: Removed third-party analytics in favor of platform-native solutions
+    - `posthog-js` - Replaced with Vercel Analytics and Sentry for comprehensive monitoring
   - ✅ **CSS Processing**: Removed redundant CSS tooling
     - `autoprefixer` - Not configured in PostCSS, Tailwind v4 has built-in autoprefixer
   - ✅ **Script Cleanup**: Removed `test` script from package.json

@@ -157,8 +157,8 @@ const nextConfig: NextConfig = {
   // Trailing slash redirect
   trailingSlash: false,
 
-  // Skip middleware for specific paths
-  skipMiddlewareUrlNormalize: false,
+  // Skip proxy URL normalization for specific paths (Next.js 16+)
+  skipProxyUrlNormalize: false,
 };
 
 // Wrap with Sentry for error tracking

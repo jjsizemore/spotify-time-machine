@@ -71,7 +71,7 @@ export default function ListeningTrends() {
 
       // Use compact tracks for trends
       const compactTracks: CompactTrack[] = getCompactTracks(currentTimeRange);
-      let currentTracksByPeriod: Record<string, number> = {};
+      const currentTracksByPeriod: Record<string, number> = {};
       let currentMaxVal = 0;
 
       const processChunk = (startIndex: number) => {

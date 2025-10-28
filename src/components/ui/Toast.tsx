@@ -111,7 +111,7 @@ export default function Toast({ message, onDismiss, type = 'success' }: ToastPro
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none p-4">
       <FlowbiteToast
-        className={`flex items-start w-full max-w-sm p-4 ${styles.container} rounded-lg shadow-sm pointer-events-auto relative`}
+        className={`flex items-start w-full max-w-sm p-4 ${styles.container} rounded-lg shadow-xs pointer-events-auto relative`}
       >
         {/* Icon */}
         <div

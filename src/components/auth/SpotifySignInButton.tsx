@@ -39,7 +39,7 @@ export default function SpotifySignInButton({
   return (
     <button
       onClick={() => signIn('spotify', { callbackUrl })}
-      className={`relative ${widthClass} flex justify-center ${button} font-medium rounded-full text-spotify-black bg-spotify-green cursor-pointer hover:bg-spotify-green/90 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${className}`}
+      className={`relative ${widthClass} flex justify-center ${button} font-medium rounded-full text-spotify-black bg-spotify-green cursor-pointer hover:bg-spotify-green/90 transition focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${className}`}
     >
       <span className={`absolute left-0 inset-y-0 flex items-center ${spacing}`}></span>
       Sign in with Spotify

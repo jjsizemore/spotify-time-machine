@@ -35,17 +35,6 @@ export default function WebVitalsMonitor() {
               });
             }
 
-            // Send to PostHog
-            if (typeof window !== 'undefined' && (window as any).posthog) {
-              (window as any).posthog.capture('web_vital', {
-                metric_name: metric.name,
-                value: metric.value,
-                id: metric.id,
-                delta: metric.delta,
-                rating: metric.rating,
-              });
-            }
-
             // Send to Sentry
             Sentry.metrics.distribution('web_vitals', metric.value, {
               unit: 'millisecond',
