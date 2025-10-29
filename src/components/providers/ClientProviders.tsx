@@ -4,14 +4,15 @@ import { AnalyticsProviders } from '@/components/providers/AnalyticsProviders';
 
 interface Props {
   children: React.ReactNode;
+  nonce?: string;
 }
 
-export default function ClientProviders({ children }: Props) {
+export default function ClientProviders({ children, nonce }: Readonly<Props>) {
   return (
     <>
       {children}
       {/* Analytics providers */}
-      <AnalyticsProviders />
+      <AnalyticsProviders nonce={nonce} />
     </>
   );
 }

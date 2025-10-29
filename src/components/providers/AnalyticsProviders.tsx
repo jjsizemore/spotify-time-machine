@@ -4,13 +4,18 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import Script from 'next/script';
 
-export function AnalyticsProviders() {
+interface AnalyticsProvidersProps {
+  nonce?: string;
+}
+
+export function AnalyticsProviders({ nonce }: Readonly<AnalyticsProvidersProps>) {
   return (
     <>
       {/* Google Analytics 4 for Core Web Vitals */}
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=G-CD6VHDL1HS"
         strategy="afterInteractive"
+        nonce={nonce}
         onLoad={() => {
           if (process.env.NODE_ENV === 'development') {
             console.log('📊 Google Analytics script loaded');
@@ -20,6 +25,7 @@ export function AnalyticsProviders() {
       <Script
         id="google-analytics"
         strategy="afterInteractive"
+        nonce={nonce}
         onLoad={() => {
           if (process.env.NODE_ENV === 'development') {
             console.log('📊 Google Analytics initialized');

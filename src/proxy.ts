@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export default function proxy(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Skip middleware for API routes, static files, and assets
   const pathname = request.nextUrl.pathname;
   if (
@@ -22,7 +22,7 @@ export default function proxy(request: NextRequest) {
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${isDev ? "'unsafe-eval'" : ''} https://www.googletagmanager.com https://va.vercel-scripts.com https://*.vercel-scripts.com https://vercel.live;
-    style-src 'self' ${isDev ? "'unsafe-inline'" : `'nonce-${nonce}'`} https://fonts.googleapis.com;
+    style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com;
     img-src 'self' blob: data: https://i.scdn.co https://mosaic.scdn.co https://platform-lookaside.fbsbx.com https://www.google-analytics.com https://www.googletagmanager.com;
     font-src 'self' https://fonts.gstatic.com data:;
     connect-src 'self' https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://analytics.google.com https://vitals.vercel-analytics.com https://*.vercel-analytics.com https://vercel.live https://*.sentry.io;
@@ -57,3 +57,22 @@ export default function proxy(request: NextRequest) {
 
   return response;
 }
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, favicon.svg (favicon files)
+     */
+    {
+      source: '/((?!api|_next/static|_next/image|favicon.ico|favicon.svg).*)',
+      missing: [
+        { type: 'header', key: 'next-router-prefetch' },
+        { type: 'header', key: 'purpose', value: 'prefetch' },
+      ],
+    },
+  ],
+};
