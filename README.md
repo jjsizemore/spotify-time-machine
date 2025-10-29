@@ -67,12 +67,7 @@ Comprehensive documentation is available following the [Diátaxis framework](htt
 - **Modern Code Quality Pipeline:**
   - Modern linting and formatting with the latest tools
   - Optimized data fetching with React Query
-  - Automated security scanning and vulnerability detection- **Enhanced Authentication:**
-  - Secure Spotify OAuth 2.0 authentication with PKCE (in progress)
-  - Automatic session management with error recovery
-  - Development-only debugging tools for authentication flow
-
-- **Performance & Reliability:**
+  - Automated security scanning and vulnerability detection- **Performance & Reliability:**
   - Advanced caching system for API responses with TTL and size limits
   - Responsive design with Tailwind CSS and modern component architecture
   - Comprehensive error handling with user-friendly retry mechanisms
