@@ -33,7 +33,7 @@ export default function AuthError({
 
           <ActionButton
             onClick={() => {
-              window.location.href = '/';
+              globalThis.location.href = '/';
             }}
             variant="secondary"
           >

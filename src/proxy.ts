@@ -22,9 +22,9 @@ export function proxy(request: NextRequest) {
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${isDev ? "'unsafe-eval'" : ''} https://www.googletagmanager.com https://va.vercel-scripts.com https://*.vercel-scripts.com https://vercel.live;
-    style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data: https://i.scdn.co https://mosaic.scdn.co https://platform-lookaside.fbsbx.com https://www.google-analytics.com https://www.googletagmanager.com;
-    font-src 'self' https://fonts.gstatic.com data:;
+    font-src 'self' https://fonts.gstatic.com https://r2cdn.perplexity.ai data:;
     connect-src 'self' https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://analytics.google.com https://vitals.vercel-analytics.com https://*.vercel-analytics.com https://vercel.live https://*.sentry.io;
     frame-src 'self' https://vercel.live https://www.googletagmanager.com;
     object-src 'none';

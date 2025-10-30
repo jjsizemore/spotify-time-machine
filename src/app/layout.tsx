@@ -23,6 +23,8 @@ import IOSInstallPrompt from '@/ui/IOSInstallPrompt';
 import OfflineIndicator from '@/ui/OfflineIndicator';
 import PWAInstallPrompt from '@/ui/PWAInstallPrompt';
 
+export const dynamic = 'force-dynamic';
+
 // Enhanced metadata for 2025 SEO standards
 export const metadata = generateEnhancedMetadata({
   title: "Jermaine's Spotify Time Machine",
@@ -130,13 +132,31 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
               __html: `
 							if ('serviceWorker' in navigator) {
 								window.addEventListener('load', function() {
-									navigator.serviceWorker.register('/sw.js')
-										.then(function(registration) {
-											console.log('SW registered: ', registration);
-										})
-										.catch(function(registrationError) {
-											console.log('SW registration failed: ', registrationError);
-										});
+                const host = window.location.hostname;
+                const isLocalDev = host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host === '::1' || host.endsWith('.local');
+                if (isLocalDev) {
+                  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    registrations.forEach(function(registration) {
+                      registration.unregister();
+                    });
+                  });
+                  if (window.caches) {
+                    caches.keys().then(function(cacheNames) {
+                      cacheNames.forEach(function(cacheName) {
+                        caches.delete(cacheName);
+                      });
+                    });
+                  }
+                  return;
+                }
+
+                navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+                  .then(function(registration) {
+                    console.log('SW registered: ', registration);
+                  })
+                  .catch(function(registrationError) {
+                    console.log('SW registration failed: ', registrationError);
+                  });
 								});
 							}
 						`,

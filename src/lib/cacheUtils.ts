@@ -50,7 +50,7 @@ function categorizeStorageError(error: any): CacheError['type'] {
   if (
     error.name === 'SecurityError' ||
     error.name === 'InvalidAccessError' ||
-    (error.message && error.message.toLowerCase().includes('access'))
+    error.message?.toLowerCase().includes('access')
   ) {
     return 'STORAGE_ACCESS';
   }
@@ -1171,8 +1171,8 @@ export async function clearAllCachesAndRefresh(
     const removedCount = clearAllCachesOnly(clearInMemoryCaches);
 
     // Refresh the page
-    if (typeof window !== 'undefined') {
-      window.location.reload();
+    if (globalThis.window !== undefined) {
+      globalThis.location.reload();
     }
 
     return { removedCount, refreshed: true };

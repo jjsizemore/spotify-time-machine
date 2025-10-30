@@ -4,6 +4,12 @@
 const STATIC_CACHE_NAME = 'spotify-time-machine-static-v2';
 const DYNAMIC_CACHE_NAME = 'spotify-time-machine-dynamic-v2';
 
+const LOCAL_DEV_HOSTS = new Set(['localhost', '127.0.0.1', '0.0.0.0', '::1']);
+const scopeLocation = globalThis.location;
+const scopeHostname = scopeLocation?.hostname ?? '';
+const IS_LOCAL_DEV = LOCAL_DEV_HOSTS.has(scopeHostname) || scopeHostname.endsWith('.local');
+const IMAGE_EXTENSION_REGEX = /\.(?:jpg|jpeg|png|gif|webp|avif|svg|ico)$/i;
+
 // Domain migration handling
 const OLD_DOMAIN = 'stm.jermainesizemore.com';
 const NEW_DOMAIN = 'tm.jermainesizemore.com';
@@ -24,6 +30,12 @@ const STATIC_ASSETS = [
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
+
+  if (IS_LOCAL_DEV) {
+    event.waitUntil(globalThis.skipWaiting());
+    return;
+  }
+
   event.waitUntil(
     caches
       .open(STATIC_CACHE_NAME)
@@ -33,7 +45,7 @@ self.addEventListener('install', (event) => {
       })
       .then(() => {
         console.log('Service Worker: Static assets cached');
-        return self.skipWaiting();
+        return globalThis.skipWaiting();
       })
       .catch((error) => {
         console.error('Service Worker: Failed to cache static assets', error);
@@ -44,6 +56,12 @@ self.addEventListener('install', (event) => {
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   console.log('Service Worker: Activating...');
+
+  if (IS_LOCAL_DEV) {
+    event.waitUntil(globalThis.clients.claim());
+    return;
+  }
+
   event.waitUntil(
     caches
       .keys()
@@ -54,14 +72,15 @@ self.addEventListener('activate', (event) => {
               console.log('Service Worker: Deleting old cache', cacheName);
               return caches.delete(cacheName);
             }
+            return Promise.resolve();
           })
         );
       })
       .then(() => {
         console.log('Service Worker: Activated');
         // Notify clients about domain migration if on old domain
-        return self.clients.matchAll().then((clients) => {
-          clients.forEach((client) => {
+        return globalThis.clients.matchAll().then((clients) => {
+          for (const client of clients) {
             const clientUrl = new URL(client.url);
             if (clientUrl.hostname === OLD_DOMAIN) {
               client.postMessage(
@@ -74,10 +93,10 @@ self.addEventListener('activate', (event) => {
                 client.location.origin
               );
             }
-          });
+          }
         });
       })
-      .then(() => self.clients.claim())
+      .then(() => globalThis.clients.claim())
   );
 });
 
@@ -85,6 +104,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  if (IS_LOCAL_DEV) {
+    return;
+  }
 
   // Skip non-GET requests
   if (request.method !== 'GET') {
@@ -108,7 +131,7 @@ self.addEventListener('fetch', (event) => {
   } else if (url.pathname.startsWith('/api/')) {
     // API routes - network first
     event.respondWith(networkFirst(request, DYNAMIC_CACHE_NAME));
-  } else if (url.pathname.match(/\.(jpg|jpeg|png|gif|webp|avif|svg|ico)$/)) {
+  } else if (IMAGE_EXTENSION_REGEX.exec(url.pathname)) {
     // Images - cache first with fallback
     event.respondWith(cacheFirst(request, DYNAMIC_CACHE_NAME));
   } else {
@@ -167,9 +190,16 @@ async function staleWhileRevalidate(request, cacheName) {
       }
       return networkResponse;
     })
-    .catch(() => cachedResponse);
+    .catch((error) => {
+      console.error('Stale-while-revalidate fetch failed:', error);
+      return cachedResponse || new Response('Offline', { status: 503 });
+    });
 
-  return cachedResponse || fetchPromise;
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  return fetchPromise;
 }
 
 // Background sync for offline actions
@@ -212,7 +242,7 @@ self.addEventListener('push', (event) => {
       ],
     };
 
-    event.waitUntil(self.registration.showNotification(data.title, options));
+    event.waitUntil(globalThis.registration.showNotification(data.title, options));
   }
 });
 
@@ -221,7 +251,7 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   if (event.action === 'explore') {
-    event.waitUntil(self.clients.openWindow('/dashboard'));
+    event.waitUntil(globalThis.clients.openWindow('/dashboard'));
   }
 });
 

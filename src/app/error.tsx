@@ -34,7 +34,7 @@ export default function ErrorBoundary({
 
           <ActionButton
             onClick={() => {
-              window.location.href = '/';
+              globalThis.location.href = '/';
             }}
             variant="secondary"
           >

@@ -129,7 +129,7 @@ export default function HistoryPage() {
       <PageContainer>
         <ErrorDisplay
           message={errorMessage || 'Failed to load your listening history'}
-          retry={() => window.location.reload()}
+          retry={() => globalThis.location.reload()}
         />
       </PageContainer>
     );

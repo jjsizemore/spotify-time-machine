@@ -113,7 +113,7 @@ export const useSpotify = () => {
     if (session?.error === 'RefreshAccessTokenError') {
       signIn('spotify');
     } else {
-      window.location.reload();
+      globalThis.location.reload();
     }
   };
 

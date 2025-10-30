@@ -63,7 +63,7 @@ export default function Navigation({ user }: NavigationProps) {
       router.push('/thank-you');
     } catch (error) {
       console.error('Error during logout:', error);
-      window.location.href = '/thank-you';
+      globalThis.location.href = '/thank-you';
     }
   };
 

@@ -115,7 +115,7 @@ function SignInContent() {
         callbackUrl,
         signInProcessState,
         timestamp: new Date().toISOString(),
-        url: window.location.href,
+        url: globalThis.location.href,
         userAgent: navigator.userAgent,
         cookies: document.cookie ? 'present' : 'none',
       });
@@ -234,7 +234,7 @@ function SignInContent() {
                   <strong>Timestamp:</strong> {new Date().toISOString()}
                 </p>
                 <p>
-                  <strong>URL:</strong> {window.location.href}
+                  <strong>URL:</strong> {globalThis.location.href}
                 </p>
               </div>
             </details>
