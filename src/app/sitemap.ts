@@ -10,7 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: baseUrl,
       lastModified: currentDate,
       changeFrequency: 'weekly',
-      priority: 1.0,
+      priority: 1,
       alternates: {
         languages: {
           en: baseUrl,
@@ -61,14 +61,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
       },
     },
-  ];
-}
-
-// Enhanced Image Sitemap for 2025 SEO
-export async function generateImageSitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://tm.jermainesizemore.com';
-
-  return [
+    // Enhanced Image Sitemap entries for 2025 SEO
     {
       url: `${baseUrl}/previews/dashboard-preview.jpeg`,
       lastModified: new Date('2024-01-01'),

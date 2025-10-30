@@ -2,6 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 📚 Documentation Structure
+
+This project follows the [Diátaxis framework](https://diataxis.fr/) for documentation organization:
+
+- **[Documentation Index](./docs/index.md)** - Central navigation hub
+- **[How-To Guides](./docs/how-to-guides/)** - Problem-solving guides
+- **[Reference](./docs/reference/)** - Technical specifications
+  - [Command Reference](./docs/reference/command-reference.md) - Quick command lookup
+  - [Developer Tools](./docs/reference/developer-tools.md) - Complete tool documentation
+- **[Explanation](./docs/explanation/)** - Architecture and concepts
+  - [Token Management Architecture](./docs/explanation/token-management-architecture.md)
+  - [Analytics Architecture](./docs/explanation/analytics-architecture.md)
+  - [Implementation Summary](./docs/explanation/implementation-summary.md)
+
 ## Project Overview
 
 This is a Next.js 15 application called "Jermaine's Spotify Time Machine" that allows users to explore their Spotify listening history, create playlists based on specific time periods, and visualize their music journey. The application uses enterprise-grade infrastructure with advanced token management, request queuing, and comprehensive error handling.

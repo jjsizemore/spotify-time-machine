@@ -36,7 +36,9 @@ pre-commit:
     # Security scanning
     semgrep:
       glob: '*.{ts,tsx,js,jsx,cjs,mjs}'
-      run: pnpm exec semgrep --config semgrep.yml {staged_files}
+      run: |
+        export PATH="${HOME}/.local/share/mise/shims:${PATH}"
+        pnpm exec semgrep --config semgrep.yml {staged_files}
 
     # Shell script linting
     shellcheck:
@@ -52,7 +54,7 @@ pre-push:
   parallel: false
   commands:
     security:
-      run: mise run security
+      run: TERM=dumb mise run security
 
 commit-msg:
   commands:

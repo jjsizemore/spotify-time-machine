@@ -34,7 +34,7 @@ The Spotify Time Machine is a Next.js Progressive Web App that integrates with S
 - **Compound Components**: Related components grouped together (StatsTabs, VisualizationContainer)
 - **Error Boundaries**: Graceful error handling with retry mechanisms
 - **Provider Pattern**: Context providers for global state (NextAuth, QueryClient, Analytics)
-- **Analytics Integration**: Multi-platform monitoring with Sentry, PostHog, and Vercel Analytics
+- **Analytics Integration**: Platform-native monitoring with Sentry, Vercel Analytics, and Next.js built-in insights
 
 ## Component Relationships
 
@@ -49,4 +49,4 @@ The Spotify Time Machine is a Next.js Progressive Web App that integrates with S
 - **Data Fetching**: useSpotify hook → spotify.ts client → API routes → Spotify API
 - **Playlist Creation**: User selection → API route → Spotify API → Success feedback
 - **Visualization**: Raw data → Processing hooks → Chart components → Interactive UI
-- **Analytics Integration**: Multi-platform monitoring with Sentry error tracking, PostHog analytics, and Vercel Speed Insights
+- **Analytics Integration**: Platform-native monitoring with Sentry error tracking, Vercel Analytics, and Vercel Speed Insights

@@ -3,8 +3,9 @@ import '@/lib/init';
 import { ReactNode } from 'react';
 import { GoogleTagManager } from '@next/third-parties/google';
 import { ThemeModeScript } from 'flowbite-react';
+import { headers } from 'next/headers';
 import Script from 'next/script';
-import WebVitalsMonitor from '@/analytics/WebVitalsMonitor';
+import WebVitalsMonitor from '@/components/analytics/WebVitalsMonitor';
 import TokenStatus from '@/auth/TokenStatus';
 import { LayoutContent } from '@/layout/LayoutContent';
 import { DomainMigrationHandler } from '@/providers/DomainMigrationHandler';
@@ -36,15 +37,16 @@ export const metadata = generateEnhancedMetadata({
   ],
 });
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   const webAppSchema = generateWebApplicationSchema();
   const organizationSchema = generateOrganizationSchema();
 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <GoogleTagManager gtmId="GTM-NFTKSSLM" />
-        <ThemeModeScript />
+        <GoogleTagManager gtmId="GTM-NFTKSSLM" nonce={nonce} />
+        <ThemeModeScript nonce={nonce} />
 
         {/* Enhanced Meta Tags for 2025 */}
         <meta name="viewport" content={ADVANCED_META_TAGS.viewport} />
@@ -93,11 +95,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="bg-spotify-black text-spotify-light-gray font-sans min-h-screen flex flex-col layout-content">
-        <ClientProviders>
+        <ClientProviders nonce={nonce}>
           {/* Structured Data for SEO */}
           <Script
             id="web-application-schema"
             type="application/ld+json"
+            nonce={nonce}
             dangerouslySetInnerHTML={{
               __html: JSON.stringify(webAppSchema),
             }}
@@ -106,6 +109,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Script
             id="organization-schema"
             type="application/ld+json"
+            nonce={nonce}
             dangerouslySetInnerHTML={{
               __html: JSON.stringify(organizationSchema),
             }}
@@ -121,6 +125,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Script
             id="service-worker"
             strategy="afterInteractive"
+            nonce={nonce}
             dangerouslySetInnerHTML={{
               __html: `
 							if ('serviceWorker' in navigator) {

@@ -25,7 +25,7 @@
     "assumeChangesOnlyAffectDirectDependencies": true,
     "useDefineForClassFields": true,
     "verbatimModuleSyntax": false,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "jsxImportSource": "react",
     "plugins": [
       {
@@ -56,7 +56,9 @@
     "*.config.js",
     "*.config.mjs",
     "*.config.ts",
-    ".flowbite-react/init.tsx"
+    ".flowbite-react/init.tsx",
+    ".next/dev/types/**/*.ts",
+    "scripts/**/*.{ts,js,mjs,mts}"
   ],
   "exclude": ["node_modules", ".next", "dist", "build", ".next", ".turbo"],
   "ts-node": {

@@ -6,6 +6,21 @@ A Next.js application that lets you explore your Spotify listening history, crea
 
 This project is actively being developed. For detailed implementation status and priorities, see [TODO.md](./TODO.md).
 
+## 📚 Documentation
+
+Comprehensive documentation is available following the [Diátaxis framework](https://diataxis.fr/):
+
+- **[Documentation Index](./docs/index.md)** - Central hub for all documentation
+- **[How-To Guides](./docs/how-to-guides/)** - Step-by-step solutions to specific problems
+- **[Reference](./docs/reference/)** - Technical specifications and command references
+- **[Explanation](./docs/explanation/)** - In-depth conceptual guides and architecture documentation
+
+### Quick Links
+
+- 🚀 **[Quick Start Commands](./docs/reference/command-reference.md)** - Essential commands for development
+- 🔧 **[Developer Tools](./docs/reference/developer-tools.md)** - Complete tooling reference
+- 🏗️ **[Architecture Guide](./docs/explanation/token-management-architecture.md)** - System design and implementation details
+
 ## Features
 
 ### 🎵 Music Discovery & Analytics
@@ -50,18 +65,9 @@ This project is actively being developed. For detailed implementation status and
   - ✅ Comprehensive console logging with emoji indicators
 
 - **Modern Code Quality Pipeline:**
-  - ✅ Biome 1.9.4 for primary formatting and linting
-  - ✅ React Query 5.80.5 for optimized data fetching
-  - ✅ Automated security scanning and vulnerability detection
-
-### 🔧 Technical Features
-
-- **Enhanced Authentication:**
-  - Secure Spotify OAuth 2.0 authentication with PKCE (in progress)
-  - Automatic session management with error recovery
-  - Development-only debugging tools for authentication flow
-
-- **Performance & Reliability:**
+  - Modern linting and formatting with the latest tools
+  - Optimized data fetching with React Query
+  - Automated security scanning and vulnerability detection- **Performance & Reliability:**
   - Advanced caching system for API responses with TTL and size limits
   - Responsive design with Tailwind CSS and modern component architecture
   - Comprehensive error handling with user-friendly retry mechanisms
@@ -165,14 +171,16 @@ if (error) return <ErrorDisplay message={error} onRetry={retry} />;
 
 The project uses modern tooling for enhanced development experience:
 
-### Updated Package Ecosystem
+### Package Versions
 
-- **@tanstack/react-query**: `^5.80.5` (Data fetching - major upgrade)
-- **zod**: `^3.25.51` (Schema validation - updated)
+![React Query](https://img.shields.io/npm/v/%40tanstack%2Freact-query?label=React%20Query&logo=npm)
+![Zod](https://img.shields.io/npm/v/zod?label=Zod&logo=npm)
+![Next.js](https://img.shields.io/npm/v/next?label=Next.js&logo=npm)
+![React](https://img.shields.io/npm/v/react?label=React&logo=npm)
 
 ### Enhanced Configuration
 
-- **Modern Linting & Formatting**: Biome 1.9.4 (replacing Prettier and ESLint)
+- **Modern Linting & Formatting**: Biome (replacing Prettier and ESLint)
 - **Security Scanning**: Automated secret detection and vulnerability scanning
 - **Development Debugging**: Real-time monitoring and comprehensive logging
 

@@ -34,7 +34,7 @@ export default function FormField({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full bg-spotify-black border border-spotify-medium-gray rounded-md p-3 text-spotify-white focus:outline-none focus:ring-2 focus:ring-spotify-green"
+        className="w-full bg-spotify-black border border-spotify-medium-gray rounded-md p-3 text-spotify-white focus:outline-hidden focus:ring-2 focus:ring-spotify-green"
         required={required}
         max={max}
       />

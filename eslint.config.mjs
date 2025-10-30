@@ -1,16 +1,29 @@
 import eslint from '@eslint/js';
 import tsParser from '@typescript-eslint/parser';
-import type { Linter } from 'eslint';
-import eslintConfigPrettier from 'eslint-config-prettier';
 import importXPlugin from 'eslint-plugin-import-x';
 import oxlint from 'eslint-plugin-oxlint';
 import reactRefresh from 'eslint-plugin-react-refresh';
-import { flatConfig as nextEslintConfig } from '@next/eslint-plugin-next';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
+import prettier from 'eslint-config-prettier/flat';
+
 import globals from 'globals';
 
 const currentDir = new URL('.', import.meta.url).pathname;
 
-export default [
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  prettier,
+  // Override default ignores of eslint-config-next.
+  globalIgnores([
+    // Default ignores of eslint-config-next:
+    '.next/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+  ]),
   {
     ignores: ['dist/', '.next/', 'node_modules/', '**/.*'],
   },
@@ -37,9 +50,6 @@ export default [
     },
   },
   eslint.configs.recommended,
-  eslintConfigPrettier,
-  nextEslintConfig.recommended,
-  nextEslintConfig.coreWebVitals,
   {
     ...reactRefresh.configs.recommended,
     rules: {
@@ -72,4 +82,6 @@ export default [
       },
     },
   },
-] as Linter.Config[];
+]);
+
+export default eslintConfig;

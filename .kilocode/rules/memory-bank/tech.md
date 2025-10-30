@@ -32,7 +32,6 @@
 - **@vercel/analytics**: Web analytics and performance tracking
 - **@vercel/speed-insights**: Real-time performance metrics and insights
 - **@sentry/nextjs**: Error tracking and performance monitoring with session replay
-- **posthog-js**: Product analytics and session replay
 - **date-fns**: Modern JavaScript date utility library
 - **fflate**: Fast zlib compression for data processing
 - **react-icons**: Popular icon library for UI components
@@ -47,4 +46,4 @@
 - **Commit Management**: Conventional commits with Husky pre-commit hooks
 - **Build Optimization**: Turbo for efficient builds and caching
 - **Development Debugging**: Enhanced console logging and real-time monitoring tools
-- **Analytics & Monitoring**: Multi-platform analytics with Sentry error tracking, PostHog product analytics, and Vercel Speed Insights
+- **Analytics & Monitoring**: Platform-native analytics with Sentry error tracking, Vercel Analytics, and Vercel Speed Insights

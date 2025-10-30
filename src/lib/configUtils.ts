@@ -8,7 +8,7 @@ const envSchema = z.object({
   SPOTIFY_CLIENT_ID: z.string().min(1, 'SPOTIFY_CLIENT_ID is required'),
   SPOTIFY_CLIENT_SECRET: z.string().min(1, 'SPOTIFY_CLIENT_SECRET is required'),
   NEXTAUTH_SECRET: z.string().min(1, 'NEXTAUTH_SECRET is required'),
-  NEXTAUTH_URL: z.string().url('NEXTAUTH_URL must be a valid URL'),
+  NEXTAUTH_URL: z.url('NEXTAUTH_URL must be a valid URL, unless in preview stage').optional(),
 });
 
 export const validateConfig = () => {
