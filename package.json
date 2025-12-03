@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@next/third-parties": "^16.0.1",
-    "@sentry/nextjs": "^10.22.0",
+    "@sentry/nextjs": "^10.28.0",
     "@tailwindcss/cli": "^4.1.16",
     "@tailwindcss/postcss": "^4.1.16",
     "@tanstack/react-query": "^5.90.5",
