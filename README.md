@@ -67,11 +67,7 @@ Comprehensive documentation is available following the [Diátaxis framework](htt
 - **Modern Code Quality Pipeline:**
   - Modern linting and formatting with the latest tools
   - Optimized data fetching with React Query
-  - Automated security scanning and vulnerability detection- **Performance & Reliability:**
-  - Advanced caching system for API responses with TTL and size limits
-  - Responsive design with Tailwind CSS and modern component architecture
-  - Comprehensive error handling with user-friendly retry mechanisms
-  - Production-ready infrastructure with zero-downtime deployment compatibility
+  - Automated security scanning and vulnerability detection
 
 ## Getting Started
 

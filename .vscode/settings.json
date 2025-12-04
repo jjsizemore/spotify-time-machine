@@ -73,5 +73,9 @@
       "input.foreground": "#ffffff",
       "input.border": "#535353"
     }
-  }
+  },
+  "debug.javascript.defaultRuntimeExecutable": {
+    "pwa-node": "${workspaceFolder}/.vscode/mise-tools/node"
+  },
+  "shellcheck.executablePath": "${workspaceFolder}/.vscode/mise-tools/shellcheck"
 }

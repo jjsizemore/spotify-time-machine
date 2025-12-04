@@ -205,3 +205,5 @@ dist
 
 # turbo
 .turbo
+
+.vscode/mise-tools
