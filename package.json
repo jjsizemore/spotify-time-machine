@@ -44,7 +44,7 @@
     "date-fns": "^4.1.0",
     "fflate": "^0.8.2",
     "flowbite": "^4.0.1",
-    "flowbite-react": "^0.12.10",
+    "flowbite-react": "^0.12.12",
     "next": "^16.0.7",
     "next-auth": "^4.24.13",
     "react": "19.2.1",
