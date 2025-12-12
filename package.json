@@ -45,7 +45,7 @@
     "fflate": "^0.8.2",
     "flowbite": "^4.0.1",
     "flowbite-react": "^0.12.10",
-    "next": "^16.0.7",
+    "next": "^16.0.9",
     "next-auth": "^4.24.13",
     "react": "19.2.1",
     "react-dom": "19.2.1",
