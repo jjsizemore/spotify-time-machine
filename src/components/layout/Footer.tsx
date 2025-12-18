@@ -43,7 +43,7 @@ export default function Footer() {
     <footer className="bg-spotify-dark-gray py-8 mt-auto border-t border-spotify-medium-gray">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center">
-          <div className="flex" style={{ gap: '1rem', marginBottom: '1rem' }}>
+          <div className="flex gap-4 sm:gap-6 mb-4">
             {socialIcons.map(({ icon: Icon, href, label }) => (
               <Link
                 key={label}

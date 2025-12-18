@@ -27,51 +27,14 @@
       "statusBar.noFolderBackground": "#191414",
       "statusBar.noFolderForeground": "#b3b3b3",
 
-      // Sidebar - Spotify Dark Gray
-      "sideBar.background": "#121212",
-      "sideBar.foreground": "#b3b3b3",
-      "sideBarSectionHeader.background": "#191414",
-      "sideBarSectionHeader.foreground": "#ffffff",
-
-      // Tabs - Spotify Black & Dark Gray
-      "editorGroupHeader.tabsBackground": "#191414",
-      "tab.activeBackground": "#121212",
-      "tab.inactiveBackground": "#191414",
-      "tab.activeForeground": "#ffffff",
-      "tab.inactiveForeground": "#535353",
-      "tab.border": "#191414",
-
-      // Editor - Spotify Dark Gray
-      "editor.background": "#121212",
-      "editor.foreground": "#ffffff",
-      "editorLineNumber.foreground": "#535353",
-      "editorLineNumber.activeForeground": "#1db954",
-
-      // Panel & Terminal - Spotify Dark Gray
-      "panel.background": "#121212",
-      "panel.border": "#535353",
-      "terminal.background": "#121212",
-      "terminal.foreground": "#b3b3b3",
-
-      // Lists & Trees
-      "list.activeSelectionBackground": "#1db954",
-      "list.activeSelectionForeground": "#191414",
-      "list.inactiveSelectionBackground": "#535353",
-      "list.hoverBackground": "#191414",
-      "tree.indentGuidesStroke": "#535353",
-
       // Borders & Accents - Spotify Green
       "window.activeBorder": "#1db954",
       "focusBorder": "#1db954",
+      "tree.indentGuidesStroke": "#1db954",
 
       // Buttons - Spotify Green
       "button.background": "#1db954",
-      "button.foreground": "#191414",
-
-      // Inputs - Spotify Black
-      "input.background": "#191414",
-      "input.foreground": "#ffffff",
-      "input.border": "#535353"
+      "button.foreground": "#191414"
     }
   },
   "debug.javascript.defaultRuntimeExecutable": {
