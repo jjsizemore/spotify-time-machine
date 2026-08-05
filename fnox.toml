@@ -1,0 +1,2 @@
+[secrets]
+CLOUDFLARE_API_TOKEN = { provider = "onepass", value = "op://Professional/Personal Cloudflare API Token/password" }
