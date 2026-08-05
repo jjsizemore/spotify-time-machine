@@ -78,7 +78,7 @@
     "oxlint": "^1.33.0",
     "postcss": "^8.5.6",
     "prettier": "^3.7.4",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.0",
     "tailwindcss": "^4.1.18",
     "turbo": "^2.6.3",
     "typescript": "^5.9.3"
