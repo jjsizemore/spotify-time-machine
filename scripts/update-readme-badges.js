@@ -59,7 +59,8 @@ async function updateReadmeBadges() {
     const codeQualityReplacement = `- **Modern Code Quality Pipeline:**
   - Modern linting and formatting with the latest tools
   - Optimized data fetching with React Query
-  - Automated security scanning and vulnerability detection`;
+  - Automated security scanning and vulnerability detection
+`;
 
     readmeContent = readmeContent.replace(codeQualityPattern, codeQualityReplacement);
 
