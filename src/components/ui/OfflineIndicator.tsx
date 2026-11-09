@@ -55,7 +55,7 @@ export default function OfflineIndicator() {
         ) : (
           <>
             <FiWifiOff size={16} />
-            <span className="text-sm font-medium">You're offline</span>
+            <span className="text-sm font-medium">You&apos;re offline</span>
           </>
         )}
       </div>

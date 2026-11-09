@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getCachedDataSmart, setCachedDataCompressed } from '@/lib/cacheUtils';
 import { SpotifyApiError } from '@/lib/spotify';
+import type { RecentlyPlayedResponse, TopArtistsResponse, TopTracksResponse } from '@/lib/spotify';
 import { SpotifyTimeRange } from '@/lib/timeRanges';
 import { useSpotify } from './useSpotify';
 
@@ -22,7 +23,7 @@ const CACHE_TTL_RECENT = 30; // 30 minutes
 export interface Artist {
   id: string;
   name: string;
-  images: { url: string; height: number; width: number }[];
+  images: { url: string; height?: number; width?: number }[];
   genres: string[];
   popularity: number;
   external_urls: { spotify: string };
@@ -32,7 +33,7 @@ export interface Track {
   id: string;
   name: string;
   album: {
-    images: { url: string; height: number; width: number }[];
+    images: { url: string; height?: number; width?: number }[];
     name: string;
   };
   artists: { id: string; name: string }[];
@@ -111,7 +112,14 @@ export const useUserStats = (timeRange: TimeRange = 'medium_term') => {
       }
 
       // Fetch missing data from API
-      const fetchPromises: Promise<any>[] = [];
+      interface CachedMarker {
+        status: 'cached';
+      }
+      type FetchResult =
+        TopArtistsResponse | TopTracksResponse | RecentlyPlayedResponse | CachedMarker;
+      const isLiveResult = (value: FetchResult): value is Exclude<FetchResult, CachedMarker> =>
+        (value as CachedMarker).status !== 'cached';
+      const fetchPromises: Promise<FetchResult>[] = [];
 
       if (!cachedTopArtists) {
         fetchPromises.push(spotifyApi.getMyTopArtists({ time_range: timeRange, limit: 10 }));
@@ -134,10 +142,13 @@ export const useUserStats = (timeRange: TimeRange = 'medium_term') => {
       // Fetch data in parallel with proper error handling and timeout
       const TIMEOUT_MS = 10000; // 10 seconds timeout
 
-      const fetchWithTimeout = (promise: Promise<any>, name: string) => {
+      type ArtistsResult = TopArtistsResponse | CachedMarker;
+      type TracksResult = TopTracksResponse | CachedMarker;
+      type RecentResult = RecentlyPlayedResponse | CachedMarker;
+      const fetchWithTimeout = <T>(promise: Promise<T>, name: string): Promise<T> => {
         return Promise.race([
           promise,
-          new Promise((_, reject) =>
+          new Promise<T>((_, reject) =>
             setTimeout(
               () => reject(new Error(`${name} timed out after ${TIMEOUT_MS}ms`)),
               TIMEOUT_MS
@@ -146,15 +157,15 @@ export const useUserStats = (timeRange: TimeRange = 'medium_term') => {
         ]);
       };
 
-      const timeoutPromises = fetchPromises.map((promise, index) => {
-        const names = ['top artists', 'top tracks', 'recently played'];
-        return fetchWithTimeout(promise, names[index]);
-      });
+      const timeoutPromises = [
+        fetchWithTimeout(fetchPromises[0] as Promise<ArtistsResult>, 'top artists'),
+        fetchWithTimeout(fetchPromises[1] as Promise<TracksResult>, 'top tracks'),
+        fetchWithTimeout(fetchPromises[2] as Promise<RecentResult>, 'recently played'),
+      ] as const;
 
       const [topArtistsRes, topTracksRes, recentlyPlayedRes] =
         await Promise.allSettled(timeoutPromises);
 
-      // Log API call results for debugging
       console.debug('API call results:', {
         topArtists: topArtistsRes.status,
         topTracks: topTracksRes.status,
@@ -170,11 +181,11 @@ export const useUserStats = (timeRange: TimeRange = 'medium_term') => {
       console.debug('📊 Starting data processing...');
 
       // Process top artists
-      if (topArtistsRes.status === 'fulfilled' && topArtistsRes.value.status !== 'cached') {
-        const mappedArtists: Artist[] = topArtistsRes.value.body.items.map((artist: any) => ({
+      if (topArtistsRes.status === 'fulfilled' && isLiveResult(topArtistsRes.value)) {
+        const mappedArtists: Artist[] = topArtistsRes.value.body.items.map((artist) => ({
           id: artist.id,
           name: artist.name,
-          images: artist.images.map((img: any) => ({
+          images: artist.images.map((img) => ({
             url: img.url,
             height: img.height || 0,
             width: img.width || 0,
@@ -220,27 +231,28 @@ export const useUserStats = (timeRange: TimeRange = 'medium_term') => {
 
       // Process top tracks
       console.debug('🎵 Processing top tracks...', topTracksRes.status);
-      if (topTracksRes.status === 'fulfilled' && topTracksRes.value.status !== 'cached') {
+      if (topTracksRes.status === 'fulfilled' && isLiveResult(topTracksRes.value)) {
         try {
           console.debug('🎵 Mapping top tracks data...');
-          const mappedTracks: Track[] = topTracksRes.value.body.items.map((track: any) => ({
+          const mappedTracks: Track[] = topTracksRes.value.body.items.map((track) => ({
             id: track.id,
             name: track.name,
             album: {
               name: track.album.name,
-              images: track.album.images.map((img: any) => ({
+              images: track.album.images.map((img) => ({
                 url: img.url,
                 height: img.height || 0,
                 width: img.width || 0,
               })),
             },
-            artists: track.artists.map((artist: any) => ({
+            artists: track.artists.map((artist) => ({
               id: artist.id,
               name: artist.name,
             })),
             duration_ms: track.duration_ms,
             preview_url: track.preview_url,
             external_urls: track.external_urls,
+            popularity: track.popularity,
           }));
           console.debug('🎵 Setting top tracks state...');
           setTopTracks(mappedTracks);
@@ -281,23 +293,23 @@ export const useUserStats = (timeRange: TimeRange = 'medium_term') => {
 
       // Process recently played
       console.debug('🎧 Processing recently played...', recentlyPlayedRes.status);
-      if (recentlyPlayedRes.status === 'fulfilled' && recentlyPlayedRes.value.status !== 'cached') {
+      if (recentlyPlayedRes.status === 'fulfilled' && isLiveResult(recentlyPlayedRes.value)) {
         try {
           console.debug('🎧 Mapping recently played data...');
           const mappedRecentlyPlayed: PlayHistory[] = recentlyPlayedRes.value.body.items.map(
-            (item: any) => ({
+            (item) => ({
               track: {
                 id: item.track.id,
                 name: item.track.name,
                 album: {
                   name: item.track.album.name,
-                  images: item.track.album.images.map((img: any) => ({
+                  images: item.track.album.images.map((img) => ({
                     url: img.url,
                     height: img.height || 0,
                     width: img.width || 0,
                   })),
                 },
-                artists: item.track.artists.map((artist: any) => ({
+                artists: item.track.artists.map((artist) => ({
                   id: artist.id,
                   name: artist.name,
                 })),

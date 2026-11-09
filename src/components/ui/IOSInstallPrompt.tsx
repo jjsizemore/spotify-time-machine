@@ -96,7 +96,7 @@ export default function IOSInstallPrompt() {
               <div className="flex-shrink-0 w-6 h-6 bg-spotify-green rounded-full flex items-center justify-center text-spotify-black font-bold">
                 3
               </div>
-              <span className="text-spotify-light-gray">Tap "Add" to install</span>
+              <span className="text-spotify-light-gray">Tap &quot;Add&quot; to install</span>
             </div>
           </div>
 
@@ -105,7 +105,7 @@ export default function IOSInstallPrompt() {
               onClick={handleDismiss}
               className="text-spotify-light-gray hover:text-spotify-white text-xs font-medium transition-colors duration-200"
             >
-              Don't show this again
+              Don&apos;t show this again
             </button>
           </div>
         </div>

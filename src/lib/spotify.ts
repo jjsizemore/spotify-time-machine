@@ -24,14 +24,93 @@ export class SpotifyApiError extends Error {
 interface QueuedRequest {
   url: string;
   options: RequestInit;
-  resolve: (value: any) => void;
-  reject: (error: any) => void;
+  resolve: (value: unknown) => void;
+  reject: (error: unknown) => void;
   retryCount: number;
   priority: number; // Lower number = higher priority
 }
 
+interface TokenRefreshResult {
+  accessToken: string;
+  refreshToken?: string;
+  expiresAt: number;
+}
+
 interface TokenRefreshCallback {
-  (): Promise<any>;
+  (): Promise<TokenRefreshResult>;
+}
+
+export interface SpotifyApiImage {
+  url: string;
+  height?: number;
+  width?: number;
+}
+
+export interface SpotifyApiArtist {
+  id: string;
+  name: string;
+  genres: string[];
+  popularity: number;
+  images: SpotifyApiImage[];
+  external_urls: { spotify: string };
+}
+
+export interface SpotifyApiTrack {
+  id: string;
+  name: string;
+  album: {
+    name: string;
+    images: SpotifyApiImage[];
+  };
+  artists: Array<{ id: string; name: string }>;
+  duration_ms: number;
+  popularity: number;
+  preview_url: string | null;
+  external_urls: { spotify: string };
+}
+
+export interface SpotifyPaging<T> {
+  items: T[];
+  total: number;
+}
+
+export interface SpotifyBody<T> {
+  body: T;
+}
+
+export type TopArtistsResponse = SpotifyBody<SpotifyPaging<SpotifyApiArtist>>;
+export type TopTracksResponse = SpotifyBody<SpotifyPaging<SpotifyApiTrack>>;
+export type RecentlyPlayedResponse = SpotifyBody<SpotifyPaging<SpotifyPlayHistoryItem>>;
+
+export interface SpotifySavedTrack {
+  added_at: string;
+  track: SpotifyApiTrack;
+}
+
+export interface SpotifyPlayHistoryItem {
+  track: SpotifyApiTrack;
+  played_at: string;
+  context: {
+    type: string;
+    uri: string;
+  } | null;
+}
+
+export interface SpotifyArtistsResponse {
+  artists: SpotifyApiArtist[];
+}
+
+interface SpotifyCurrentUserResponse {
+  id: string;
+}
+
+interface SpotifyPlaylistResponse {
+  id: string;
+  external_urls: { spotify: string };
+}
+
+interface SpotifyAddTracksResponse {
+  snapshot_id: string;
 }
 
 class SpotifyApi {
@@ -44,7 +123,7 @@ class SpotifyApi {
   private rateLimitResetTime = 0;
   private readonly minRequestInterval = 100; // 100ms between requests
   private readonly maxRetries = 3;
-  private pendingRequests = new Map<string, Promise<any>>(); // For request deduplication
+  private pendingRequests = new Map<string, Promise<unknown>>(); // For request deduplication
   private readonly requestTimeout = 60000; // 60 seconds timeout for pending requests
 
   setAccessToken(token: string) {
@@ -252,12 +331,12 @@ class SpotifyApi {
     let bodyKey = '';
     if (options.body) {
       try {
-        const raw = options.body as any;
+        const raw: unknown = options.body;
         if (typeof raw === 'string') {
           try {
             const parsed = JSON.parse(raw);
             const keys = Object.keys(parsed).toSorted();
-            const canonical: Record<string, any> = {};
+            const canonical: Record<string, unknown> = {};
             keys.forEach((k) => {
               canonical[k] = parsed[k];
             });
@@ -268,10 +347,11 @@ class SpotifyApi {
         } else if (raw instanceof Blob || raw instanceof ArrayBuffer) {
           bodyKey = ':binary';
         } else if (typeof raw === 'object') {
-          const keys = Object.keys(raw).toSorted();
-          const canonical: Record<string, any> = {};
+          const record = raw as Record<string, unknown>;
+          const keys = Object.keys(record).toSorted();
+          const canonical: Record<string, unknown> = {};
           keys.forEach((k) => {
-            canonical[k] = raw[k];
+            canonical[k] = record[k];
           });
           bodyKey = `:${JSON.stringify(canonical)}`;
         } else {
@@ -286,7 +366,7 @@ class SpotifyApi {
     // Check if this exact request is already pending
     if (this.pendingRequests.has(requestKey)) {
       console.log(`🔄 Deduplicating request: ${method} ${endpoint}`);
-      return this.pendingRequests.get(requestKey)!;
+      return this.pendingRequests.get(requestKey)! as Promise<T>;
     }
 
     const requestPromise = new Promise<T>((resolve, reject) => {
@@ -302,7 +382,7 @@ class SpotifyApi {
         resolve: (value) => {
           clearTimeout(timeoutId);
           this.pendingRequests.delete(requestKey);
-          resolve(value);
+          resolve(value as T);
         },
         reject: (error) => {
           clearTimeout(timeoutId);
@@ -330,7 +410,7 @@ class SpotifyApi {
     if (params.offset) searchParams.set('offset', params.offset.toString());
 
     const endpoint = `/me/tracks${searchParams.toString() ? `?${searchParams}` : ''}`;
-    const data = await this.makeRequest<any>(endpoint, {}, 4); // Lower priority - slower endpoint
+    const data = await this.makeRequest<SpotifyPaging<SpotifySavedTrack>>(endpoint, {}, 4); // Lower priority - slower endpoint
     return { body: data };
   }
 
@@ -342,7 +422,7 @@ class SpotifyApi {
     if (params.offset) searchParams.set('offset', params.offset.toString());
 
     const endpoint = `/me/top/artists${searchParams.toString() ? `?${searchParams}` : ''}`;
-    const data = await this.makeRequest<any>(endpoint, {}, 1); // Highest priority - fast endpoint
+    const data = await this.makeRequest<SpotifyPaging<SpotifyApiArtist>>(endpoint, {}, 1); // Highest priority - fast endpoint
     return { body: data };
   }
 
@@ -354,7 +434,7 @@ class SpotifyApi {
     if (params.offset) searchParams.set('offset', params.offset.toString());
 
     const endpoint = `/me/top/tracks${searchParams.toString() ? `?${searchParams}` : ''}`;
-    const data = await this.makeRequest<any>(endpoint, {}, 1); // Highest priority - fast endpoint
+    const data = await this.makeRequest<SpotifyPaging<SpotifyApiTrack>>(endpoint, {}, 1); // Highest priority - fast endpoint
     return { body: data };
   }
 
@@ -368,7 +448,7 @@ class SpotifyApi {
     if (params.before) searchParams.set('before', params.before.toString());
 
     const endpoint = `/me/player/recently-played${searchParams.toString() ? `?${searchParams}` : ''}`;
-    const data = await this.makeRequest<any>(endpoint, {}, 2); // High priority - fast endpoint
+    const data = await this.makeRequest<SpotifyPaging<SpotifyPlayHistoryItem>>(endpoint, {}, 2); // High priority - fast endpoint
     return { body: data };
   }
 
@@ -379,14 +459,14 @@ class SpotifyApi {
     }
 
     const endpoint = `/artists?ids=${ids.join(',')}`;
-    const data = await this.makeRequest<any>(endpoint, {}, 3); // Medium priority
+    const data = await this.makeRequest<SpotifyArtistsResponse>(endpoint, {}, 3); // Medium priority
     return { body: data };
   }
 
   // Create a playlist
   async createPlaylist(name: string, options: { description?: string; public?: boolean } = {}) {
     // First get the current user's ID
-    const userResponse = await this.makeRequest<any>('/me', {}, 1);
+    const userResponse = await this.makeRequest<SpotifyCurrentUserResponse>('/me', {}, 1);
     const userId = userResponse.id;
 
     const endpoint = `/users/${userId}/playlists`;
@@ -396,7 +476,7 @@ class SpotifyApi {
       public: options.public ?? false,
     };
 
-    const data = await this.makeRequest<any>(
+    const data = await this.makeRequest<SpotifyPlaylistResponse>(
       endpoint,
       {
         method: 'POST',
@@ -415,7 +495,7 @@ class SpotifyApi {
       uris: trackUris,
     };
 
-    const data = await this.makeRequest<any>(
+    const data = await this.makeRequest<SpotifyAddTracksResponse>(
       endpoint,
       {
         method: 'POST',

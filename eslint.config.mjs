@@ -82,6 +82,15 @@ const eslintConfig = defineConfig([
       },
     },
   },
+  {
+    // Plain JS tooling scripts: no type-aware rules (not in tsconfig program)
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
+    },
+  },
 ]);
 
 export default eslintConfig;

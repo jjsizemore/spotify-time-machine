@@ -11,7 +11,7 @@ interface CacheError {
   type: 'QUOTA_EXCEEDED' | 'PARSE_ERROR' | 'STORAGE_ACCESS' | 'CORRUPTED_DATA' | 'UNKNOWN';
   operation: 'SET' | 'GET' | 'CLEAR';
   key?: string;
-  originalError?: Error;
+  originalError?: unknown;
   context?: string;
 }
 
@@ -25,7 +25,9 @@ function logCacheError(error: CacheError): void {
     `[Cache Error] ${error.type} during ${error.operation}`,
     error.key ? `Key: ${error.key}` : '',
     error.context ? `Context: ${error.context}` : '',
-    error.originalError ? `Original: ${error.originalError.message}` : '',
+    error.originalError
+      ? `Original: ${error.originalError instanceof Error ? error.originalError.message : String(error.originalError)}`
+      : '',
   ]
     .filter(Boolean)
     .join(' | ');
@@ -33,24 +35,28 @@ function logCacheError(error: CacheError): void {
   console.error(logMessage, error.originalError);
 }
 
-function categorizeStorageError(error: any): CacheError['type'] {
+function categorizeStorageError(error: unknown): CacheError['type'] {
+  const err = error as { name?: unknown; code?: unknown; message?: unknown } | null | undefined;
+  const name = typeof err?.name === 'string' ? err.name : '';
+  const code = typeof err?.code === 'number' ? err.code : -1;
+  const message = typeof err?.message === 'string' ? err.message : '';
   if (
-    error.name === 'QuotaExceededError' ||
-    error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
-    error.code === 22 ||
-    (error.message && error.message.toLowerCase().includes('quota'))
+    name === 'QuotaExceededError' ||
+    name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+    code === 22 ||
+    (message !== '' && message.toLowerCase().includes('quota'))
   ) {
     return 'QUOTA_EXCEEDED';
   }
 
-  if (error instanceof SyntaxError || error.name === 'SyntaxError') {
+  if (error instanceof SyntaxError || name === 'SyntaxError') {
     return 'PARSE_ERROR';
   }
 
   if (
-    error.name === 'SecurityError' ||
-    error.name === 'InvalidAccessError' ||
-    (error.message && error.message.toLowerCase().includes('access'))
+    name === 'SecurityError' ||
+    name === 'InvalidAccessError' ||
+    (message !== '' && message.toLowerCase().includes('access'))
   ) {
     return 'STORAGE_ACCESS';
   }
@@ -91,7 +97,7 @@ function clearOldestCacheEntry(): boolean {
               oldestKey = key;
             }
           }
-        } catch (parseError: any) {
+        } catch (parseError) {
           corruptedItemsCount++;
           logCacheError({
             type: 'CORRUPTED_DATA',
@@ -103,7 +109,7 @@ function clearOldestCacheEntry(): boolean {
 
           try {
             localStorage.removeItem(key);
-          } catch (removeError: any) {
+          } catch (removeError) {
             logCacheError({
               type: 'STORAGE_ACCESS',
               operation: 'CLEAR',
@@ -130,7 +136,7 @@ function clearOldestCacheEntry(): boolean {
           )}) from ${new Date(oldestTimestamp).toLocaleString()}`
         );
         return true;
-      } catch (removeError: any) {
+      } catch (removeError) {
         logCacheError({
           type: 'STORAGE_ACCESS',
           operation: 'CLEAR',
@@ -144,7 +150,7 @@ function clearOldestCacheEntry(): boolean {
 
     console.warn('Cache cleanup requested but no cache entries found to remove');
     return false;
-  } catch (error: any) {
+  } catch (error) {
     logCacheError({
       type: categorizeStorageError(error),
       operation: 'CLEAR',
@@ -156,7 +162,7 @@ function clearOldestCacheEntry(): boolean {
 }
 
 // Compression utilities for more efficient storage
-async function compressData(data: any): Promise<string> {
+async function compressData(data: unknown): Promise<string> {
   try {
     const jsonString = JSON.stringify(data);
     const uint8Array = new TextEncoder().encode(jsonString);
@@ -322,7 +328,7 @@ export function setCachedData<T>(key: string, data: T, ttlMinutes: number): void
   try {
     attemptSetItem();
     console.debug(`Cache set: ${key} (${itemSizeKB}KB, TTL: ${ttlMinutes}min)`);
-  } catch (error: any) {
+  } catch (error) {
     const errorType = categorizeStorageError(error);
 
     logCacheError({
@@ -343,7 +349,7 @@ export function setCachedData<T>(key: string, data: T, ttlMinutes: number): void
           console.info(`Retrying cache set for ${key} after clearing space...`);
           attemptSetItem();
           console.info(`Successfully cached ${key} after cleanup`);
-        } catch (retryError: any) {
+        } catch (retryError) {
           logCacheError({
             type: categorizeStorageError(retryError),
             operation: 'SET',
@@ -397,7 +403,7 @@ export function getCachedData<T>(key: string): T | null {
     let item: CachedData<T>;
     try {
       item = JSON.parse(cachedItem);
-    } catch (parseError: any) {
+    } catch (parseError) {
       logCacheError({
         type: 'PARSE_ERROR',
         operation: 'GET',
@@ -410,7 +416,7 @@ export function getCachedData<T>(key: string): T | null {
       try {
         localStorage.removeItem(cacheKey);
         console.info(`Removed corrupted cache item: ${key}`);
-      } catch (removeError: any) {
+      } catch (removeError) {
         logCacheError({
           type: 'STORAGE_ACCESS',
           operation: 'GET',
@@ -434,7 +440,7 @@ export function getCachedData<T>(key: string): T | null {
       try {
         localStorage.removeItem(cacheKey);
         console.info(`Removed malformed cache item: ${key}`);
-      } catch (removeError: any) {
+      } catch (removeError) {
         logCacheError({
           type: 'STORAGE_ACCESS',
           operation: 'GET',
@@ -457,7 +463,7 @@ export function getCachedData<T>(key: string): T | null {
       );
       try {
         localStorage.removeItem(cacheKey);
-      } catch (removeError: any) {
+      } catch (removeError) {
         logCacheError({
           type: 'STORAGE_ACCESS',
           operation: 'GET',
@@ -475,7 +481,7 @@ export function getCachedData<T>(key: string): T | null {
       )}s`
     );
     return item.data;
-  } catch (error: any) {
+  } catch (error) {
     logCacheError({
       type: categorizeStorageError(error),
       operation: 'GET',
@@ -488,7 +494,7 @@ export function getCachedData<T>(key: string): T | null {
     try {
       localStorage.removeItem(cacheKey);
       console.info(`Removed problematic cache item: ${key}`);
-    } catch (removeError: any) {
+    } catch (removeError) {
       logCacheError({
         type: 'STORAGE_ACCESS',
         operation: 'GET',
@@ -578,7 +584,7 @@ export async function setCachedDataCompressed<T>(
     } else {
       console.debug(`Cache set: ${key} (${itemSizeKB}KB, TTL: ${ttlMinutes}min)`);
     }
-  } catch (error: any) {
+  } catch (error) {
     const errorType = categorizeStorageError(error);
 
     logCacheError({
@@ -599,7 +605,7 @@ export async function setCachedDataCompressed<T>(
           console.info(`Retrying cache set for ${key} after clearing space...`);
           attemptSetItem();
           console.info(`Successfully cached ${key} after cleanup`);
-        } catch (retryError: any) {
+        } catch (retryError) {
           logCacheError({
             type: categorizeStorageError(retryError),
             operation: 'SET',
@@ -653,7 +659,7 @@ export async function getCachedDataCompressed<T>(key: string): Promise<T | null>
     let item: CompressedCachedData;
     try {
       item = JSON.parse(cachedItem);
-    } catch (parseError: any) {
+    } catch (parseError) {
       // Note: Legacy format fallback removed for now to avoid circular dependency
 
       logCacheError({
@@ -667,7 +673,7 @@ export async function getCachedDataCompressed<T>(key: string): Promise<T | null>
       try {
         localStorage.removeItem(cacheKey);
         console.info(`Removed corrupted cache item: ${key}`);
-      } catch (removeError: any) {
+      } catch (removeError) {
         logCacheError({
           type: 'STORAGE_ACCESS',
           operation: 'GET',
@@ -691,7 +697,7 @@ export async function getCachedDataCompressed<T>(key: string): Promise<T | null>
       try {
         localStorage.removeItem(cacheKey);
         console.info(`Removed malformed cache item: ${key}`);
-      } catch (removeError: any) {
+      } catch (removeError) {
         logCacheError({
           type: 'STORAGE_ACCESS',
           operation: 'GET',
@@ -714,7 +720,7 @@ export async function getCachedDataCompressed<T>(key: string): Promise<T | null>
       );
       try {
         localStorage.removeItem(cacheKey);
-      } catch (removeError: any) {
+      } catch (removeError) {
         logCacheError({
           type: 'STORAGE_ACCESS',
           operation: 'GET',
@@ -736,7 +742,7 @@ export async function getCachedDataCompressed<T>(key: string): Promise<T | null>
       try {
         localStorage.removeItem(cacheKey);
         console.info(`Removed corrupted compressed cache item: ${key}`);
-      } catch (removeError: any) {
+      } catch (removeError) {
         logCacheError({
           type: 'STORAGE_ACCESS',
           operation: 'GET',
@@ -754,7 +760,7 @@ export async function getCachedDataCompressed<T>(key: string): Promise<T | null>
       )}s${item.compressed ? ' (compressed)' : ''}`
     );
     return decompressedData;
-  } catch (error: any) {
+  } catch (error) {
     logCacheError({
       type: categorizeStorageError(error),
       operation: 'GET',
@@ -767,7 +773,7 @@ export async function getCachedDataCompressed<T>(key: string): Promise<T | null>
     try {
       localStorage.removeItem(cacheKey);
       console.info(`Removed problematic cache item: ${key}`);
-    } catch (removeError: any) {
+    } catch (removeError) {
       logCacheError({
         type: 'STORAGE_ACCESS',
         operation: 'GET',
@@ -814,7 +820,7 @@ export function clearAllCache(): number {
         localStorage.removeItem(key);
         removedCount++;
         console.debug(`Removed cache item: ${key.replace(CACHE_PREFIX, '')}`);
-      } catch (removeError: any) {
+      } catch (removeError) {
         logCacheError({
           type: 'STORAGE_ACCESS',
           operation: 'CLEAR',
@@ -827,7 +833,7 @@ export function clearAllCache(): number {
 
     console.info(`Cache cleared: Removed ${removedCount} cache items`);
     return removedCount;
-  } catch (error: any) {
+  } catch (error) {
     logCacheError({
       type: categorizeStorageError(error),
       operation: 'CLEAR',
@@ -891,7 +897,7 @@ class IndexedDBCacheStorage implements IndexedDBStorage {
       });
 
       console.debug(`IndexedDB cache set: ${key} (TTL: ${ttlMinutes}min)`);
-    } catch (error: any) {
+    } catch (error) {
       console.error('IndexedDB cache set error:', error);
       throw error;
     }
@@ -903,7 +909,7 @@ class IndexedDBCacheStorage implements IndexedDBStorage {
       const transaction = db.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
 
-      const item = await new Promise<any>((resolve, reject) => {
+      const item = await new Promise<CachedData<T> | null>((resolve, reject) => {
         const request = store.get(CACHE_PREFIX + key);
         request.onsuccess = () => resolve(request.result);
         request.addEventListener('error', () => reject(request.error));
@@ -928,7 +934,7 @@ class IndexedDBCacheStorage implements IndexedDBStorage {
 
       console.debug(`IndexedDB cache hit: ${key}`);
       return item.data;
-    } catch (error: any) {
+    } catch (error) {
       console.error('IndexedDB cache get error:', error);
       return null;
     }
@@ -961,7 +967,7 @@ class IndexedDBCacheStorage implements IndexedDBStorage {
       });
 
       console.info(`IndexedDB cache cleared: Removed ${removedCount} items`);
-    } catch (error: any) {
+    } catch (error) {
       console.error('IndexedDB cache clear error:', error);
     }
   }

@@ -1,6 +1,22 @@
 import { Metadata } from 'next';
 import { SPOTIFY_GREEN } from './branding';
 
+// Structural type for web-vitals metric callbacks (CLS/INP/FCP/LCP/TTFB).
+interface WebVitalMetric {
+  name: string;
+  id: string;
+  value: number;
+}
+
+// Minimal gtag surface used for Core Web Vitals reporting.
+interface GtagWindow {
+  gtag?: (
+    command: string,
+    eventName: string,
+    params: Record<string, string | number | boolean>
+  ) => void;
+}
+
 // 2025 SEO Configuration
 export const SEO_CONFIG = {
   baseUrl: process.env.NEXT_PUBLIC_BASE_URL || 'https://tm.jermainesizemore.com',
@@ -114,7 +130,7 @@ export function generateEnhancedMetadata({
 }
 
 // Enhanced Structured Data Generator for 2025
-export function generateWebApplicationSchema(overrides: Record<string, any> = {}) {
+export function generateWebApplicationSchema(overrides: Record<string, unknown> = {}) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
@@ -222,13 +238,13 @@ export const initCoreWebVitals = () => {
   });
 };
 
-function sendToAnalytics(metric: any) {
+function sendToAnalytics(metric: WebVitalMetric) {
   // Send to your analytics service
   console.log('Core Web Vital:', metric);
 
   // Example: Send to Google Analytics 4
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', metric.name, {
+  if (typeof window !== 'undefined' && (window as unknown as GtagWindow).gtag) {
+    (window as unknown as GtagWindow).gtag?.('event', metric.name, {
       event_category: 'Web Vitals',
       event_label: metric.id,
       value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
