@@ -1,0 +1,9 @@
+{
+  "closeoutCommand": ["node", "scripts/admission-probe.mjs"],
+  "admissionCommand": ["node", "scripts/admission-probe.mjs"],
+  "rollbackPolicy": {
+    "owner": "jjsizemore",
+    "procedure": "Vercel instant rollback to a READY production deployment UID; TO 15 minutes",
+    "recoveryTarget": "15 minutes"
+  }
+}
