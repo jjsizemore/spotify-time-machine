@@ -2,6 +2,27 @@
 
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/nextjs';
+import type { Metric } from 'web-vitals';
+
+interface GtagWindow {
+  gtag?: (
+    command: string,
+    eventName: string,
+    params: Record<string, string | number | boolean>
+  ) => void;
+}
+
+interface VaWindow {
+  va?: (command: string, eventName: string, params: Record<string, unknown>) => void;
+}
+
+function hasGtag(value: unknown): value is GtagWindow {
+  return typeof value === 'object' && value !== null && 'gtag' in value;
+}
+
+function hasVa(value: unknown): value is VaWindow {
+  return typeof value === 'object' && value !== null && 'va' in value;
+}
 
 export default function WebVitalsMonitor() {
   useEffect(() => {
@@ -10,12 +31,12 @@ export default function WebVitalsMonitor() {
       import('web-vitals')
         .then((webVitals) => {
           // Send metrics to analytics
-          const sendToAnalytics = (metric: any) => {
+          const sendToAnalytics = (metric: Metric) => {
             console.log('Core Web Vital:', metric);
 
             // Send to Google Analytics 4
-            if (typeof window !== 'undefined' && (window as any).gtag) {
-              (window as any).gtag('event', metric.name, {
+            if (typeof window !== 'undefined' && hasGtag(window)) {
+              window.gtag?.('event', metric.name, {
                 event_category: 'Web Vitals',
                 event_label: metric.id,
                 value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
@@ -25,8 +46,8 @@ export default function WebVitalsMonitor() {
             }
 
             // Send to Vercel Analytics
-            if (typeof window !== 'undefined' && (window as any).va) {
-              (window as any).va('track', 'Web Vital', {
+            if (typeof window !== 'undefined' && hasVa(window)) {
+              window.va?.('track', 'Web Vital', {
                 name: metric.name,
                 value: metric.value,
                 id: metric.id,
@@ -89,11 +110,19 @@ export default function WebVitalsMonitor() {
         // Monitor layout shifts
         const layoutShiftObserver = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
-            if ((entry as any).hadRecentInput) continue;
-            console.log('Layout shift:', {
-              value: (entry as any).value,
-              sources: (entry as any).sources,
-            });
+            if (
+              entry &&
+              typeof entry === 'object' &&
+              'hadRecentInput' in entry &&
+              'value' in entry &&
+              'sources' in entry
+            ) {
+              if (entry.hadRecentInput) continue;
+              console.log('Layout shift:', {
+                value: entry.value,
+                sources: entry.sources,
+              });
+            }
           }
         });
         layoutShiftObserver.observe({ entryTypes: ['layout-shift'] });

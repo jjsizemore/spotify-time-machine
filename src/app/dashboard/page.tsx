@@ -91,9 +91,9 @@ export default function Dashboard() {
                   Limited functionality: App in development mode
                 </h2>
                 <p className="text-xs text-yellow-200 mb-3">
-                  Due to Spotify's new API restrictions requiring 250k MAUs (Monthly Active Users)
-                  and only accepting organizations (not individuals), this app has severe rate
-                  limits and you may experience slower performance.
+                  Due to Spotify&apos;s new API restrictions requiring 250k MAUs (Monthly Active
+                  Users) and only accepting organizations (not individuals), this app has severe
+                  rate limits and you may experience slower performance.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <a

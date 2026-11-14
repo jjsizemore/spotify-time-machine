@@ -1,0 +1,10 @@
+# Fail instead of silently adding minimumReleaseAgeExclude entries for too-new releases.
+minimumReleaseAgeStrict: true
+
+allowBuilds:
+  '@parcel/watcher': true
+  '@tailwindcss/oxide': true
+  esbuild: true
+  lefthook: true
+  protobufjs: true
+  sharp: true

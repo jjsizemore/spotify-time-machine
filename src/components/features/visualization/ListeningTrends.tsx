@@ -197,7 +197,7 @@ export default function ListeningTrends() {
           </div>
 
           <div className="flex justify-between text-sm text-spotify-light-gray mt-8">
-            <div>Timeline of songs you've liked</div>
+            <div>Timeline of songs you&apos;ve liked</div>
             <div>Total: {monthlyData.reduce((sum, data) => sum + data.count, 0)} tracks</div>
           </div>
         </>

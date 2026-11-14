@@ -1,9 +1,9 @@
 import { JWT, getToken } from 'next-auth/jwt';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { refreshAccessToken } from '@/lib/spotify';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   return Sentry.startSpan(
     {
       name: 'POST /api/auth/refresh-token',
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       try {
         // Retrieve the NextAuth token server-side from the request cookies
         const nextAuthToken: JWT | null = await getToken({
-          req: request as any,
+          req: request,
           secret: process.env.NEXTAUTH_SECRET,
         });
 

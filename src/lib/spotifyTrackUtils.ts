@@ -1,25 +1,10 @@
 import { format, parse } from 'date-fns';
+import type { spotifyApi } from './spotify';
+import type { SavedTrack } from '@/hooks/useLikedTracks';
 
-export interface Track {
-  id: string;
-  name: string;
-  album: {
-    name: string;
-    images: Array<{
-      url: string;
-      height?: number;
-      width?: number;
-    }>;
-  };
-  artists: Array<{ id: string; name: string }>;
-  duration_ms: number;
-  preview_url: string | null;
-}
+type SpotifyClient = typeof spotifyApi;
 
-export interface SavedTrack {
-  added_at: string;
-  track: Track;
-}
+export type { SavedTrack };
 
 export interface MonthlyTracks {
   month: string;
@@ -30,7 +15,7 @@ export interface MonthlyTracks {
 /**
  * Process and group tracks by month
  */
-export function processAndGroupTracks(items: any[]): MonthlyTracks[] {
+export function processAndGroupTracks(items: SavedTrack[]): MonthlyTracks[] {
   const processedTracks: SavedTrack[] = items.map((item) => ({
     added_at: item.added_at,
     track: {
@@ -38,13 +23,15 @@ export function processAndGroupTracks(items: any[]): MonthlyTracks[] {
       name: item.track.name,
       album: {
         name: item.track.album.name,
-        images: item.track.album.images.map((img: any) => ({
-          url: img.url,
-          height: img.height || 0,
-          width: img.width || 0,
-        })),
+        images: item.track.album.images.map(
+          (img: { url: string; height?: number; width?: number }) => ({
+            url: img.url,
+            height: img.height || 0,
+            width: img.width || 0,
+          })
+        ),
       },
-      artists: item.track.artists.map((artist: any) => ({
+      artists: item.track.artists.map((artist: { id: string; name: string }) => ({
         id: artist.id,
         name: artist.name,
       })),
@@ -92,14 +79,14 @@ export function groupTracksByMonth(tracks: SavedTrack[]): MonthlyTracks[] {
 /**
  * Fetch all liked tracks from Spotify API
  */
-export async function fetchAllLikedTracks(spotifyApi: any): Promise<SavedTrack[]> {
+export async function fetchAllLikedTracks(spotifyApi: SpotifyClient | null): Promise<SavedTrack[]> {
   if (!spotifyApi) {
     throw new Error('Spotify API is not ready');
   }
 
   const limit = 50;
   let offset = 0;
-  let allTracks: any[] = [];
+  let allTracks: SavedTrack[] = [];
   let total = 0;
 
   do {
@@ -117,7 +104,7 @@ export async function fetchAllLikedTracks(spotifyApi: any): Promise<SavedTrack[]
  * Create a playlist with tracks on Spotify
  */
 export async function createPlaylist(
-  spotifyApi: any,
+  spotifyApi: SpotifyClient,
   playlistName: string,
   description: string,
   trackUris: string[]

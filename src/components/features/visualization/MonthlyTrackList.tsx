@@ -47,6 +47,7 @@ export default function MonthlyTrackList({
       <div
         className="bg-spotify-medium-gray py-4 px-6 flex justify-between items-center cursor-pointer"
         style={getTextStyle(hovered === month, expanded)}
+        role="button"
         tabIndex={0}
         onMouseOver={() => setHovered(month)}
         onMouseOut={() => setHovered(null)}

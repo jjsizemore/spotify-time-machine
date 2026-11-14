@@ -58,10 +58,14 @@ export default function PlaylistGeneratorPage() {
         // Try to fetch from useUserStats cache first, then get additional artists if needed
         // This could be optimized to leverage existing cached data
         const response = await spotifyApi.getMyTopArtists({ limit: 50 });
-        const artists: Artist[] = response.body.items.map((artist: any) => ({
+        const artists: Artist[] = response.body.items.map((artist) => ({
           id: artist.id,
           name: artist.name,
-          images: artist.images,
+          images: artist.images.map((img) => ({
+            url: img.url,
+            height: img.height ?? 0,
+            width: img.width ?? 0,
+          })),
           genres: artist.genres,
           popularity: artist.popularity,
           external_urls: artist.external_urls,
@@ -180,10 +184,10 @@ export default function PlaylistGeneratorPage() {
           for (let i = 0; i < uncachedArtistIds.length; i += batchSize) {
             const batch = uncachedArtistIds.slice(i, i + batchSize);
             const artistsResponse = await spotifyApi.getArtists(batch);
-            const newArtists = artistsResponse.body.artists.map((artist: any) => ({
+            const newArtists = artistsResponse.body.artists.map((artist) => ({
               id: artist.id,
               name: artist.name,
-              images: artist.images.map((img: any) => ({
+              images: artist.images.map((img) => ({
                 url: img.url,
                 height: img.height || 0,
                 width: img.width || 0,
@@ -387,10 +391,13 @@ export default function PlaylistGeneratorPage() {
                     A track will be included if any of its artists match any of the selected genres
                   </li>
                   <li>
-                    Some tracks may be included even if they don't perfectly match your genre
+                    Some tracks may be included even if they don&apos;t perfectly match your genre
                     preferences
                   </li>
-                  <li>Some tracks may be excluded if their artists' genres don't match exactly</li>
+                  <li>
+                    Some tracks may be excluded if their artists&apos; genres don&apos;t match
+                    exactly
+                  </li>
                 </ul>
               </div>
 
