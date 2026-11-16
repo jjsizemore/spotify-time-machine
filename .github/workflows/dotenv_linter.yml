@@ -19,7 +19,7 @@ concurrency:
 jobs:
   dotenv-linter:
     name: Lint Environment Files
-    runs-on: ubicloud-standard-4
+    runs-on: ubicloud-standard-2
     steps:
       - name: Checkout
         uses: actions/checkout@v4
