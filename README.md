@@ -68,9 +68,6 @@ Comprehensive documentation is available following the [Diátaxis framework](htt
   - Modern linting and formatting with the latest tools
   - Optimized data fetching with React Query
   - Automated security scanning and vulnerability detection
-- Node.js 16.8.0 or later
-- A Spotify Developer account and application
-- Environment variables set up (see below)
 
 ### Environment Setup
 
