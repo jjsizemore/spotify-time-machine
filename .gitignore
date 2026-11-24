@@ -207,3 +207,8 @@ dist
 .turbo
 
 .vscode/mise-tools
+
+# Local agent tool state (regenerable, never shared)
+.mesh/
+.codegraph/
+.op/
